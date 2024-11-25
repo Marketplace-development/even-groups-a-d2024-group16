@@ -2,20 +2,107 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    listings = db.relationship('Listing', backref='user', lazy=True)
+    __tablename__ = 'User'
+
+    userid = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, nullable=False, unique=True)
+    name = db.Column(db.String(80), nullable=False)
+    date_of_birth = db.Column(db.DateTime, nullable=True)  # Handles 'timestamp with time zone'
+    street = db.Column(db.String, nullable=True)
+    housenr = db.Column(db.Integer, nullable=True)
+    postalcode = db.Column(db.Integer, nullable=True)
+    city = db.Column(db.String, nullable=True)
+    country = db.Column(db.String, nullable=True)
+    telephonenr = db.Column(db.String, nullable=True)
+
+    # Relationships
+    consumer = db.relationship('Consumer', backref='user', uselist=False)
+    chef = db.relationship('Chef', backref='user', uselist=False)
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f"<User(name={self.name}, email={self.email})>"
     
-class Listing(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    listing_name = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+class dish(db.Model):
+    __tablename__ = 'dish'
+
+    dishid = db.Column(db.Integer, primary_key=True)
+    dishtype = db.Column(db.String, nullable=False)  # Assumes this is required
+
+    # Relationships
+    recipes = db.relationship('Recipe', backref='dish', lazy=True)
 
     def __repr__(self):
-        return f'<Listing {self.listing_name}, ${self.price}>'
+        return f"<Dish(dishid={self.dishid}, dishtype={self.dishtype})>"
+
+class Chef(db.Model):
+    __tablename__ = 'chef'
+
+    chefid = db.Column(db.Integer, primary_key=True)
+    avgrating = db.Column(db.String, nullable=True)  # Assuming stored as numeric
+    userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
+
+    # Relationships
+    recipes = db.relationship('Recipe', backref='chef', lazy=True)
+    transactions = db.relationship('Transaction', backref='chef', lazy=True)
+
+    def __repr__(self):
+        return f"<Chef(chefid={self.chefid}, avgrating={self.avgrating})>"
+
+
+class recipe(db.Model):
+    __tablename__ = 'recipe'
+
+    chefid = db.Column(db.Integer, db.ForeignKey('Chef.chefid'), nullable=False)  # Foreign key to Chef
+    dishid = db.Column(db.Integer, db.ForeignKey('dish.dishid'), nullable=False)  # Foreign key to DishC
+    description = db.Column(db.String, nullable=True)
+    duration = db.Column(db.Integer, nullable=True)  # Assuming this is in minutes
+    price = db.Column(db.String, nullable=True)  # Numeric stored as string for precision
+    ingredients = db.Column(db.String, nullable=True)
+    allergiesrec = db.Column(db.String, nullable=True)
+    image = db.Column(db.String, nullable=True)
+    
+
+class Transaction(db.Model):
+    __tablename__ = 'transaction'
+
+    transactionid = db.Column(db.Integer, primary_key=True)
+    transactiondate = db.Column(db.DateTime, nullable=False)  # Timestamp with time zone
+    price = db.Column(db.String, nullable=False)  # Numeric stored as string
+    consumerid = db.Column(db.Integer, db.ForeignKey('consumer.consumerid'), nullable=False)  # Foreign key to Consumer
+    chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), nullable=False)  # Foreign key to Chef
+
+    # Relationships
+    reviews = db.relationship('Review', backref='transaction', lazy=True)
+
+    def __repr__(self):
+        return f"<Transaction(transactionid={self.transactionid}, price={self.price})>"
+
+class Review(db.Model):
+    __tablename__ = 'review'
+
+    reviewid = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.String, nullable=True)
+    rating = db.Column(db.Integer, nullable=False)  # Assuming this is an integer rating (e.g., 1-5)
+    reviewdate = db.Column(db.DateTime, nullable=False)  # Timestamp with time zone
+    transactionid = db.Column(db.Integer, db.ForeignKey('transaction.transactionid'), nullable=False)  # Foreign key to Transaction
+
+    def __repr__(self):
+        return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
+
+class Consumer(db.Model):
+    __tablename__ = 'consumer'
+
+    consumerid = db.Column(db.Integer, primary_key=True)
+    allergiescon = db.Column(db.String, nullable=True)
+    fridgecontents = db.Column(db.String, nullable=True)
+    userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
+
+    # Relationships
+    transactions = db.relationship('Transaction', backref='consumer', lazy=True)
+
+    def __repr__(self):
+        return f"<Consumer(consumerid={self.consumerid})>"
+
+dish = Dish(dishtype="Vegetarian")
+recipe = Recipe(chefid=1, dishid=1, description="Tasty Veggie Curry", price="12.99")
