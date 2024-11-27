@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = 'User'
+    __tablename__ = 'user'
 
     userid = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
@@ -24,7 +24,7 @@ class User(db.Model):
         return f"<User(name={self.name}, email={self.email})>"
     
 class Dish(db.Model):
-    __tablename__ = 'Dish'
+    __tablename__ = 'dish'
 
     dishid = db.Column(db.Integer, primary_key=True)
     dishtype = db.Column(db.String, nullable=False)  # Assumes this is required
@@ -36,7 +36,7 @@ class Dish(db.Model):
         return f"<Dish(dishid={self.dishid}, dishtype={self.dishtype})>"
 
 class Chef(db.Model):
-    __tablename__ = 'Chef'
+    __tablename__ = 'chef'
 
     chefid = db.Column(db.Integer, primary_key=True)
     avgrating = db.Column(db.String, nullable=True)  # Assuming stored as numeric
@@ -51,10 +51,11 @@ class Chef(db.Model):
 
 
 class Recipe(db.Model):
-    __tablename__ = 'Recipe'
+    __tablename__ = 'recipe'
 
-    chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), primary_key=True, nullable=False)  # Foreign key to Chef
-    dishid = db.Column(db.Integer, db.ForeignKey('dish.dishid'), primary_key=True, nullable=False)  # Foreign key to DishC
+    recipeid = db.Column(db.Integer, primary_key=True, nullable=False)
+    chefid = db.Column(db.Integer, db.ForeignKey('Chef.chefid'), nullable=False)  # Foreign key to Chef
+    dishid = db.Column(db.Integer, db.ForeignKey('Dish.dishid'), nullable=False)  # Foreign key to DishC
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)  # Assuming this is in minutes
     price = db.Column(db.String, nullable=True)  # Numeric stored as string for precision
@@ -64,7 +65,7 @@ class Recipe(db.Model):
     
 
 class Transaction(db.Model):
-    __tablename__ = 'Transaction'
+    __tablename__ = 'transaction'
 
     transactionid = db.Column(db.Integer, primary_key=True)
     transactiondate = db.Column(db.DateTime, nullable=False)  # Timestamp with time zone
@@ -79,7 +80,7 @@ class Transaction(db.Model):
         return f"<Transaction(transactionid={self.transactionid}, price={self.price})>"
 
 class Review(db.Model):
-    __tablename__ = 'Review'
+    __tablename__ = 'review'
 
     reviewid = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.String, nullable=True)
@@ -91,7 +92,7 @@ class Review(db.Model):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
 
 class Consumer(db.Model):
-    __tablename__ = 'Consumer'
+    __tablename__ = 'consumer'
 
     consumerid = db.Column(db.Integer, primary_key=True)
     allergiescon = db.Column(db.String, nullable=True)
@@ -104,5 +105,3 @@ class Consumer(db.Model):
     def __repr__(self):
         return f"<Consumer(consumerid={self.consumerid})>"
 
-dish1 = dish(dishtype="Vegetarian")
-recipe2 = recipe(chefid=1, dishid=1, description="Tasty Veggie Curry", price="12.99")
