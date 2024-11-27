@@ -1,13 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin: 10px 0 5px;
+        }
+        input[type="email"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            background-color: #0056b3;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+        p {
+            text-align: center;
+        }
+        a {
+            color: #218838;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <form method="post">
-        Username: <input type="text" name="username" required>
-        <input type="submit" value="Login">
-    </form>
+    <div class="form-container">
+        <h1>Login</h1>
+        <form method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <input type="submit" value="Login">
+        </form>
+        <p>Don't have an account? <a href="/register">Register here</a></p>
+    </div>
 </body>
 </html>
