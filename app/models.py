@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
+class user(db.Model):
     __tablename__ = 'User'
 
     userid = db.Column(db.Integer, primary_key=True)
@@ -35,7 +35,7 @@ class dish(db.Model):
     def __repr__(self):
         return f"<Dish(dishid={self.dishid}, dishtype={self.dishtype})>"
 
-class Chef(db.Model):
+class chef(db.Model):
     __tablename__ = 'chef'
 
     chefid = db.Column(db.Integer, primary_key=True)
@@ -53,8 +53,8 @@ class Chef(db.Model):
 class recipe(db.Model):
     __tablename__ = 'recipe'
 
-    chefid = db.Column(db.Integer, db.ForeignKey('Chef.chefid'), nullable=False)  # Foreign key to Chef
-    dishid = db.Column(db.Integer, db.ForeignKey('dish.dishid'), nullable=False)  # Foreign key to DishC
+    chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), primary_key=True, nullable=False)  # Foreign key to Chef
+    dishid = db.Column(db.Integer, db.ForeignKey('dish.dishid'), primary_key=True, nullable=False)  # Foreign key to DishC
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)  # Assuming this is in minutes
     price = db.Column(db.String, nullable=True)  # Numeric stored as string for precision
