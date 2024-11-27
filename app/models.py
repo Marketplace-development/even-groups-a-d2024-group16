@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class user(db.Model):
+class User(db.Model):
     __tablename__ = 'User'
 
     userid = db.Column(db.Integer, primary_key=True)
@@ -17,41 +17,41 @@ class user(db.Model):
     telephonenr = db.Column(db.String, nullable=True)
 
     # Relationships
-    consumer = db.relationship('Consumer', backref='user', uselist=False)
-    chef = db.relationship('Chef', backref='user', uselist=False)
+    consumer = db.relationship('Consumer', backref='User', uselist=False)
+    chef = db.relationship('Chef', backref='User', uselist=False)
 
     def __repr__(self):
         return f"<User(name={self.name}, email={self.email})>"
     
-class dish(db.Model):
-    __tablename__ = 'dish'
+class Dish(db.Model):
+    __tablename__ = 'Dish'
 
     dishid = db.Column(db.Integer, primary_key=True)
     dishtype = db.Column(db.String, nullable=False)  # Assumes this is required
 
     # Relationships
-    recipes = db.relationship('Recipe', backref='dish', lazy=True)
+    recipes = db.relationship('Recipe', backref='Dish', lazy=True)
 
     def __repr__(self):
         return f"<Dish(dishid={self.dishid}, dishtype={self.dishtype})>"
 
-class chef(db.Model):
-    __tablename__ = 'chef'
+class Chef(db.Model):
+    __tablename__ = 'Chef'
 
     chefid = db.Column(db.Integer, primary_key=True)
     avgrating = db.Column(db.String, nullable=True)  # Assuming stored as numeric
     userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
 
     # Relationships
-    recipes = db.relationship('Recipe', backref='chef', lazy=True)
-    transactions = db.relationship('Transaction', backref='chef', lazy=True)
+    recipes = db.relationship('Recipe', backref='Chef', lazy=True)
+    transactions = db.relationship('Transaction', backref='Chef', lazy=True)
 
     def __repr__(self):
         return f"<Chef(chefid={self.chefid}, avgrating={self.avgrating})>"
 
 
-class recipe(db.Model):
-    __tablename__ = 'recipe'
+class Recipe(db.Model):
+    __tablename__ = 'Recipe'
 
     chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), primary_key=True, nullable=False)  # Foreign key to Chef
     dishid = db.Column(db.Integer, db.ForeignKey('dish.dishid'), primary_key=True, nullable=False)  # Foreign key to DishC
@@ -64,7 +64,7 @@ class recipe(db.Model):
     
 
 class Transaction(db.Model):
-    __tablename__ = 'transaction'
+    __tablename__ = 'Transaction'
 
     transactionid = db.Column(db.Integer, primary_key=True)
     transactiondate = db.Column(db.DateTime, nullable=False)  # Timestamp with time zone
@@ -73,13 +73,13 @@ class Transaction(db.Model):
     chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), nullable=False)  # Foreign key to Chef
 
     # Relationships
-    reviews = db.relationship('Review', backref='transaction', lazy=True)
+    reviews = db.relationship('Review', backref='Transaction', lazy=True)
 
     def __repr__(self):
         return f"<Transaction(transactionid={self.transactionid}, price={self.price})>"
 
 class Review(db.Model):
-    __tablename__ = 'review'
+    __tablename__ = 'Review'
 
     reviewid = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.String, nullable=True)
@@ -91,7 +91,7 @@ class Review(db.Model):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
 
 class Consumer(db.Model):
-    __tablename__ = 'consumer'
+    __tablename__ = 'Consumer'
 
     consumerid = db.Column(db.Integer, primary_key=True)
     allergiescon = db.Column(db.String, nullable=True)
@@ -99,10 +99,10 @@ class Consumer(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
 
     # Relationships
-    transactions = db.relationship('Transaction', backref='consumer', lazy=True)
+    transactions = db.relationship('Transaction', backref='Consumer', lazy=True)
 
     def __repr__(self):
         return f"<Consumer(consumerid={self.consumerid})>"
 
-dish = Dish(dishtype="Vegetarian")
-recipe = Recipe(chefid=1, dishid=1, description="Tasty Veggie Curry", price="12.99")
+dish1 = dish(dishtype="Vegetarian")
+recipe2 = recipe(chefid=1, dishid=1, description="Tasty Veggie Curry", price="12.99")
