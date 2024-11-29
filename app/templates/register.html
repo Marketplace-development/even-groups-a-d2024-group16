@@ -1,70 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
-        .register-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 400px;
-        }
-        .register-container h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #333;
-            text-align: center;
-        }
-        .register-container input[type="text"],
-        .register-container input[type="email"],
-        .register-container input[type="date"],
-        .register-container input[type="number"],
-        .register-container input[type="tel"],
-        .register-container input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .register-container input[type="submit"] {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .register-container input[type="submit"]:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
-<body>
-    <div class="register-container">
-        <h1>Register</h1>
-        <form method="post" action="/register">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="text" name="name" placeholder="Name" required>
-            <label for="date_of_birth">Date of Birth:</label>
-            <input type="date" name="date_of_birth" id="date_of_birth">
-            <input type="text" name="street" placeholder="Street">
-            <input type="number" name="housenr" placeholder="House Number">
-            <input type="number" name="postalcode" placeholder="Postal Code">
-            <input type="text" name="city" placeholder="City">
-            <input type="text" name="country" placeholder="Country">
-            <input type="tel" name="telephonenr" placeholder="Telephone Number">
-            <input type="submit" value="Register">
-        </form>
+<form class="row g-3">
+    <div class="col-md-4">
+      <label for="validationServer01" class="form-label">Voornaam</label>
+      <input type="text" class="form-control is-valid" id="validationServer01" value="Mark" required>
+      <div class="valid-feedback">
+      </div>
     </div>
-</body>
-</html>
+    <div class="col-md-4">
+      <label for="validationServer02" class="form-label">Achternaam</label>
+      <input type="text" class="form-control is-valid" id="validationServer02" value="Otto" required>
+      <div class="valid-feedback">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <label for="validationServerUsername" class="form-label">email</label>
+      <div class="input-group has-validation">
+        <span class="input-group-text" id="inputGroupPrepend3">@</span>
+        <input type="text" class="form-control is-invalid" id="validationServerUsername" aria-describedby="inputGroupPrepend3 validationServerUsernameFeedback" required>
+        <div id="validationServerUsernameFeedback" class="invalid-feedback">
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label for="validationServer03" class="form-label">City</label>
+      <input type="text" class="form-control is-invalid" id="validationServer03" aria-describedby="validationServer03Feedback" required>
+      <div id="validationServer03Feedback" class="invalid-feedback">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label for="validationServer04" class="form-label">State</label>
+      <select class="form-select is-invalid" id="validationServer04" aria-describedby="validationServer04Feedback" required>
+        <option selected disabled value="">Choose...</option>
+        <option>...</option>
+      </select>
+      <div id="validationServer04Feedback" class="invalid-feedback">
+        Kies een geldige stad.
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label for="validationServer05" class="form-label">Zip</label>
+      <input type="text" class="form-control is-invalid" id="validationServer05" aria-describedby="validationServer05Feedback" required>
+      <div id="validationServer05Feedback" class="invalid-feedback">
+        Please provide a valid zip.
+      </div>
+    </div>
+    
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit">Submit form</button>
+    </div>
+  </form>
