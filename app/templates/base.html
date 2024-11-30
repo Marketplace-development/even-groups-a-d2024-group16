@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyRecepies{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h3 {
+            color: #2c3e50;
+        }
+        .button-group .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button-group .btn:hover {
+            background-color: #2980b9;
+        }
+        .klus {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .klus h3 {
+            margin: 0;
+        }
+        .klus p {
+            margin: 10px 0;
+        }
+        .btn-primary {
+            background-color: #27ae60;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
