@@ -24,7 +24,7 @@ def register():
         #does user already exist 
         if User.query.filter_by(email=form.email.data).first():
             print(f"The email {form.email.data} is already in use.")
-            flash('This email is already in use, pic another one or login', 'danger')
+            flash('This email is already in use, pick another one or login', 'danger')
             return redirect(url_for('main.register'))
             
         # Introduce a new user
