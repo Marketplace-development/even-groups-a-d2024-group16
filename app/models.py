@@ -5,7 +5,7 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'user'
 
-    email = db.Column(db.String, nullable=False, primary_key=True)
+    email = db.Column(db.String, nullable=False, primary_key=True, unique=True)
     name = db.Column(db.String(80), nullable=False)
     date_of_birth = db.Column(db.DateTime, nullable=True)  # Handles 'timestamp with time zone'
     street = db.Column(db.String, nullable=True)
@@ -21,25 +21,14 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User(name={self.name}, email={self.email})>"
- 
-# class Dish(db.Model):
-#     __tablename__ = 'dish'
-
-#     dishid = db.Column(db.Integer, primary_key=True)
-#     dishtype = db.Column(db.String, nullable=False)  # Assumes this is required
-
-#     # Relationships
-#     recipes = db.relationship('Recipe', backref='Dish', lazy=True)
-
-#     def __repr__(self):
-#         return f"<Dish(dishid={self.dishid}, dishtype={self.dishtype})>"
+    
 
 # class Chef(db.Model):
 #     __tablename__ = 'chef'
 
 #     chefid = db.Column(db.Integer, primary_key=True)
 #     avgrating = db.Column(db.String, nullable=True)  # Assuming stored as numeric
-#     userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
+#     email = db.Column(db.String, db.ForeignKey('user.email'), nullable=False)  # Foreign key to User
 
 #     # Relationships
 #     recipes = db.relationship('Recipe', backref='Chef', lazy=True)
@@ -52,15 +41,20 @@ class User(db.Model):
 # class Recipe(db.Model):
 #     __tablename__ = 'recipe'
 
-#     recipeid = db.Column(db.Integer, primary_key=True, nullable=False)
+#     recipename = db.Column(db.String, primary_key=True, nullable=False)
 #     chefid = db.Column(db.Integer, db.ForeignKey('Chef.chefid'), nullable=False)  # Foreign key to Chef
-#     dishid = db.Column(db.Integer, db.ForeignKey('Dish.dishid'), nullable=False)  # Foreign key to DishC
 #     description = db.Column(db.String, nullable=True)
 #     duration = db.Column(db.Integer, nullable=True)  # Assuming this is in minutes
 #     price = db.Column(db.String, nullable=True)  # Numeric stored as string for precision
 #     ingredients = db.Column(db.String, nullable=True)
 #     allergiesrec = db.Column(db.String, nullable=True)
 #     image = db.Column(db.String, nullable=True)
+#       
+#     # Relationships
+#     transactions = db.relationship('Transaction', backref='Recipe', lazy=True)
+#     
+#     def __repr__(self):
+#        return f"<Recipe(recipename={self.recipename}, chefid={self.chefid})>"
     
 
 # class Transaction(db.Model):
@@ -71,6 +65,7 @@ class User(db.Model):
 #     price = db.Column(db.String, nullable=False)  # Numeric stored as string
 #     consumerid = db.Column(db.Integer, db.ForeignKey('consumer.consumerid'), nullable=False)  # Foreign key to Consumer
 #     chefid = db.Column(db.Integer, db.ForeignKey('chef.chefid'), nullable=False)  # Foreign key to Chef
+#     recipename = db.Colum,(db.String, db.ForeignKey('recipe.recipename'), nullable=False)
 
 #     # Relationships
 #     reviews = db.relationship('Review', backref='Transaction', lazy=True)
@@ -96,7 +91,7 @@ class User(db.Model):
 #     consumerid = db.Column(db.Integer, primary_key=True)
 #     allergiescon = db.Column(db.String, nullable=True)
 #     fridgecontents = db.Column(db.String, nullable=True)
-#     userid = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)  # Foreign key to User
+#     email = db.Column(db.String, db.ForeignKey('user.email'), nullable=False)  # Foreign key to User
 
 #     # Relationships
 #     transactions = db.relationship('Transaction', backref='Consumer', lazy=True)
