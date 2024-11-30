@@ -1,79 +1,97 @@
 
 /* Algemene instellingen */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fc;
     margin: 0;
     padding: 0;
-    background-color: #f0f8ff;
-    color: #333;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.registration-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.registration-form h1 {
     text-align: center;
-    width: 100%;
-    max-width: 800px; /* Dit zorgt ervoor dat de container niet breder wordt dan 800px */
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
 }
 
-h1 {
-    font-size: 2.5rem;
-    color: #003366;
+.registration-form .subtitle {
+    text-align: center;
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.form-group {
     margin-bottom: 20px;
 }
 
-/* Stijlen voor knoppen */
-.btn, input[type="submit"] {
-    padding: 12px 20px;
-    background-color: #1e90ff;
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 3px rgba(0, 86, 179, 0.2);
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-primary {
+    background: #0056b3;
     color: white;
-    font-size: 1.2rem;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
+    font-size: 1rem;
     cursor: pointer;
-    text-decoration: none;
     width: 100%;
-    max-width: 250px; /* Max breedte voor de knoppen */
-    transition: background-color 0.3s;
 }
 
-.btn:hover, input[type="submit"]:hover {
-    background-color: #4682b4;
-}
-
-/* Extra stijl voor de knop "Geaccepteerde Klussen" */
-.btn-success {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-/* Dashboard card-styling */
-.card {
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-    background-color: #f4f4f4;
-    padding: 10px;
-    font-size: 1.5rem;
-    border-bottom: 1px solid #ddd;
-}
-
-.card-body {
-    padding: 15px;
-    font-size: 1.1rem;
-}
-
-.d-grid {
-    gap: 10px;
-    display: flex;
-    flex-direction: column;
+.btn-primary:hover {
+    background: #004494;
 }
