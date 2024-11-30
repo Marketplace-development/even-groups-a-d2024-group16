@@ -1,63 +1,88 @@
 # app/routes.py
 
-from flask import Blueprint, request, redirect, url_for, render_template, session
-from .models import db, User
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from app import db
+from app.models import User
+from app.forms import UserForm, LoginForm
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        listings = Listing.query.filter_by(user_id=user.id).all()  # Fetch listings for logged-in user
-        return render_template('index.html', username=user.username, listings=listings)
-    return render_template('index.html', username=None)
+    return render_template('index.html')
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        if User.query.filter_by(username=username).first() is None:
-            new_user = User(username=username)
-            db.session.add(new_user)
-            db.session.commit()
-            session['user_id'] = new_user.id
-            return redirect(url_for('main.index'))
-        return 'Username already registered'
-    return render_template('register.html')
+    form = UserForm()
+
+    #validate if form is submitted
+    if form.validate_on_submit():
+        print("Form is submitted")
+        print(f"E-mail: {form.email.data}")
+        # Save or process the data
+
+        #does user already exist 
+        if User.query.filter_by(email=form.email.data).first():
+            print(f"The email {form.email.data} is already in use.")
+            flash('This email is already in use, pic another one or login', 'danger')
+            return redirect(url_for('main.register'))
+            
+        # Introduce a new user
+        new_user = User(
+            email=form.email.data,
+            name=form.name.data,
+            date_of_birth=form.date_of_birth.data,
+            street = form.street.data,
+            housenr=form.housenr.data,
+            postalcode=form.postalcode.data,
+            city=form.city.data,
+            country=form.country.data,
+            telephonenr=form.telephonenr.data,
+        )
+
+            # Add new user to tge database
+        print("User is being added to the database...")
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Message of validation
+        flash('You are registered succesfully', 'success')
+
+                # Debugging: validate the redirect
+        print("Redirecten naar de loginpagina...")
+
+                # Directe redirect to loginpage
+        return redirect(url_for('main.login'))
+    
+        # AIf the form isn't submitted or not valid, show the registrationForm
+
+    print("Form not submitted succesfully")
+    return render_template('register.html', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        user = User.query.filter_by(username=username).first()
+    print("Login route is reached")  # Dit moet in je terminal verschijnen
+    form = LoginForm()
+    
+    if form.validate_on_submit():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        
         if user:
-            session['user_id'] = user.id
-            return redirect(url_for('main.index'))
-        return 'User not found'
-    return render_template('login.html')
+            session['email'] = user.email  # Save the email in the Session
+            flash(f'Logged in with email {user.email}', 'success')
+            return redirect(url_for('main.dashboard'))  # Redirect to the dashboard
+        else:
+            flash('Email not found', 'danger')
+    
+    return render_template('login.html', form=form)
 
-@main.route('/logout', methods=['POST'])
-def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('main.index'))
-
-@main.route('/add-listing', methods=['GET', 'POST'])
-def add_listing():
-    if 'user_id' not in session:
+@main.route('/dashboard')
+def dashboard():
+    if 'email' not in session:
+        flash('You have to login first', 'danger')
         return redirect(url_for('main.login'))
     
-    if request.method == 'POST':
-        listing_name = request.form['listing_name']
-        price = float(request.form['price'])
-        new_listing = Listing(listing_name=listing_name, price=price, user_id=session['user_id'])
-        db.session.add(new_listing)
-        db.session.commit()
-        return redirect(url_for('main.listings'))
-
-    return render_template('add_listing.html')
-
-@main.route('/listings')
-def listings():
-    all_listings = Listing.query.all()
-    return render_template('listings.html', listings=all_listings)
+    user = User.query.get(session['email'])  # Get user with email
+    
+    return render_template('dashboard.html', user=user)

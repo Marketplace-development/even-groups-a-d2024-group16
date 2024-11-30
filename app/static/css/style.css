@@ -1,0 +1,79 @@
+
+/* Algemene instellingen */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 800px; /* Dit zorgt ervoor dat de container niet breder wordt dan 800px */
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #003366;
+    margin-bottom: 20px;
+}
+
+/* Stijlen voor knoppen */
+.btn, input[type="submit"] {
+    padding: 12px 20px;
+    background-color: #1e90ff;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;
+    max-width: 250px; /* Max breedte voor de knoppen */
+    transition: background-color 0.3s;
+}
+
+.btn:hover, input[type="submit"]:hover {
+    background-color: #4682b4;
+}
+
+/* Extra stijl voor de knop "Geaccepteerde Klussen" */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Dashboard card-styling */
+.card {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f4f4f4;
+    padding: 10px;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body {
+    padding: 15px;
+    font-size: 1.1rem;
+}
+
+.d-grid {
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
