@@ -1,38 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipes Listing</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigatiebalk -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">MyRecipes</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if session.get('email') %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('main.logout') }}" class="nav-link btn btn-danger text-white">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a href="{{ url_for('main.login') }}" class="nav-link">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('main.register') }}" class="nav-link">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% extends 'base.html' %}
 
+{% block title %}Recipes Listing{% endblock %}
+
+{% block content %}
     <!-- Recepten Lijst -->
     <div class="container mt-4">
         <h1 class="mb-4">Available Recipes</h1>
@@ -56,7 +26,4 @@
             <p class="text-muted">No recipes available at the moment. Please check back later!</p>
         {% endif %}
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}
