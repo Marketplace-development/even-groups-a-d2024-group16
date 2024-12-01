@@ -15,12 +15,7 @@ class User(db.Model):
     city = db.Column(db.String, nullable=True)
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
-<<<<<<< HEAD
-    is_chef = db.Column(db.Boolean, nullable=False)
-=======
-    is_consumer = db.Column(db.Boolean, default=True, nullable=False)  # Gebruiker is standaard een consument
     is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Gebruiker kan optioneel een chef zijn
->>>>>>> 2e6c500332b7fdb9e297f2c957490655f84c081f
 
     # Relationships
     recipes = db.relationship('Recipe', backref='chef', lazy=True, foreign_keys='Recipe.chef_email')
