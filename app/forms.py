@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
 
+
 class UserForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     name = StringField('Name', validators=[DataRequired()])
@@ -17,3 +18,4 @@ class UserForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField('Emai', validators=[DataRequired()])
     submit = SubmitField('Login')
+

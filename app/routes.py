@@ -24,7 +24,7 @@ def register():
         #does user already exist 
         if User.query.filter_by(email=form.email.data).first():
             print(f"The email {form.email.data} is already in use.")
-            flash('This email is already in use, pic another one or login', 'danger')
+            flash('This email is already in use, pick another one or login', 'danger')
             return redirect(url_for('main.register'))
             
         # Introduce a new user
@@ -87,9 +87,15 @@ def dashboard():
     
     return render_template('dashboard.html', user=user)
 
-@main.route('/logout')
+@main.route('/logout', methods=['GET'])
 def logout():
-    # Verwijder de e-mail uit de sessie om de gebruiker uit te loggen
-    session.pop('email', None)
-    flash('You have been logged out.', 'info')
-    return render_template('logout.html')
+    print("Logout route is reached")  # Dit verschijnt in je terminal voor debugging
+    # Verwijder de email uit de sessie om de gebruiker uit te loggen
+    if 'email' in session:
+        session.pop('email', None)
+        flash('You have been logged out successfully.', 'info')
+        print("User session cleared, redirecting to index")
+
+    # Redirect naar de homepage of een andere pagina na uitloggen
+    return redirect(url_for('main.index'))
+

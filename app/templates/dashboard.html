@@ -7,26 +7,27 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<<<<<<< Updated upstream
-    <div class="container mt-5">
-        <h1 class="text-center">Dashboard</h1>
-    </div>
-=======
-    <!-- Navigatie of Header -->
+    <!-- Navigatiebalk -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">MyRecipes Dashboard</a>
-            <div class="d-flex">
-                <!-- Logout knop -->
-                {% if session.get('email') %}
-                    <a href="{{ url_for('main.logout') }}" class="btn btn-danger me-2">Logout</a>
-                {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if session.get('email') %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('main.logout') }}" class="btn btn-danger">Logout</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
 
     <!-- Dashboard Content -->
-    <div class="container mt-4">
+    <div class="container mt-5">
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -41,12 +42,12 @@
         {% endwith %}
         
         <!-- Dashboard content -->
-        <h1>Welcome to your Dashboard!</h1>
-        <p>Here you can manage your recipes and track your activity.</p>
+        <h1 class="text-center">Welcome to your Dashboard!</h1>
+        <p class="text-center">Here you can manage your recipes and track your activity.</p>
         <!-- Voeg meer inhoud toe, zoals een lijst met recepten of statistieken -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
->>>>>>> Stashed changes
 </body>
 </html>
+
