@@ -86,3 +86,10 @@ def dashboard():
     user = User.query.get(session['email'])  # Get user with email
     
     return render_template('dashboard.html', user=user)
+
+@main.route('/logout')
+def logout():
+    # Verwijder de e-mail uit de sessie om de gebruiker uit te loggen
+    session.pop('email', None)
+    flash('You have been logged out.', 'info')
+    return render_template('logout.html')
