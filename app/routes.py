@@ -2,8 +2,8 @@
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app import db
-from app.models import User
-from app.forms import UserForm, LoginForm
+from app.models import User, Recipe
+from app.forms import UserForm, LoginForm, RecipeForm
 
 main = Blueprint('main', __name__)
 
@@ -15,49 +15,51 @@ def index():
 def register():
     form = UserForm()
 
-    #validate if form is submitted
+    # Validate if form is submitted
     if form.validate_on_submit():
         print("Form is submitted")
         print(f"E-mail: {form.email.data}")
-        # Save or process the data
 
-        #does user already exist 
+        # Haal de waarde van is_chef direct op uit de POST-gegevens
+        is_chef = request.form.get('is_chef') == 'true'  # Dit converteert de string 'true' naar een boolean
+
+        # Check if the user already exists
         if User.query.filter_by(email=form.email.data).first():
             print(f"The email {form.email.data} is already in use.")
             flash('This email is already in use, pick another one or login', 'danger')
             return redirect(url_for('main.register'))
-            
-        # Introduce a new user
+
+        # Create new user
         new_user = User(
             email=form.email.data,
             name=form.name.data,
             date_of_birth=form.date_of_birth.data,
-            street = form.street.data,
+            street=form.street.data,
             housenr=form.housenr.data,
             postalcode=form.postalcode.data,
             city=form.city.data,
             country=form.country.data,
             telephonenr=form.telephonenr.data,
+            is_chef=is_chef  # Use the value of is_chef obtained from the form
         )
 
-            # Add new user to tge database
+        # Add new user to the database
         print("User is being added to the database...")
         db.session.add(new_user)
         db.session.commit()
 
-        # Message of validation
-        flash('You are registered succesfully', 'success')
+        # Flash a success message
+        flash('You are registered successfully', 'success')
 
-                # Debugging: validate the redirect
-        print("Redirecten naar de loginpagina...")
-
-                # Directe redirect to loginpage
+        # Redirect to the login page
+        print("Redirecting to the login page...")
         return redirect(url_for('main.login'))
-    
-        # AIf the form isn't submitted or not valid, show the registrationForm
 
-    print("Form not submitted succesfully")
+    # If the form isn't submitted or is not valid, show the registration form
+    print("Form not submitted successfully")
     return render_template('register.html', form=form)
+
+
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -99,3 +101,58 @@ def logout():
     # Redirect naar de homepage of een andere pagina na uitloggen
     return redirect(url_for('main.index'))
 
+@main.route('/recipes', methods=['GET'])
+def list_recipes():
+    # Haal alle recepten op uit de database
+    recipes = Recipe.query.all()
+    
+    # Render de template en geef de recepten mee
+    return render_template('listing.html', recipes=recipes)
+
+@main.route('/add_recipe', methods=['GET', 'POST'])
+def add_recipe():
+    if 'email' not in session:
+        flash('You need to be logged in to add a recipe.', 'danger')
+        return redirect(url_for('main.login'))
+
+    form = RecipeForm()
+    if form.validate_on_submit():
+        # Controleer of het recept al bestaat
+        existing_recipe = Recipe.query.filter_by(recipename=form.recipename.data).first()
+        if existing_recipe:
+            flash('A recipe with this name already exists. Please choose a different name.', 'danger')
+            return redirect(url_for('main.add_recipe'))
+
+        # Zoek de ingelogde gebruiker
+        user = User.query.filter_by(email=session['email']).first()
+        
+        # Maak een nieuw recept aan
+        new_recipe = Recipe(
+            recipename=form.recipename.data,
+            chef_email=user.email,
+            description=form.description.data,
+            duration=form.duration.data,
+            price=form.price.data,
+            ingredients=form.ingredients.data,
+            allergiesrec=form.allergiesrec.data,
+            image=form.image.data
+        )
+        
+        # Voeg het nieuwe recept toe aan de database
+        db.session.add(new_recipe)
+        db.session.commit()
+
+        flash('Recipe has been added successfully!', 'success')
+        return redirect(url_for('main.list_recipes'))
+
+    return render_template('add_recipe.html', form=form)
+
+
+
+@main.route('/recipe/<recipename>')
+def recipe_detail(recipename):
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if recipe is None:
+        flash('Recipe not found', 'danger')
+        return redirect(url_for('main.list_recipes'))
+    return render_template('recipe_detail.html', recipe=recipe)

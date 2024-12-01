@@ -5,6 +5,7 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         
+        <!-- E-mail invoerveld -->
         <div>
             <label for="email">E-mail</label>
             {{ form.email(class="form-control") }}
@@ -17,6 +18,7 @@
             {% endif %}
         </div>
 
+        <!-- Volledige naam invoerveld -->
         <div>
             <label for="name">Full name</label>
             {{ form.name(class="form-control") }}
@@ -29,6 +31,7 @@
             {% endif %}
         </div>
 
+        <!-- Geboortedatum invoerveld -->
         <div>
           <label for="date_of_birth">Date of birth</label>
           {{ form.date_of_birth(class="form-control") }}
@@ -41,6 +44,7 @@
           {% endif %}
       </div>
 
+        <!-- Adres velden -->
         <div>
             <label for="street">Street</label>
             {{ form.street(class="form-control") }}
@@ -66,7 +70,7 @@
         </div>
 
         <div>
-            <label for="postalcode">postalcode</label>
+            <label for="postalcode">Postalcode</label>
             {{ form.postalcode(class="form-control") }}
             {% if form.postalcode.errors %}
                 <ul class="errors">
@@ -101,6 +105,7 @@
             {% endif %}
         </div>
 
+        <!-- Telefoonnummer veld -->
         <div>
           <label for="telephonenr">Telephone</label>
           {{ form.telephonenr(class="form-control") }}
@@ -112,8 +117,51 @@
               </ul>
           {% endif %}
       </div>
+
+        <!-- Vraag of de gebruiker een chef is met radioknoppen -->
+        <div class="chef-container">
+            <label>Are you a chef?</label>
+            <div class="chef-radios">
+                <div class="radio-container">
+                    <input type="radio" id="yes" name="is_chef" value="true" required>
+                    <label for="yes">Yes</label>
+                </div>
+                <div class="radio-container">
+                    <input type="radio" id="no" name="is_chef" value="false" required>
+                    <label for="no">No</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit knop -->
         <div>
-            <button type="submit" class="btn btn-primary">Registreren</button>
+            <button type="submit" class="btn btn-primary">Register</button>
         </div>
     </form>
+
+    <style>
+        /* Centraal positioneren van de form en de knoppen */
+        .chef-container {
+            display: flex;
+            justify-content: center; /* Centraal in de breedte */
+            align-items: center; /* Centraal in de hoogte */
+            flex-direction: column; /* Zorg ervoor dat de label boven de knoppen staat */
+            margin-top: 20px;
+        }
+
+        /* Styling voor de radioknoppen naast elkaar */
+        .chef-radios {
+            display: flex; /* Zorgt ervoor dat de knoppen naast elkaar komen te staan */
+            gap: 20px; /* Ruimte tussen de knoppen */
+        }
+
+        .radio-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-container input {
+            margin-right: 10px; /* Ruimte tussen het radio-knopje en het label */
+        }
+    </style>
 {% endblock %}
