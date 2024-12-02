@@ -15,13 +15,14 @@ def index():
 def register():
     form = UserForm()
 
-    # Validate if form is submitted
     if form.validate_on_submit():
         print("Form is submitted")
         print(f"E-mail: {form.email.data}")
 
         # Haal de waarde van is_chef direct op uit de POST-gegevens
-        is_chef = request.form.get('is_chef') == 'true'  # Dit converteert de string 'true' naar een boolean
+        is_chef_value = request.form.get('is_chef')
+        print(f"Received is_chef value: {is_chef_value}")
+        is_chef = True if is_chef_value == 'true' else False  # Converteer correct naar boolean
 
         # Check if the user already exists
         if User.query.filter_by(email=form.email.data).first():
@@ -29,7 +30,7 @@ def register():
             flash('This email is already in use, pick another one or login', 'danger')
             return redirect(url_for('main.register'))
 
-        # Create new user
+        # Maak nieuwe gebruiker aan
         new_user = User(
             email=form.email.data,
             name=form.name.data,
@@ -40,20 +41,24 @@ def register():
             city=form.city.data,
             country=form.country.data,
             telephonenr=form.telephonenr.data,
-            is_chef=is_chef  # Use the value of is_chef obtained from the form
+            is_chef=is_chef  # Gebruik de juiste waarde van is_chef
         )
 
-        # Add new user to the database
+        # Voeg nieuwe gebruiker toe aan de database
         print("User is being added to the database...")
         db.session.add(new_user)
         db.session.commit()
 
-        # Flash a success message
+        # Flash een succesbericht
         flash('You are registered successfully', 'success')
 
-        # Redirect to the login page
+        # Redirect naar de login pagina
         print("Redirecting to the login page...")
         return redirect(url_for('main.login'))
+
+    print("Form not submitted successfully")
+    return render_template('register.html', form=form)
+
 
     # If the form isn't submitted or is not valid, show the registration form
     print("Form not submitted successfully")

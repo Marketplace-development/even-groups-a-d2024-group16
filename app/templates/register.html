@@ -122,16 +122,18 @@
             <label>Are you a chef?</label>
             <div class="chef-radios">
                 <div class="radio-container">
-                    <input type="radio" id="yes" name="is_chef" value="true" required>
+                    <input type="radio" id="yes" name="is_chef" value="true" 
+                           {% if request.form.get('is_chef') == 'true' %} checked {% endif %}>
                     <label for="yes">Yes</label>
                 </div>
                 <div class="radio-container">
-                    <input type="radio" id="no" name="is_chef" value="false" required>
+                    <input type="radio" id="no" name="is_chef" value="false" 
+                           {% if request.form.get('is_chef') == 'false' %} checked {% endif %}>
                     <label for="no">No</label>
                 </div>
             </div>
         </div>
-
+        
         <!-- Submit knop -->
         <div>
             <button type="submit" class="btn btn-primary">Register</button>
