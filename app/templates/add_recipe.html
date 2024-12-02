@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Recipe{% endblock %}
+{% block title %}Add Recipe{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <h1>Add a New Recipe</h1>
-    <form method="POST" action="{{ url_for('main.add_recipe') }}">
+    <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="mb-3">
             {{ form.recipename.label(class="form-label") }}
@@ -34,9 +34,11 @@
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
             {{ form.image(class="form-control") }}
+            {% if form.image.errors %}
+                <small class="text-danger">{{ form.image.errors[0] }}</small>
+            {% endif %}
         </div>
-        <!-- Add Recipe button met de rode knopstijl -->
-        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
 </div>
 {% endblock %}

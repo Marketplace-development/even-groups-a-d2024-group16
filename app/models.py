@@ -35,7 +35,7 @@ class Recipe(db.Model):
     price = db.Column(db.String, nullable=True)
     ingredients = db.Column(db.String, nullable=True)
     allergiesrec = db.Column(db.String, nullable=True)
-    image = db.Column(db.String, nullable=True)
+    image = db.Column(db.Text, nullable=True)  # URL van de afbeelding
 
     # Relationships
     transactions = db.relationship('Transaction', backref='recipe', lazy=True)

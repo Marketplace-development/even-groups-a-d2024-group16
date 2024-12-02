@@ -8,21 +8,31 @@
     <div class="container mt-5">
         <h1 class="text-center">My Uploaded Recipes</h1>
         <div class="recipes-container">
-            {% for recipe in uploads %}
-                <div class="recipe-card">
-                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="recipe-image">
-                    <div class="recipe-details">
-                        <h3>{{ recipe.title }}</h3>
-                        <p><strong>Description:</strong> {{ recipe.description }}</p>
-                        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                        <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+            {% if uploads %}
+                {% for recipe in uploads %}
+                    <div class="recipe-card">
+                        <!-- Afbeelding -->
+                        {% if recipe.image %}
+                            <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="recipe-image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
+                        {% endif %}
+                        
+                        <!-- Recept Details -->
+                        <div class="recipe-details">
+                            <h3>{{ recipe.recipename }}</h3>
+                            <p><strong>Description:</strong> {{ recipe.description }}</p>
+                            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                            <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             {% else %}
+                <!-- Geen recepten geüpload -->
                 <p class="text-center">You haven't uploaded any recipes yet.</p>
-            {% endfor %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

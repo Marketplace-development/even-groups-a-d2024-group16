@@ -56,8 +56,15 @@
         <div class="recipes-container">
             {% for recipe in recipes %}
                 <div class="recipe-card">
-                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="recipe-image">
+                    {% if recipe.image %}
+                        <!-- Gebruik url_for om de juiste URL te genereren -->
+                        <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="recipe-image">
+                    {% else %}
+                        <!-- Gebruik een standaardafbeelding als er geen afbeelding is -->
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
+                    {% endif %}
                     <div class="recipe-details">
+                        <h3>{{ recipe.recipename }}</h3>
                         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
                         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
                         <p><strong>Price:</strong> €{{ recipe.price }}</p>

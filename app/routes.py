@@ -1,6 +1,7 @@
 # app/routes.py
-
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+import os
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
+from werkzeug.utils import secure_filename
 from app import db
 from app.models import User, Recipe
 from app.forms import UserForm, LoginForm, RecipeForm
@@ -125,6 +126,13 @@ def list_recipes():
     # Render de template en geef de recepten mee
     return render_template('listing.html', recipes=recipes)
 
+import os
+from flask import current_app, flash, redirect, render_template, url_for
+from werkzeug.utils import secure_filename
+from app.models import Recipe
+from app.forms import RecipeForm
+from app import db
+
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
     if 'email' not in session or session.get('role') != 'chef':
@@ -133,6 +141,19 @@ def add_recipe():
 
     form = RecipeForm()
     if form.validate_on_submit():
+        # Bepaal de map voor afbeeldingen
+        upload_folder = os.path.join(current_app.root_path, 'static/images')
+        
+        # Controleer of de map bestaat en maak deze aan indien nodig
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        # Sla de afbeelding veilig op
+        image_file = secure_filename(form.image.data.filename)
+        image_path = os.path.join(upload_folder, image_file)
+        form.image.data.save(image_path)
+
+        # Voeg recept toe aan de database
         new_recipe = Recipe(
             recipename=form.recipename.data,
             description=form.description.data,
@@ -140,8 +161,7 @@ def add_recipe():
             price=form.price.data,
             ingredients=form.ingredients.data,
             allergiesrec=form.allergiesrec.data,
-            image=form.image.data,
-            chef_email=session['email']  # Verbind het recept met de chef
+            image=f'images/{image_file}'  # Bewaar het relatieve pad
         )
         db.session.add(new_recipe)
         db.session.commit()
@@ -149,6 +169,7 @@ def add_recipe():
         return redirect(url_for('main.my_uploads'))
 
     return render_template('add_recipe.html', form=form)
+
 
 
 
