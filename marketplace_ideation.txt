@@ -1,36 +1,35 @@
 ### Marketplace Ideation
 
-Platform name: 
+Platform name: Dishcovery
 
-Short description: 
+Short description: Ontdek een wereld van smaak met Dishcovery, het platform waar gerechten 
+tot leven komen. Of je nu een meesterchef bent die nieuwe recepten met de buitenwereld wilt delen, 
+of net begint met koken en wat hulp nodig hebt, Dishcovery helpt je unieke recepten te ontdekken, 
+direct van gepassioneerde chefs. Laat je inspireren door te bladeren door een grote collectie van gerechten, 
+koop alleen de recepten die jij wilt, en bewaar ze in je persoonlijke digitale kookboek!
 
 # Taxonomy: Business Model
 
-User Type: Person | Organization
-Listing Kind: Good Transfer |Service
-Listing Type: Physical Good | Digital Good | Offline Serviced | Online Serviced
-Frequency: One-Time | Recurring
-Quantity: One | Many
-Price Discovery: Set by Provider | Set by Customer | Set by Market
-Price Calculation: By Quantity | By Feature | Auction | Quote
-Conversation System: Listing Conversation | Transaction Conversation
-Review by: By Customer | By Provider
-Review of: Of Listing | Of Provider
-Trust and Safety: ID Verification | Badges | In-app reporting
-Revenue Stream: Subscription | Commission | Fixed Fee | Listing Fee
-Revenue Source: Customer | Provider
-
-# Ontology model
-
-1. Download Visual Paradigm Community Edition: https://www.visual-paradigm.com/download/community.jsp
-2. Install the OntoUML plugin: https://github.com/OntoUML/ontouml-vp-plugin
-3. Develop a platform-specific ontology: https://model-a-platform.com/applying-the-ontology/
+User Type: Person
+Listing Kind: Good Transfer
+Listing Type: Digital Good | Online Serviced
+Frequency: One-Time
+Quantity: One
+Price Discovery: Set by Provider (Chef bepaalt de prijs)
+Price Calculation: By Feature (prijs per recept)
+Conversation System: Transaction Conversation
+Review by: By Customer (gebruikers laten recensies achter)
+Review of: Of Listing (recept) | Of Provider (chef)
+Trust and Safety: ID Verification | Badges | In-app reporting ?
+Revenue Stream: Subscription | Commission
+Revenue Source: Customer (gebruikers betalen voor recepten)
 
 # User stories
 
-As a [], I want to [], so that []. Prio
-As a [Customer], I want to [buy a product], so that [I can use it]. 2
-As a [provider], I want to [sell a product], so that [I earn money]. 1
+As a [Customer], I want to [buy recipes], so that [I can prepare them and don't have to buy a whole cookbook].
+As a [Customer], I want to [buy recipes], so that [I can save my recipes in my peronal cookbook]. 
+As a [Customer], I want to [receive personalized recommendations], so that [I can find dishes that suit my taste].
+As a [Chef], I want to [sell a recipe], so that [I earn money]. 
 
 # UI Prototype
 
