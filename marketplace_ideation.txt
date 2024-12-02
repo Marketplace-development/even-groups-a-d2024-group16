@@ -2,11 +2,12 @@
 
 Platform name: Dishcovery
 
-Short description: Ontdek een wereld van smaak met Dishcovery, het platform waar gerechten 
-tot leven komen. Of je nu een meesterchef bent die nieuwe recepten met de buitenwereld wilt delen, 
-of net begint met koken en wat hulp nodig hebt, Dishcovery helpt je unieke recepten te ontdekken, 
-direct van gepassioneerde chefs. Laat je inspireren door te bladeren door een grote collectie van gerechten, 
-koop alleen de recepten die jij wilt, en bewaar ze in je persoonlijke digitale kookboek!
+Short description: Discover a world of taste with Dishcovery, the platform where dishes 
+come to life. Whether you are a master chef who wants to share new recipes with the outside world, 
+or are just starting to cook and need some help, Dishcovery will help you discover unique recipes, 
+directly from passionate chefs. Get inspired by browsing through a large collection of dishes, 
+buy only the recipes you want and save them in your personal digital cookbook!
+
 
 # Taxonomy: Business Model
 
@@ -15,14 +16,13 @@ Listing Kind: Good Transfer
 Listing Type: Digital Good | Online Serviced
 Frequency: One-Time
 Quantity: One
-Price Discovery: Set by Provider (Chef bepaalt de prijs)
-Price Calculation: By Feature (prijs per recept)
+Price Discovery: Set by Provider (chef determines the price)
+Price Calculation: By Feature (price per recipe)
 Conversation System: Transaction Conversation
 Review by: By Customer (gebruikers laten recensies achter)
-Review of: Of Listing (recept) | Of Provider (chef)
-Trust and Safety: ID Verification | Badges | In-app reporting ?
+Review of: Of Listing (recipe) | Of Provider (chef)
 Revenue Stream: Subscription | Commission
-Revenue Source: Customer (gebruikers betalen voor recepten)
+Revenue Source: Customer
 
 # User stories
 
