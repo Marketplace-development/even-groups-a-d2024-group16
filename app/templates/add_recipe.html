@@ -12,22 +12,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Voor Customers -->
-                {% if session.get('role') == 'customer' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
-                    </li>
-                {% endif %}
-
-                <!-- Voor Chefs -->
-                {% if session.get('role') == 'chef' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
-                    </li>
-                {% endif %}
+                <!-- My Uploads voor chefs -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                </li>
 
                 <!-- Logout -->
                 {% if session.get('email') %}

@@ -1,70 +1,60 @@
 {% extends 'base.html' %}
 
-{% block title %}
-    My Uploads
-{% endblock %}
+{% block title %}My Uploads{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <!-- Dishcovery knop -->
-        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <!-- Voor Customers -->
-                {% if session.get('role') == 'customer' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
-                    </li>
-                {% endif %}
-
-                <!-- Voor Chefs -->
-                {% if session.get('role') == 'chef' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+    <!-- Navigatiebalk -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Dishcovery knop -->
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Algemeen menu voor alle gebruikers -->
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
                     </li>
-                {% endif %}
 
-                <!-- Logout -->
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
-                {% endif %}
-            </ul>
+                    <!-- Logout -->
+                    {% if session.get('email') %}
+                        <li class="nav-item">
+                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+
+    <!-- Content -->
     <div class="container mt-5">
         <h1 class="text-center">My Uploaded Recipes</h1>
-        <div class="recipes-container">
-            {% if uploads %}
-                {% for recipe in uploads %}
+
+        <!-- Controleer of er recepten zijn geüpload door de chef -->
+        {% if recipes %}
+            <div class="recipes-container">
+                {% for recipe in recipes %}
                     <div class="recipe-card">
-                        <!-- Afbeelding -->
                         {% if recipe.image %}
+                            <!-- Gebruik url_for om de juiste URL te genereren -->
                             <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="recipe-image">
                         {% else %}
+                            <!-- Gebruik een standaardafbeelding als er geen afbeelding is -->
                             <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
                         {% endif %}
-                        
-                        <!-- Recept Details -->
                         <div class="recipe-details">
                             <h3>{{ recipe.recipename }}</h3>
-                            <p><strong>Description:</strong> {{ recipe.description }}</p>
                             <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
                             <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
                             <p><strong>Price:</strong> €{{ recipe.price }}</p>
@@ -72,10 +62,9 @@
                         </div>
                     </div>
                 {% endfor %}
-            {% else %}
-                <!-- Geen recepten geüpload -->
-                <p class="text-center">You haven't uploaded any recipes yet.</p>
-            {% endif %}
-        </div>
+            </div>
+        {% else %}
+            <p class="text-center">You haven't uploaded any recipes yet.</p>
+        {% endif %}
     </div>
 {% endblock %}

@@ -135,11 +135,18 @@ from app import db
 
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
+    # Controleer of de gebruiker is ingelogd als chef
     if 'email' not in session or session.get('role') != 'chef':
         flash('You need to log in as a chef to add recipes.', 'danger')
         return redirect(url_for('main.login'))
 
     form = RecipeForm()
+
+    # Als het een GET-verzoek is, render het formulier om een nieuw recept toe te voegen
+    if request.method == 'GET':
+        return render_template('add_recipe.html', form=form)  # Zorg ervoor dat er een template wordt geretourneerd
+
+    # Als het een POST-verzoek is en het formulier is correct ingevuld
     if form.validate_on_submit():
         # Bepaal de map voor afbeeldingen
         upload_folder = os.path.join(current_app.root_path, 'static/images')
@@ -153,23 +160,30 @@ def add_recipe():
         image_path = os.path.join(upload_folder, image_file)
         form.image.data.save(image_path)
 
-        # Voeg recept toe aan de database
+        # Haal het e-mailadres van de ingelogde chef op uit de sessie
+        chef_email = session['email']
+
+        # Voeg het recept toe aan de database, inclusief het e-mailadres van de chef
         new_recipe = Recipe(
             recipename=form.recipename.data,
+            chef_email=chef_email,  # Chef's e-mailadres opslaan
             description=form.description.data,
             duration=form.duration.data,
             price=form.price.data,
             ingredients=form.ingredients.data,
             allergiesrec=form.allergiesrec.data,
-            image=f'images/{image_file}'  # Bewaar het relatieve pad
+            image=f'images/{image_file}'  # Bewaar het relatieve pad van de afbeelding
         )
+
+        # Voeg het nieuwe recept toe aan de sessie en commit
         db.session.add(new_recipe)
         db.session.commit()
+
         flash('Recipe added successfully!', 'success')
-        return redirect(url_for('main.my_uploads'))
+        return redirect(url_for('main.dashboard'))
 
+    # Als het formulier niet valideert of het een GET-verzoek is, render het formulier opnieuw
     return render_template('add_recipe.html', form=form)
-
 
 
 
@@ -184,8 +198,6 @@ def my_recipes():
 
 
 
-
-
 @main.route('/recipe/<recipename>')
 def recipe_detail(recipename):
     recipe = Recipe.query.filter_by(recipename=recipename).first()
@@ -194,15 +206,23 @@ def recipe_detail(recipename):
         return redirect(url_for('main.list_recipes'))
     return render_template('recipe_detail.html', recipe=recipe)
 
+
 @main.route('/my_uploads')
 def my_uploads():
+    # Controleer of de gebruiker ingelogd is en een chef is
     if 'email' not in session or session.get('role') != 'chef':
-        flash('You need to log in as a chef to access this page.', 'danger')
+        flash('You need to log in as a chef to view your uploads.', 'danger')
         return redirect(url_for('main.login'))
 
+    # Haal het e-mailadres van de ingelogde chef op uit de sessie
     chef_email = session['email']
-    uploads = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
-    return render_template('my_uploads.html', recipes=uploads)
+
+    # Haal alle recepten op die zijn geüpload door de chef
+    recipes = Recipe.query.filter_by(chef_email=chef_email).all()
+
+    # Render de my_uploads template met de recepten van de chef
+    return render_template('my_uploads.html', recipes=recipes)
+
 
 
 @main.route('/my_library')

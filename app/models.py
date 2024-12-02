@@ -28,14 +28,19 @@ class User(db.Model):
 class Recipe(db.Model):
     __tablename__ = 'recipe'
 
-    recipename = db.Column(db.String, primary_key=True, nullable=False)
+    recipename = db.Column(db.String, nullable=False)
     chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Verwijzing naar user.email (chef)
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
     price = db.Column(db.String, nullable=True)
     ingredients = db.Column(db.String, nullable=True)
     allergiesrec = db.Column(db.String, nullable=True)
-    image = db.Column(db.Text, nullable=True)  # URL van de afbeelding
+    image = db.Column(db.Text, nullable=True)
+
+    # Maak de combinatie van recipename en chef_email de primaire sleutel
+    __table_args__ = (
+        db.PrimaryKeyConstraint('recipename', 'chef_email'),
+    )
 
     # Relationships
     transactions = db.relationship('Transaction', backref='recipe', lazy=True)
