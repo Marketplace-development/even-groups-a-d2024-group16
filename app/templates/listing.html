@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Recipes Listing{% endblock %}
+
+{% block content %}
+    <!-- Recepten Lijst -->
+    <div class="container mt-4">
+        <h1 class="mb-4">Available Recipes</h1>
+
+        {% if recipes %}
+            <div class="row">
+                {% for recipe in recipes %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ recipe.recipename }}</h5> <!-- Vervang 'recipe.title' door 'recipe.recipename' -->
+                                <p class="card-text">{{ recipe.description }}</p>
+                                <p class="card-text"><strong>Price:</strong> €{{ recipe.price }}</p>
+                                <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-primary">View Recipe</a> <!-- Gebruik recipename als identifier -->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">No recipes available at the moment. Please check back later!</p>
+        {% endif %}
+    </div>
+{% endblock %}

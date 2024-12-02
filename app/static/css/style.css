@@ -1,0 +1,123 @@
+/* Algemene instellingen */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 800px; /* Dit zorgt ervoor dat de container niet breder wordt dan 800px */
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #003366;
+    margin-bottom: 20px;
+}
+
+/* Stijlen voor knoppen */
+.btn, input[type="submit"] {
+    padding: 12px 20px;
+    background-color: #1e90ff;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;
+    max-width: 250px; /* Max breedte voor de knoppen */
+    transition: background-color 0.3s;
+}
+
+.btn:hover, input[type="submit"]:hover {
+    background-color: #4682b4;
+}
+
+/* Extra stijl voor de knop "Geaccepteerde Klussen" */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Dashboard card-styling */
+.card {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f4f4f4;
+    padding: 10px;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body {
+    padding: 15px;
+    font-size: 1.1rem;
+}
+
+.d-grid {
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Homepagina voor klanten */
+.recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.recipe-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-card .recipe-details {
+    padding: 15px;
+    text-align: left;
+}
+
+.recipe-card .recipe-details p {
+    margin: 10px 0;
+    line-height: 1.5;
+    color: #555;
+}
+
+.recipe-card .recipe-details strong {
+    color: #003366;
+}

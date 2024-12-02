@@ -1,0 +1,48 @@
+### Marketplace Ideation
+
+Platform name: Dishcovery
+
+Short description: Ontdek een wereld van smaak met Dishcovery, het platform waar gerechten 
+tot leven komen. Of je nu een meesterchef bent die nieuwe recepten met de buitenwereld wilt delen, 
+of net begint met koken en wat hulp nodig hebt, Dishcovery helpt je unieke recepten te ontdekken, 
+direct van gepassioneerde chefs. Laat je inspireren door te bladeren door een grote collectie van gerechten, 
+koop alleen de recepten die jij wilt, en bewaar ze in je persoonlijke digitale kookboek!
+
+# Taxonomy: Business Model
+
+User Type: Person
+Listing Kind: Good Transfer
+Listing Type: Digital Good | Online Serviced
+Frequency: One-Time
+Quantity: One
+Price Discovery: Set by Provider (Chef bepaalt de prijs)
+Price Calculation: By Feature (prijs per recept)
+Conversation System: Transaction Conversation
+Review by: By Customer (gebruikers laten recensies achter)
+Review of: Of Listing (recept) | Of Provider (chef)
+Trust and Safety: ID Verification | Badges | In-app reporting ?
+Revenue Stream: Subscription | Commission
+Revenue Source: Customer (gebruikers betalen voor recepten)
+
+# User stories
+
+As a [Customer], I want to [buy recipes], so that [I can prepare them and don't have to buy a whole cookbook].
+As a [Customer], I want to [buy recipes], so that [I can save my recipes in my peronal cookbook]. 
+As a [Customer], I want to [receive personalized recommendations], so that [I can find dishes that suit my taste].
+As a [Chef], I want to [sell a recipe], so that [I earn money]. 
+
+# UI Prototype
+
+https://www.figma.com/
+
+# Database Design
+
+https://supabase.com/
+
+# Software Development
+
+https://www.geeksforgeeks.org/flask-tutorial/
+
+
+
+
