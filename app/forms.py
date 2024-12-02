@@ -22,7 +22,7 @@ class UserForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Emai', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Login')
 
 class RecipeForm(FlaskForm):

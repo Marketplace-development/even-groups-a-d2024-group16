@@ -65,34 +65,45 @@ def register():
     return render_template('register.html', form=form)
 
 
-
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    print("Login route is reached")  # Dit moet in je terminal verschijnen
     form = LoginForm()
-    
     if form.validate_on_submit():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
-        
         if user:
-            session['email'] = user.email  # Save the email in the Session
-            flash(f'Logged in with email {user.email}', 'success')
-            return redirect(url_for('main.dashboard'))  # Redirect to the dashboard
+            # Sla e-mail en rol op in de session
+            session['email'] = user.email
+            session['role'] = 'chef' if user.is_chef else 'customer'
+            flash(f'Logged in as {user.email}', 'success')
+            return redirect(url_for('main.dashboard'))
         else:
-            flash('Email not found', 'danger')
-    
+            flash('Invalid email. Please try again.', 'danger')
     return render_template('login.html', form=form)
 
+
+
+    
 @main.route('/dashboard')
 def dashboard():
     if 'email' not in session:
-        flash('You have to login first', 'danger')
+        flash('You need to log in first.', 'danger')
         return redirect(url_for('main.login'))
-    
-    user = User.query.get(session['email'])  # Get user with email
-    
-    return render_template('dashboard.html', user=user)
+
+    user = User.query.filter_by(email=session['email']).first()
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('main.login'))
+
+    recipes = Recipe.query.all()
+    return render_template(
+        'dashboard.html',
+        user=user,
+        recipes=recipes,
+        role=session.get('role')
+    )
+
+
 
 @main.route('/logout', methods=['GET'])
 def logout():
@@ -116,41 +127,41 @@ def list_recipes():
 
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
-    if 'email' not in session:
-        flash('You need to be logged in to add a recipe.', 'danger')
+    if 'email' not in session or session.get('role') != 'chef':
+        flash('You need to log in as a chef to add recipes.', 'danger')
         return redirect(url_for('main.login'))
 
     form = RecipeForm()
     if form.validate_on_submit():
-        # Controleer of het recept al bestaat
-        existing_recipe = Recipe.query.filter_by(recipename=form.recipename.data).first()
-        if existing_recipe:
-            flash('A recipe with this name already exists. Please choose a different name.', 'danger')
-            return redirect(url_for('main.add_recipe'))
-
-        # Zoek de ingelogde gebruiker
-        user = User.query.filter_by(email=session['email']).first()
-        
-        # Maak een nieuw recept aan
         new_recipe = Recipe(
             recipename=form.recipename.data,
-            chef_email=user.email,
             description=form.description.data,
             duration=form.duration.data,
             price=form.price.data,
             ingredients=form.ingredients.data,
             allergiesrec=form.allergiesrec.data,
-            image=form.image.data
+            image=form.image.data,
+            chef_email=session['email']  # Verbind het recept met de chef
         )
-        
-        # Voeg het nieuwe recept toe aan de database
         db.session.add(new_recipe)
         db.session.commit()
-
-        flash('Recipe has been added successfully!', 'success')
-        return redirect(url_for('main.list_recipes'))
+        flash('Recipe added successfully!', 'success')
+        return redirect(url_for('main.my_uploads'))
 
     return render_template('add_recipe.html', form=form)
+
+
+
+@main.route('/my_recipes')
+def my_recipes():
+    if 'email' not in session or session.get('role') != 'customer':
+        flash('You need to log in as a customer to access this page.', 'danger')
+        return redirect(url_for('main.login'))
+
+    recipes = []  # Voorlopig geen recepten beschikbaar
+    return render_template('my_recipes.html', recipes=recipes)
+
+
 
 
 
@@ -161,3 +172,24 @@ def recipe_detail(recipename):
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.list_recipes'))
     return render_template('recipe_detail.html', recipe=recipe)
+
+@main.route('/my_uploads')
+def my_uploads():
+    if 'email' not in session or session.get('role') != 'chef':
+        flash('You need to log in as a chef to access this page.', 'danger')
+        return redirect(url_for('main.login'))
+
+    chef_email = session['email']
+    uploads = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
+    return render_template('my_uploads.html', recipes=uploads)
+
+
+@main.route('/my_library')
+def my_library():
+    if 'email' not in session or session.get('role') != 'chef':
+        flash('You need to log in as a chef to access this page.', 'danger')
+        return redirect(url_for('main.login'))
+
+    chef_email = session['email']
+    library_recipes = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
+    return render_template('my_library.html', recipes=library_recipes)
