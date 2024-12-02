@@ -3,27 +3,69 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+    <!-- Navigatiebalk -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Dishcovery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Voor Customers -->
+                    {% if session.get('role') == 'customer' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Voor Chefs -->
+                    {% if session.get('role') == 'chef' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Logout -->
+                    {% if session.get('email') %}
+                        <li class="nav-item">
+                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
     <!-- Dashboard Content -->
     <div class="container mt-5">
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages mb-4">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-        
-        <!-- Dashboard content -->
         <h1 class="text-center">Welcome to your Dashboard!</h1>
-        <p class="text-center">Here you can manage your recipes and track your activity.</p>
-        <!-- Voeg meer inhoud toe, zoals een lijst met recepten of statistieken -->
+        <p class="text-center">Here you can view all available recipes.</p>
+
+        <!-- Receptenlijst -->
+        <div class="recipes-container">
+            {% for recipe in recipes %}
+                <div class="recipe-card">
+                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="recipe-image">
+                    <div class="recipe-details">
+                        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                        <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-center">No recipes available at the moment.</p>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
-
-
-

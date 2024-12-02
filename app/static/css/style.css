@@ -1,4 +1,3 @@
-
 /* Algemene instellingen */
 body {
     font-family: Arial, sans-serif;
@@ -76,4 +75,49 @@ h1 {
     gap: 10px;
     display: flex;
     flex-direction: column;
+}
+
+/* Homepagina voor klanten */
+.recipes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.recipe-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-card .recipe-details {
+    padding: 15px;
+    text-align: left;
+}
+
+.recipe-card .recipe-details p {
+    margin: 10px 0;
+    line-height: 1.5;
+    color: #555;
+}
+
+.recipe-card .recipe-details strong {
+    color: #003366;
 }

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}My Recipes{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>My Recipes</h1>
+    {% if recipes %}
+        <div class="recipes-container">
+            {% for recipe in recipes %}
+                <div class="recipe-card">
+                    <h2>{{ recipe.recipename }}</h2>
+                    <p><strong>Description:</strong> {{ recipe.description }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No recipes available at the moment.</p>
+    {% endif %}
+</div>
+{% endblock %}
