@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField
-from wtforms import StringField, TextAreaField, RadioField, SubmitField, IntegerField, DateField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms import StringField, TextAreaField, RadioField, SubmitField, IntegerField, DateField, FloatField, IntegerField, FileField
+from wtforms.validators import DataRequired, Email, Length, Optional
+from flask_wtf.file import FileAllowed, FileRequired
+
 
 class UserForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -32,5 +34,7 @@ class RecipeForm(FlaskForm):
     price = StringField('Price (in €)', validators=[DataRequired()])
     ingredients = TextAreaField('Ingredients', validators=[DataRequired()])
     allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
-    image = StringField('Image URL', validators=[DataRequired()])
-    submit = SubmitField('Add Recipe')
+    image = FileField('Recipe Image', validators=[
+        FileRequired(message='An image is required.'),
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+    ])  # Het veld is nu verplicht    submit = SubmitField('Add Recipe')

@@ -1,11 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Recipe{% endblock %}
+{% block title %}Add Recipe{% endblock %}
 
 {% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <!-- Dishcovery knop -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- My Uploads voor chefs -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                </li>
+
+                <!-- Logout -->
+                {% if session.get('email') %}
+                    <li class="nav-item">
+                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container mt-4">
     <h1>Add a New Recipe</h1>
-    <form method="POST" action="{{ url_for('main.add_recipe') }}">
+    <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <div class="mb-3">
             {{ form.recipename.label(class="form-label") }}
@@ -34,9 +65,11 @@
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
             {{ form.image(class="form-control") }}
+            {% if form.image.errors %}
+                <small class="text-danger">{{ form.image.errors[0] }}</small>
+            {% endif %}
         </div>
-        <!-- Add Recipe button met de rode knopstijl -->
-        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+        <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
 </div>
 {% endblock %}
