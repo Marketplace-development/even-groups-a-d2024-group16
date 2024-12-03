@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, Numeric
 
 db = SQLAlchemy()
 
@@ -20,7 +20,7 @@ class User(db.Model):
     # Relationships
     recipes = db.relationship('Recipe', backref='chef', lazy=True, foreign_keys='Recipe.chef_email')
     transactions = db.relationship('Transaction', backref='User', lazy=True, foreign_keys='Transaction.consumer_email')
-    
+
     def __repr__(self):
         return f"<User(name={self.name}, email={self.email})>"
 
@@ -32,7 +32,7 @@ class Recipe(db.Model):
     chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Verwijzing naar user.email (chef)
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
-    price = db.Column(db.String, nullable=True)
+    price = db.Column(Numeric, nullable=True)  # Price should be Numeric
     ingredients = db.Column(db.String, nullable=True)
     allergiesrec = db.Column(db.String, nullable=True)
     image = db.Column(db.Text, nullable=True)
@@ -54,7 +54,7 @@ class Transaction(db.Model):
 
     transactionid = db.Column(db.Integer, primary_key=True)
     transactiondate = db.Column(db.DateTime, nullable=False)
-    price = db.Column(db.String, nullable=False)
+    price = db.Column(Numeric, nullable=False)  # Price should be Numeric
     consumer_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Foreign key naar User (consument)
     chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Foreign key naar User (chef)
     recipename = db.Column(db.String, db.ForeignKey('recipe.recipename'), nullable=False)
@@ -74,6 +74,8 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     reviewdate = db.Column(db.DateTime, nullable=False)
     transactionid = db.Column(db.Integer, db.ForeignKey('transaction.transactionid'), nullable=False)
+    chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Added field
+    recipename = db.Column(db.String, db.ForeignKey('recipe.recipename'), nullable=False)  # Added field
 
     # Constraints
     __table_args__ = (
@@ -82,4 +84,3 @@ class Review(db.Model):
 
     def __repr__(self):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
-
