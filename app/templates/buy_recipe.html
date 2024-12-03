@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Buy {{ recipe.recipename }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Purchase {{ recipe.recipename }}</h1>
+    <div class="recipe-detail">
+        <img src="{{ recipe.image }}" alt="{{ recipe.recipename }}" class="img-fluid">
+        <h2>Details</h2>
+        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+        <p><strong>Price:</strong> €{{ recipe.price }}</p>
+        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+    </div>
+
+    <form method="POST">
+        <button type="submit" class="btn btn-success">Confirm Purchase</button>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

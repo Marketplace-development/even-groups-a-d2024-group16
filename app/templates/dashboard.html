@@ -13,14 +13,14 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Voor Customers -->
+                    <!-- For Customers -->
                     {% if session.get('role') == 'customer' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
                         </li>
                     {% endif %}
 
-                    <!-- Voor Chefs -->
+                    <!-- For Chefs -->
                     {% if session.get('role') == 'chef' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
@@ -47,30 +47,36 @@
             </div>
         </div>
     </nav>
+
     <!-- Dashboard Content -->
     <div class="container mt-5">
         <h1 class="text-center">Welcome to your Dashboard!</h1>
         <p class="text-center">Here you can view all available recipes.</p>
 
-        <!-- Receptenlijst -->
+        <!-- Recipe List -->
         <div class="recipes-container">
             {% for recipe in recipes %}
                 <div class="recipe-card">
+                    <!-- Display Recipe Image -->
                     {% if recipe.image %}
-                        <!-- Gebruik url_for om de juiste URL te genereren -->
                         <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="recipe-image">
                     {% else %}
-                        <!-- Gebruik een standaardafbeelding als er geen afbeelding is -->
                         <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
                     {% endif %}
+
                     <div class="recipe-details">
                         <h3>{{ recipe.recipename }}</h3>
-                        <p class="text-muted">by {{ recipe.chef_email }}</p> <!-- Chefnaam direct onder de receptnaam -->
-
+                        <p class="text-muted">by {{ recipe.chef_email }}</p> <!-- Show Chef's Email -->
+                        
                         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
                         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
                         <p><strong>Price:</strong> €{{ recipe.price }}</p>
                         <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+
+                        <!-- Only show "Buy Now" button for customers -->
+                        {% if session.get('role') == 'customer' %}
+                            <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success">Buy Now</a>
+                        {% endif %}
                     </div>
                 </div>
             {% else %}
