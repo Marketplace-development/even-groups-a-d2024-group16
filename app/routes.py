@@ -1,10 +1,17 @@
 # app/routes.py
+import os  # Voor bestandspaden en mapbeheer
+from datetime import datetime  # Voor datum- en tijdstempels
 
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
-from app import db
-from app.models import User, Recipe, Transaction
-from app.forms import UserForm, LoginForm, RecipeForm
-from datetime import datetime
+# Flask-specifieke imports
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
+from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
+
+# Database en modellen
+from app import db  # SQLAlchemy-instantie
+from app.models import User, Recipe, Transaction  # Je databasemodellen
+
+# Formulieren
+from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
 main = Blueprint('main', __name__)
 
@@ -134,15 +141,32 @@ def add_recipe():
 
     form = RecipeForm()
     if form.validate_on_submit():
+        # Map voor afbeeldingen
+        upload_folder = os.path.join(current_app.root_path, 'static/images')
+        
+        # Controleer of de map bestaat
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        # Sla de afbeelding veilig op
+        image_file = form.image.data
+        filename = secure_filename(image_file.filename)
+        file_path = os.path.join(upload_folder, filename)
+        image_file.save(file_path)
+
+        # Sla alleen het relatieve pad op in de database
+        relative_path = f'images/{filename}'
+
+        # Voeg recept toe aan de database
         new_recipe = Recipe(
             recipename=form.recipename.data,
+            chef_email=session['email'],
             description=form.description.data,
             duration=form.duration.data,
             price=form.price.data,
             ingredients=form.ingredients.data,
             allergiesrec=form.allergiesrec.data,
-            image=form.image.data,
-            chef_email=session['email']  # Verbind het recept met de chef
+            image=relative_path  # Alleen het bestandspad opslaan
         )
         db.session.add(new_recipe)
         db.session.commit()
@@ -150,6 +174,7 @@ def add_recipe():
         return redirect(url_for('main.my_uploads'))
 
     return render_template('add_recipe.html', form=form)
+
 
 
 
