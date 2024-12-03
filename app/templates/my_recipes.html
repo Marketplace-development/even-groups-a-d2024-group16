@@ -1,64 +1,88 @@
 {% extends 'base.html' %}
 
-{% block title %}My Recipes{% endblock %}
+{% block title %}My Purchased Recipes{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <!-- Dishcovery knop -->
-        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <!-- Voor Customers -->
-                {% if session.get('role') == 'customer' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
-                    </li>
-                {% endif %}
+    <!-- Navigatiebalk -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- Dishcovery knop -->
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Voor Customers -->
+                    {% if session.get('role') == 'customer' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
+                        </li>
+                    {% endif %}
 
-                <!-- Voor Chefs -->
-                {% if session.get('role') == 'chef' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
-                    </li>
-                {% endif %}
+                    <!-- Voor Chefs -->
+                    {% if session.get('role') == 'chef' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
+                        </li>
+                    {% endif %}
 
-                <!-- Logout -->
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
-                {% endif %}
-            </ul>
+                    <!-- Logout -->
+                    {% if session.get('email') %}
+                        <li class="nav-item">
+                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
+    </nav>
+
+    <!-- Pagina inhoud -->
+    <div class="container mt-5">
+        <h1 class="text-center">My Purchased Recipes</h1>
+
+        {% if recipes %}
+            <div class="recipes-container row mt-4">
+                {% for recipe in recipes %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm h-100 d-flex flex-column">
+                            <!-- Recept afbeelding -->
+                            {% if recipe.image %}
+                                <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ recipe.recipename }}</h5>
+                                <p class="card-text text-muted">by {{ recipe.chef_email }}</p>
+                                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                                <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                                <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                                <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                                <!-- Deze div zorgt ervoor dat de knop naar beneden wordt gedrukt -->
+                                <div class="mt-auto">
+                                    <!-- Groene knop voor "View Recipe" -->
+                                    <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success">View Recipe</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">You haven't purchased any recipes yet.</p>
+        {% endif %}
     </div>
-</nav>
-<div class="container mt-5">
-    <h1>My Recipes</h1>
-    {% if recipes %}
-        <div class="recipes-container">
-            {% for recipe in recipes %}
-                <div class="recipe-card">
-                    <h2>{{ recipe.recipename }}</h2>
-                    <p><strong>Description:</strong> {{ recipe.description }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No recipes available at the moment.</p>
-    {% endif %}
-</div>
 {% endblock %}
+

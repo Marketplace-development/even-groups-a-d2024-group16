@@ -35,6 +35,7 @@ class RecipeForm(FlaskForm):
     ingredients = TextAreaField('Ingredients', validators=[DataRequired()])
     allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
     image = FileField('Recipe Image', validators=[
-        FileRequired(message='An image is required.'),
-        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
-    ])  # Het veld is nu verplicht    submit = SubmitField('Add Recipe')
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!'),
+        Optional()  # De afbeelding is nu optioneel
+    ])
+    submit = SubmitField('Save Changes')

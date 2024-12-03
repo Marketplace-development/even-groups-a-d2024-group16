@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Recipe Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ recipe.recipename }}</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Afbeelding van het recept -->
+            {% if recipe.image %}
+                <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
+            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+            <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+            <p><strong>Description:</strong> {{ recipe.description }}</p>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.my_recipes') }}" class="btn btn-primary">Back to My Recipes</a>
+    </div>
+</div>
+{% endblock %}

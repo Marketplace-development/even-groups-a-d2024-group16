@@ -1,14 +1,10 @@
-# app/routes.py
 import os  # Voor bestandspaden en mapbeheer
 from datetime import datetime  # Voor datum- en tijdstempels
-
-# Flask-specifieke imports
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
-
-# Database en modellen
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Transaction  # Je databasemodellen
+from app.forms import RecipeForm
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -177,27 +173,41 @@ def add_recipe():
 
 
 
-
 @main.route('/my_recipes')
 def my_recipes():
     if 'email' not in session or session.get('role') != 'customer':
         flash('You need to log in as a customer to access this page.', 'danger')
         return redirect(url_for('main.login'))
 
-    recipes = []  # Voorlopig geen recepten beschikbaar
-    return render_template('my_recipes.html', recipes=recipes)
+    # Haal de huidige gebruiker op
+    user_email = session['email']
+
+    # Haal de transacties op waar deze gebruiker de koper is (customer)
+    transactions = Transaction.query.filter_by(consumer_email=user_email).all()
+
+    # Haal de recepten op die bij deze transacties horen
+    purchased_recipes = []
+    for transaction in transactions:
+        recipe = Recipe.query.filter_by(recipename=transaction.recipename, chef_email=transaction.chef_email).first()
+        if recipe:
+            purchased_recipes.append(recipe)
+
+    return render_template('my_recipes.html', recipes=purchased_recipes)
 
 
 
-
-
-@main.route('/recipe/<recipename>')
+@main.route('/recipe/<recipename>', methods=['GET'])
 def recipe_detail(recipename):
+    # Zoek het recept op basis van recipename
     recipe = Recipe.query.filter_by(recipename=recipename).first()
+
     if recipe is None:
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.list_recipes'))
+
+    # Render de template voor de receptdetails
     return render_template('recipe_detail.html', recipe=recipe)
+
 
 @main.route('/my_uploads')
 def my_uploads():
@@ -221,24 +231,37 @@ def my_library():
     return render_template('my_library.html', recipes=library_recipes)
 
 
+
 @main.route('/buy_recipe/<recipename>', methods=['GET', 'POST'])
 def buy_recipe(recipename):
-    # Fetch the recipe from the database
+    # Haal het recept op uit de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
 
     if recipe is None:
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    if request.method == 'POST':
-        # Simulate the buying process (e.g., create a transaction)
-        if 'email' not in session:
-            flash('You need to be logged in to buy a recipe.', 'danger')
-            return redirect(url_for('main.login'))
+    # Check of de gebruiker is ingelogd
+    if 'email' not in session:
+        flash('You need to be logged in to buy a recipe.', 'danger')
+        return redirect(url_for('main.login'))
 
-        # Create a transaction (example logic)
+    # Als het een POST-verzoek is (bij klikken op "Confirm Purchase")
+    if request.method == 'POST':
         user_email = session['email']
         chef_email = recipe.chef_email
+
+        # Controleer of de gebruiker dit recept al gekocht heeft
+        existing_transaction = Transaction.query.filter_by(
+            consumer_email=user_email,
+            recipename=recipename
+        ).first()
+
+        if existing_transaction:
+            flash('You have already purchased this recipe.', 'warning')
+            return redirect(url_for('main.dashboard'))
+
+        # Maak de transactie aan
         transaction = Transaction(
             transactiondate=datetime.now(),
             price=recipe.price,
@@ -250,8 +273,62 @@ def buy_recipe(recipename):
         db.session.commit()
 
         flash('Recipe purchased successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.my_recipes'))
 
-    # Render the buy_recipe page
+    # Render de buy_recipe pagina bij GET-verzoek
     return render_template('buy_recipe.html', recipe=recipe)
 
+
+@main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])
+def edit_recipe(recipename):
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if recipe is None:
+        flash('Recipe not found', 'danger')
+        return redirect(url_for('main.my_uploads'))
+
+    form = RecipeForm()
+
+    # Vul het formulier met de huidige gegevens van het recept bij een GET-verzoek
+    if request.method == 'GET':
+        form.recipename.data = recipe.recipename
+        form.description.data = recipe.description
+        form.ingredients.data = recipe.ingredients
+        form.price.data = recipe.price
+        form.allergiesrec.data = recipe.allergiesrec
+        form.duration.data = recipe.duration  # Zorg ervoor dat je duration ook vult
+
+    # Verwerk het formulier bij een POST-verzoek
+    if form.validate_on_submit():
+        # Werk de receptgegevens bij
+        recipe.recipename = form.recipename.data
+        recipe.description = form.description.data
+        recipe.ingredients = form.ingredients.data
+        recipe.price = form.price.data
+        recipe.allergiesrec = form.allergiesrec.data
+        recipe.duration = form.duration.data  # Update de cooking time (duur)
+
+        # Als er een nieuwe afbeelding is geüpload, werk het bestand bij
+        if form.image.data:
+            upload_folder = os.path.join(current_app.root_path, 'static/images')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+
+            image_file = form.image.data
+            filename = secure_filename(image_file.filename)
+            file_path = os.path.join(upload_folder, filename)
+            image_file.save(file_path)
+
+            # Update het bestandspad naar de afbeelding in de database
+            relative_path = f'images/{filename}'
+            recipe.image = relative_path
+
+        try:
+            db.session.commit()  # Pas de wijzigingen toe op de database
+            flash('Recipe updated successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()  # Rollback in geval van een fout
+            flash(f'Error updating recipe: {str(e)}', 'danger')
+
+        return redirect(url_for('main.my_uploads'))
+
+    return render_template('edit_recipe.html', form=form, recipe=recipe)

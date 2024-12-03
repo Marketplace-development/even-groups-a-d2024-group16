@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Recipe{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Edit Recipe: {{ recipe.recipename }}</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                <label for="recipename" class="form-label">Recipe Name</label>
+                {{ form.recipename(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                {{ form.description(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="duration" class="form-label">Cooking Time (minutes)</label>
+                {{ form.duration(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="price" class="form-label">Price (€)</label>
+                {{ form.price(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="ingredients" class="form-label">Ingredients</label>
+                {{ form.ingredients(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="allergiesrec" class="form-label">Allergies</label>
+                {{ form.allergiesrec(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Image (Optional)</label>
+                {{ form.image(class="form-control") }}
+                {% if recipe.image %}
+                    <p>Current Image: <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-thumbnail" style="width: 100px; height: auto;"></p>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+{% endblock %}
