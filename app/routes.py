@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app import db
-from app.models import User, Recipe
+from app.models import User, Recipe, Transaction
 from app.forms import UserForm, LoginForm, RecipeForm
 
 main = Blueprint('main', __name__)
