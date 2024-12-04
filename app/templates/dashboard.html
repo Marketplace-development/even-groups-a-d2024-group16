@@ -51,31 +51,55 @@
     <!-- Dashboard Content -->
     <div class="container mt-5">
         <h1 class="text-center">Welcome to your Dashboard!</h1>
-        <p class="text-center">Here you can view all available recipes.</p>
+        <p class="text-center">Here you can view all available recipes and their reviews.</p>
 
         <!-- Recipe List -->
         <div class="recipes-container">
-            {% for recipe in recipes %}
+            {% for data in recipe_data %}
                 <div class="recipe-card">
                     <!-- Display Recipe Image -->
-                    {% if recipe.image %}
-                        <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="recipe-image">
+                    {% if data.recipe.image %}
+                        <img src="{{ url_for('static', filename=data.recipe.image) }}" alt="{{ data.recipe.recipename }}" class="recipe-image">
                     {% else %}
                         <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
                     {% endif %}
 
                     <div class="recipe-details">
-                        <h3>{{ recipe.recipename }}</h3>
-                        <p class="text-muted">by {{ recipe.chef_email }}</p> <!-- Show Chef's Email -->
+                        <h3>{{ data.recipe.recipename }}</h3>
+                        <p class="text-muted">by {{ data.recipe.chef_email }}</p> <!-- Show Chef's Email -->
                         
-                        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                        <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                        <p><strong>Cooking Time:</strong> {{ data.recipe.duration }} minutes</p>
+                        <p><strong>Ingredients:</strong> {{ data.recipe.ingredients }}</p>
+                        <p><strong>Price:</strong> €{{ data.recipe.price }}</p>
+                        <p><strong>Allergies:</strong> {{ data.recipe.allergiesrec }}</p>
+
+                        <!-- Average Rating -->
+                        <p><strong>Average Rating:</strong> 
+                            {% if data.avg_rating %}
+                                {{ data.avg_rating }}/5
+                            {% else %}
+                                No ratings yet.
+                            {% endif %}
+                        </p>
+
+                        <!-- Reviews -->
+                        <h4>Reviews:</h4>
+                        {% if data.reviews %}
+                            <ul>
+                                {% for review in data.reviews %}
+                                    <li>
+                                        <strong>{{ review.consumer_email }}:</strong> 
+                                        {{ review.comment }} ({{ review.rating }}/5)
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No reviews yet.</p>
+                        {% endif %}
 
                         <!-- Only show "Buy Now" button for customers -->
                         {% if session.get('role') == 'customer' %}
-                            <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success">Buy Now</a>
+                            <a href="{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}" class="btn btn-success">Buy Now</a>
                         {% endif %}
                     </div>
                 </div>

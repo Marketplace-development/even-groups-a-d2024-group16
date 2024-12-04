@@ -23,6 +23,31 @@
             <p><strong>Description:</strong> {{ recipe.description }}</p>
         </div>
     </div>
+
+    <!-- Reviews Section -->
+    <div class="mt-5">
+        <h3>Reviews</h3>
+        {% if recipe.reviews %}
+            <ul class="list-group">
+                {% for review in recipe.reviews %}
+                    <li class="list-group-item">
+                        <strong>{{ review.consumer_email }}</strong> - <span class="text-warning">{{ review.rating }}/5</span>
+                        <p class="mb-1">{{ review.comment }}</p>
+                        <small class="text-muted">Reviewed on {{ review.reviewdate }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No reviews yet. Be the first to review this recipe!</p>
+        {% endif %}
+    </div>
+
+    <!-- Add Review Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-warning">Add a Review</a>
+    </div>
+
+    <!-- Back to My Recipes Button -->
     <div class="text-center mt-4">
         <a href="{{ url_for('main.my_recipes') }}" class="btn btn-primary">Back to My Recipes</a>
     </div>

@@ -3,8 +3,8 @@ from datetime import datetime  # Voor datum- en tijdstempels
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
-from app.models import User, Recipe, Transaction  # Je databasemodellen
-from app.forms import RecipeForm
+from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
+from app.forms import RecipeForm, ReviewForm
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -99,13 +99,33 @@ def dashboard():
         flash('User not found.', 'danger')
         return redirect(url_for('main.login'))
 
+    # Fetch all recipes
     recipes = Recipe.query.all()
+
+    # Fetch reviews and average ratings for each recipe
+    recipe_data = []
+    for recipe in recipes:
+        reviews = Review.query.filter_by(recipename=recipe.recipename).all()
+        avg_rating = (
+            db.session.query(db.func.avg(Review.rating))
+            .filter(Review.recipename == recipe.recipename)
+            .scalar()
+        )
+        avg_rating = round(avg_rating, 1) if avg_rating else None
+
+        recipe_data.append({
+            'recipe': recipe,
+            'reviews': reviews,
+            'avg_rating': avg_rating
+        })
+
     return render_template(
         'dashboard.html',
         user=user,
-        recipes=recipes,
+        recipe_data=recipe_data,
         role=session.get('role')
     )
+
 
 
 
@@ -185,12 +205,22 @@ def my_recipes():
     # Haal de transacties op waar deze gebruiker de koper is (customer)
     transactions = Transaction.query.filter_by(consumer_email=user_email).all()
 
-    # Haal de recepten op die bij deze transacties horen
+    # Haal de recepten op die bij deze transacties horen, inclusief de chefnaam
     purchased_recipes = []
     for transaction in transactions:
         recipe = Recipe.query.filter_by(recipename=transaction.recipename, chef_email=transaction.chef_email).first()
         if recipe:
-            purchased_recipes.append(recipe)
+            chef = User.query.filter_by(email=recipe.chef_email).first()
+            purchased_recipes.append({
+                "recipename": recipe.recipename,
+                "chef_name": chef.name if chef else "Unknown",
+                "description": recipe.description,
+                "duration": recipe.duration,
+                "price": recipe.price,
+                "ingredients": recipe.ingredients,
+                "allergiesrec": recipe.allergiesrec,
+                "image": recipe.image
+            })
 
     return render_template('my_recipes.html', recipes=purchased_recipes)
 
@@ -277,6 +307,55 @@ def buy_recipe(recipename):
 
     # Render de buy_recipe pagina bij GET-verzoek
     return render_template('buy_recipe.html', recipe=recipe)
+
+@main.route('/add_review/<recipename>', methods=['GET', 'POST'])
+def add_review(recipename):
+    # Ensure user is logged in
+    if 'email' not in session:
+        flash('You need to log in to add a review.', 'danger')
+        return redirect(url_for('main.login'))
+
+    # Get the recipe
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if not recipe:
+        flash('Recipe not found.', 'danger')
+        return redirect(url_for('main.my_recipes'))
+
+    # Fetch the transaction linked to the recipe
+    transaction = Transaction.query.filter_by(
+        recipename=recipename,
+        consumer_email=session['email']
+    ).first()
+
+    if not transaction:
+        flash('No transaction found for this recipe.', 'danger')
+        return redirect(url_for('main.my_recipes'))
+
+    if request.method == 'POST':
+        # Retrieve data from the form
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
+
+        # Validate inputs
+        if not rating or not comment:
+            flash('All fields are required.', 'danger')
+            return redirect(url_for('main.add_review', recipename=recipename))
+
+        # Save the review to the database
+        new_review = Review(
+            comment=comment,
+            rating=int(rating),
+            consumer_email=session['email'],
+            recipename=recipename,
+            transactionid=transaction.transactionid  # Associate with the transaction
+        )
+        db.session.add(new_review)
+        db.session.commit()
+
+        flash('Review submitted successfully!', 'success')
+        return redirect(url_for('main.recipe_detail', recipename=recipename))
+
+    return render_template('add_review.html', recipe=recipe, transaction=transaction)
 
 
 @main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])

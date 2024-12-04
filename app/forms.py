@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField
 from wtforms import StringField, TextAreaField, RadioField, SubmitField, IntegerField, DateField, FloatField, IntegerField, FileField
-from wtforms.validators import DataRequired, Email, Length, Optional
+from wtforms.validators import DataRequired, Email, Length, Optional, NumberRange
 from flask_wtf.file import FileAllowed, FileRequired
 
 
@@ -39,3 +39,9 @@ class RecipeForm(FlaskForm):
         Optional()  # De afbeelding is nu optioneel
     ])
     submit = SubmitField('Save Changes')
+
+class ReviewForm(FlaskForm):
+    comment = TextAreaField('Comment', validators=[DataRequired()])
+    rating = IntegerField('Rating', validators=[DataRequired(), NumberRange(min=1, max=5)])
+    review_date = DateField('Review Date', validators=[DataRequired()])
+    submit = SubmitField('Submit Review')

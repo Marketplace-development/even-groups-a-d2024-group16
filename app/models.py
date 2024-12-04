@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint, Numeric
+from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, Numeric
 
 db = SQLAlchemy()
 
@@ -7,7 +7,7 @@ class User(db.Model):
     __tablename__ = 'User'
 
     email = db.Column(db.String, primary_key=True, unique=True, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String, nullable=False)
     date_of_birth = db.Column(db.DateTime, nullable=True)
     street = db.Column(db.String, nullable=True)
     housenr = db.Column(db.Integer, nullable=True)
@@ -15,35 +15,42 @@ class User(db.Model):
     city = db.Column(db.String, nullable=True)
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
-    is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Gebruiker kan optioneel een chef zijn
+    is_consumer = db.Column(db.Boolean, default=True, nullable=False)
+    is_chef = db.Column(db.Boolean, default=False, nullable=False)
 
-    # Relationships
-    recipes = db.relationship('Recipe', backref='chef', lazy=True, foreign_keys='Recipe.chef_email')
-    transactions = db.relationship('Transaction', backref='User', lazy=True, foreign_keys='Transaction.consumer_email')
+    # Relaties
+    recipes = db.relationship('Recipe', backref='chef', lazy=True)
+    consumer_transactions = db.relationship(
+        'Transaction',
+        backref='consumer',
+        lazy=True,
+        primaryjoin="User.email == Transaction.consumer_email"
+    )
+    chef_transactions = db.relationship(
+        'Transaction',
+        backref='chef_user',
+        lazy=True,
+        primaryjoin="User.email == Transaction.chef_email"
+    )
 
     def __repr__(self):
-        return f"<User(name={self.name}, email={self.email})>"
-
+        return f"<User(email={self.email}, name={self.name})>"
 
 class Recipe(db.Model):
     __tablename__ = 'recipe'
 
-    recipename = db.Column(db.String, nullable=False)
-    chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Verwijzing naar user.email (chef)
+    recipename = db.Column(db.String, primary_key=True)
+    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='CASCADE'), primary_key=True)
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
-    price = db.Column(Numeric, nullable=True)  # Price should be Numeric
+    price = db.Column(db.Numeric(10, 2), nullable=False)
     ingredients = db.Column(db.String, nullable=True)
     allergiesrec = db.Column(db.String, nullable=True)
     image = db.Column(db.Text, nullable=True)
 
-    # Maak de combinatie van recipename en chef_email de primaire sleutel
     __table_args__ = (
-        db.PrimaryKeyConstraint('recipename', 'chef_email'),
+        PrimaryKeyConstraint('recipename', 'chef_email'),
     )
-
-    # Relationships
-    transactions = db.relationship('Transaction', backref='recipe', lazy=True)
 
     def __repr__(self):
         return f"<Recipe(recipename={self.recipename}, chef_email={self.chef_email})>"
@@ -52,34 +59,46 @@ class Recipe(db.Model):
 class Transaction(db.Model):
     __tablename__ = 'transaction'
 
-    transactionid = db.Column(db.Integer, primary_key=True)
+    transactionid = db.Column(db.BigInteger, primary_key=True)
     transactiondate = db.Column(db.DateTime, nullable=False)
-    price = db.Column(Numeric, nullable=False)  # Price should be Numeric
-    consumer_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Foreign key naar User (consument)
-    chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Foreign key naar User (chef)
-    recipename = db.Column(db.String, db.ForeignKey('recipe.recipename'), nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    consumer_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=True)
+    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=True)
+    recipename = db.Column(db.String, nullable=False)
 
-    # Relationships
-    reviews = db.relationship('Review', backref='transaction', lazy=True)
+    __table_args__ = (
+        db.ForeignKeyConstraint(
+            ['recipename', 'chef_email'],
+            ['recipe.recipename', 'recipe.chef_email'],
+            ondelete='SET NULL'
+        ),
+    )
 
     def __repr__(self):
-        return f"<Transaction(transactionid={self.transactionid}, price={self.price})>"
+        return f"<Transaction(transactionid={self.transactionid}, recipename={self.recipename})>"
+
+
 
 
 class Review(db.Model):
     __tablename__ = 'review'
 
-    reviewid = db.Column(db.Integer, primary_key=True)
-    comment = db.Column(db.String, nullable=True)
+    reviewid = db.Column(db.BigInteger, primary_key=True)
+    comment = db.Column(db.Text, nullable=True)
     rating = db.Column(db.Integer, nullable=False)
-    reviewdate = db.Column(db.DateTime, nullable=False)
-    transactionid = db.Column(db.Integer, db.ForeignKey('transaction.transactionid'), nullable=False)
-    chef_email = db.Column(db.String, db.ForeignKey('User.email'), nullable=False)  # Added field
-    recipename = db.Column(db.String, db.ForeignKey('recipe.recipename'), nullable=False)  # Added field
+    reviewdate = db.Column(db.DateTime, default=db.func.current_timestamp())
+    consumer_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=False)
+    recipename = db.Column(db.String, nullable=False)
+    chef_email = db.Column(db.String, nullable=False)
+    transactionid = db.Column(db.BigInteger, db.ForeignKey('transaction.transactionid', ondelete='CASCADE'), nullable=False)
 
-    # Constraints
     __table_args__ = (
-        CheckConstraint('rating >= 1 AND rating <= 5', name='check_rating_between_1_and_5'),
+        db.ForeignKeyConstraint(
+            ['recipename', 'chef_email'],
+            ['recipe.recipename', 'recipe.chef_email'],
+            ondelete='CASCADE'
+        ),
+        db.CheckConstraint('rating BETWEEN 1 AND 5', name='check_rating_range'),
     )
 
     def __repr__(self):
