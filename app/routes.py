@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
-from app.forms import RecipeForm, ReviewForm
+from app.forms import RecipeForm, ReviewForm, EditProfileForm
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -411,3 +411,38 @@ def edit_recipe(recipename):
         return redirect(url_for('main.my_uploads'))
 
     return render_template('edit_recipe.html', form=form, recipe=recipe)
+
+
+@main.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    # Fetch the user from the database using the email stored in the session
+    user = User.query.filter_by(email=session.get('email')).first()
+
+    # Check if the user is logged in and exists
+    if not user:
+        return redirect(url_for('main.login'))  # Redirect if no user found or not logged in
+
+    # Create the form, populating it with the current user data
+    form = EditProfileForm(obj=user)
+
+    # If the form is submitted and valid, update the user information
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.date_of_birth = form.date_of_birth.data
+        user.street = form.street.data
+        user.housenr = form.housenr.data
+        user.postalcode = form.postalcode.data
+        user.city = form.city.data
+        user.country = form.country.data
+        user.telephonenr = form.telephonenr.data
+        user.is_chef = form.is_chef.data
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return redirect(url_for('main.dashboard'))  # Redirect to the dashboard after saving changes
+
+    # Pass the user data to the template
+    return render_template('edit_profile.html', form=form, user=user)
+
+

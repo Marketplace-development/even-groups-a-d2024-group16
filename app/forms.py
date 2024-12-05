@@ -45,3 +45,16 @@ class ReviewForm(FlaskForm):
     rating = IntegerField('Rating', validators=[DataRequired(), NumberRange(min=1, max=5)])
     review_date = DateField('Review Date', validators=[DataRequired()])
     submit = SubmitField('Submit Review')
+
+class EditProfileForm(FlaskForm):
+    email = StringField('E-mail', validators=[Email()], render_kw={'readonly': True})
+    name = StringField('Full Name', validators=[DataRequired()])
+    date_of_birth = DateField('Date of Birth', validators=[Optional()])
+    street = StringField('Street', validators=[Optional(), Length(max=100)])
+    housenr = IntegerField('House Number', validators=[Optional()])
+    postalcode = StringField('Postal Code', validators=[Optional(), Length(max=20)])
+    city = StringField('City', validators=[Optional(), Length(max=50)])
+    country = StringField('Country', validators=[Optional(), Length(max=50)])
+    telephonenr = StringField('Telephone', validators=[Optional(), Length(max=15)])
+    is_chef = BooleanField('Are you a chef?')
+    submit = SubmitField('Save Changes')

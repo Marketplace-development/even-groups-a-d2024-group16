@@ -13,40 +13,36 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- For Customers -->
-                    {% if session.get('role') == 'customer' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
-                        </li>
-                    {% endif %}
-
-                    <!-- For Chefs -->
-                    {% if session.get('role') == 'chef' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
-                        </li>
-                    {% endif %}
-
-                    <!-- Logout -->
-                    {% if session.get('email') %}
-                        <li class="nav-item">
-                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                        </li>
-                    {% endif %}
+                    <!-- Dropdown Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Menu
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+                            {% if session.get('role') == 'customer' %}
+                                <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            {% endif %}
+                            {% if session.get('role') == 'chef' %}
+                                <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li> <!-- New Button -->
+                            {% if session.get('email') %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
+                            {% else %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.login') }}">Login</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.register') }}">Register</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+    
+    
 
     <!-- Dashboard Content -->
     <div class="container mt-5">
