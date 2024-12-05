@@ -19,14 +19,21 @@
                             Menu
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+                            <!-- For Customers -->
                             {% if session.get('role') == 'customer' %}
                                 <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
                             {% endif %}
+
+                            <!-- For Chefs -->
                             {% if session.get('role') == 'chef' %}
                                 <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li> <!-- New Button -->
+
+                            <!-- Edit Profile -->
+                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+
+                            <!-- Login/Register or Logout -->
                             {% if session.get('email') %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
@@ -42,8 +49,6 @@
         </div>
     </nav>
     
-    
-
     <!-- Dashboard Content -->
     <div class="container mt-5">
         <h1 class="text-center">Welcome to your Dashboard!</h1>
@@ -96,6 +101,8 @@
                         <!-- Only show "Buy Now" button for customers -->
                         {% if session.get('role') == 'customer' %}
                             <a href="{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}" class="btn btn-success">Buy Now</a>
+                        {% elif session.get('role') == 'chef' and data.recipe.chef_email == session.get('email') %}
+                            <a href="{{ url_for('main.edit_recipe', recipename=data.recipe.recipename) }}" class="btn btn-primary">Edit Recipe</a>
                         {% endif %}
                     </div>
                 </div>
