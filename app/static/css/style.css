@@ -121,3 +121,16 @@ h1 {
 .recipe-card .recipe-details strong {
     color: #003366;
 }
+/* Zorg ervoor dat de header vast blijft staan */
+nav.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030; /* Zorgt ervoor dat de header altijd boven andere elementen blijft */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optionele schaduw voor visuele scheiding */
+}
+
+/* Voeg extra ruimte toe aan de inhoud, zodat het niet onder de header wordt verborgen */
+body {
+    padding-top: 70px; /* Pas dit aan op basis van de hoogte van je header */
+}

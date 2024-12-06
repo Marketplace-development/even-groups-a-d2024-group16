@@ -4,21 +4,27 @@
 
 {% block content %}
     <!-- Navigatiebalk -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
-            <!-- Dishcovery knop -->
             <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Algemeen menu voor alle gebruikers -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
-                    </li>
-
-                    <!-- Logout -->
+                    {% if session.get('role') == 'customer' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
+                        </li>
+                    {% endif %}
+                    {% if session.get('role') == 'chef' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
+                        </li>
+                    {% endif %}
                     {% if session.get('email') %}
                         <li class="nav-item">
                             <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
