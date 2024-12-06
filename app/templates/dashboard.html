@@ -45,8 +45,8 @@
     
     <!-- Dashboard Content -->
     <div class="container mt-5">
-        <h1 class="text-center">Welcome to your Dashboard!</h1>
-        <p class="text-center">Here you can view all available recipes and their reviews.</p>
+        <h1 class="text-center">Welcome to Dischcovery!</h1>
+        <p class="text-center">Here you can view all available recipes.</p>
 
         <!-- Recipe List -->
         <div class="recipes-container">
@@ -77,20 +77,8 @@
                             {% endif %}
                         </p>
 
-                        <!-- Reviews -->
-                        <h4>Reviews:</h4>
-                        {% if data.reviews %}
-                            <ul>
-                                {% for review in data.reviews %}
-                                    <li>
-                                        <strong>{{ review.consumer_email }}:</strong> 
-                                        {{ review.comment }} ({{ review.rating }}/5)
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p>No reviews yet.</p>
-                        {% endif %}
+                        <!-- View Reviews Button -->
+                        <a href="{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}" class="btn btn-secondary">View Reviews</a>
 
                         <!-- Only show "Buy Now" button for customers -->
                         {% if session.get('role') == 'customer' %}

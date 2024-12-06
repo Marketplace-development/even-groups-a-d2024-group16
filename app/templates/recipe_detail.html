@@ -66,7 +66,7 @@
     <!-- Reviews Section -->
     <div class="mt-5">
         <h3>Reviews</h3>
-        {% if recipe.reviews %}
+        {% if recipe.reviews and recipe.reviews|length > 0 %}
             <ul class="list-group">
                 {% for review in recipe.reviews %}
                     <li class="list-group-item">

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Recipe Reviews{% endblock %}
+
+{% block content %}
+    <!-- Navigatiebalk -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if session.get('role') == 'customer' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
+                        </li>
+                    {% endif %}
+                    {% if session.get('role') == 'chef' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
+                        </li>
+                    {% endif %}
+                    {% if session.get('email') %}
+                        <li class="nav-item">
+                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Recipe Details Section -->
+    <div class="container mt-5">
+        <h1 class="text-center">{{ recipe.recipename }}</h1>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <!-- Recipe Image -->
+                {% if recipe.image %}
+                    <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
+                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+                <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                <p><strong>Average Rating:</strong> 
+                    {% if avg_rating %}
+                        {{ avg_rating }}/5
+                    {% else %}
+                        No ratings yet.
+                    {% endif %}
+                </p>
+
+                <!-- Buy Now Button -->
+                {% if session.get('role') == 'customer' %}
+                    <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success mt-3">Buy Now</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="mt-5">
+            <h3>Reviews</h3>
+            {% if reviews %}
+                <ul class="list-group">
+                    {% for review in reviews %}
+                        <li class="list-group-item">
+                            <strong>{{ review.consumer_email }}</strong> - <span class="text-warning">{{ review.rating }}/5</span>
+                            <p class="mb-1">{{ review.comment }}</p>
+                            <small class="text-muted">Reviewed on {{ review.reviewdate }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No reviews yet. Be the first to review this recipe!</p>
+            {% endif %}
+        </div>
+
+        <!-- Back to Dashboard Button -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+{% endblock %}

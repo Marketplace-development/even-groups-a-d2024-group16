@@ -448,3 +448,19 @@ def edit_profile():
     return render_template('edit_profile.html', form=form, user=user)
 
 
+@main.route('/recipe_reviews/<recipename>')
+def recipe_reviews(recipename):
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if not recipe:
+        flash('Recipe not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    reviews = Review.query.filter_by(recipename=recipename).all()
+    avg_rating = (
+        db.session.query(db.func.avg(Review.rating))
+        .filter(Review.recipename == recipename)
+        .scalar()
+    )
+    avg_rating = round(avg_rating, 1) if avg_rating else None
+
+    return render_template('recipe_reviews.html', recipe=recipe, reviews=reviews, avg_rating=avg_rating)
