@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, Numeric
+from sqlalchemy.dialects.postgresql import JSONB
 
 db = SQLAlchemy()
 
@@ -44,7 +45,7 @@ class Recipe(db.Model):
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
     price = db.Column(db.Numeric(10, 2), nullable=False)
-    ingredients = db.Column(db.String, nullable=True)
+    ingredients = db.Column(JSONB, nullable=True)
     allergiesrec = db.Column(db.String, nullable=True)
     image = db.Column(db.Text, nullable=True)
 

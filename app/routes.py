@@ -173,6 +173,8 @@ def add_recipe():
         # Sla alleen het relatieve pad op in de database
         relative_path = f'images/{filename}'
 
+        ingredients = form.ingredients.data
+
         # Voeg recept toe aan de database
         new_recipe = Recipe(
             recipename=form.recipename.data,
@@ -180,7 +182,7 @@ def add_recipe():
             description=form.description.data,
             duration=form.duration.data,
             price=form.price.data,
-            ingredients=form.ingredients.data,
+            ingredients=ingredients,
             allergiesrec=form.allergiesrec.data,
             image=relative_path  # Alleen het bestandspad opslaan
         )
