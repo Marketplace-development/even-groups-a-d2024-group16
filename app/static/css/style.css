@@ -134,3 +134,15 @@ nav.navbar {
 body {
     padding-top: 70px; /* Pas dit aan op basis van de hoogte van je header */
 }
+.flash-messages {
+    position: relative;
+    z-index: 1050;
+    margin-top: 60px; /* Adjust based on navbar height */
+    width: 100%;
+}
+.flash-messages .alert {
+    margin: 10px auto;
+    max-width: 600px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
