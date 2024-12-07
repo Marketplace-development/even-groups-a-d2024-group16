@@ -230,15 +230,21 @@ def my_recipes():
 
 @main.route('/recipe/<recipename>', methods=['GET'])
 def recipe_detail(recipename):
-    # Zoek het recept op basis van recipename
     recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if not recipe:
+        flash('Recipe not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
 
-    if recipe is None:
-        flash('Recipe not found', 'danger')
-        return redirect(url_for('main.list_recipes'))
+    user_email = session.get('email')
+    user_review = Review.query.filter_by(recipename=recipename, consumer_email=user_email).first()
 
-    # Render de template voor de receptdetails
-    return render_template('recipe_detail.html', recipe=recipe)
+    return render_template(
+        'recipe_detail.html',
+        recipe=recipe,
+        user_review=user_review
+    )
+
+
 
 
 @main.route('/my_uploads')
