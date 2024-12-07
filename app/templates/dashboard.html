@@ -10,40 +10,43 @@
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
         </a>
+        
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Dropdown Menu -->
+
+                <!-- Menu knop met drie witte strepen en "MENU" tekst -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Menu
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- Drie witte strepen voor het menu-icoon -->
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <!-- Tekst "MENU" naast de strepen -->
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+                    
+                    <!-- Dropdown menu met 'kotjes' -->
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
                         {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_uploads') }}" style="border-radius: 5px;">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.add_recipe') }}" style="border-radius: 5px;">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
                         {% endif %}
+                        <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
                     </ul>
                 </li>
-                <!-- Logout Button -->
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
-                {% endif %}
+
             </ul>
         </div>
     </div>
