@@ -5,40 +5,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
 <style>
+    html, body {
+        margin: 0; /* Remove default margins */
+        padding: 0; /* Remove default padding */
+        height: 100%; /* Ensure the elements span the full viewport height */
+    }
+
     body {
         /* Set the background image */
         background-image: url('{{ url_for('static', filename='images/Index_background.jpeg') }}');
-        background-size: cover; /* Make the image cover the entire area */
+        background-size: cover; /* Cover the entire viewport */
         background-position: center; /* Center the image */
-        background-repeat: no-repeat;
-        height: 100vh; /* Ensure the body covers the full viewport */
-        margin: 0; /* Remove any margin */
-        padding: 0; /* Remove any padding */
-        color: white; /* White text for contrast */
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Shadow for readability */
-        font-family: 'Roboto', sans-serif; /* Use Roboto font */
+        background-repeat: no-repeat; /* Prevent tiling */
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+        font-family: 'Roboto', sans-serif; /* Use a clean font */
+        color: white; /* Set default text color */
         scroll-behavior: smooth; /* Enable smooth scrolling */
     }
 
-    html {
-        height: 100%; /* Ensure the HTML element spans the full height */
-    }
-
+    /* Ensure all container elements fit inside the viewport */
     .welcome-content {
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+        background-color: rgba(255, 255, 255, 0.8); /* Slightly increase opacity for better readability */
         padding: 2rem;
         border-radius: 12px; /* Rounded corners */
         max-width: 600px;
-        margin: 150px auto; /* Center the content and add more top spacing */
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow around the box */
-        color: black; /* Change text color to black for contrast */
+        margin: 20vh auto; /* Center the content both vertically and horizontally */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+        color: black; /* Black text for contrast */
     }
+
+    /* Fix white bar issue on smaller screens */
+    html {
+        box-sizing: border-box; /* Include padding and border in element dimensions */
+        overflow-y: auto; /* Enable vertical scrolling without white bars */
+    }
+    
 
     .welcome-content h1 {
         font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
         color: #ff4500; /* Red color */
-        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); /* Soft shadow for better visibility */
         font-size: 3rem; /* Increase font size for emphasis */
     }
 
