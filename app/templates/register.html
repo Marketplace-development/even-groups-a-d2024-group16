@@ -1,56 +1,153 @@
 {% extends 'base.html' %}
+
 {% block content %}
+<!-- Include Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        /* Set the background image */
+        background-image: url('{{ url_for('static', filename='images/Index_background.jpeg') }}');
+        background-size: cover; /* Make the image cover the entire area */
+        background-position: center; /* Center the image */
+        background-repeat: no-repeat;
+        height: 100vh; /* Ensure the body covers the full viewport */
+        margin: 0; /* Remove any margin */
+        padding: 0; /* Remove any padding */
+        color: white; /* White text for contrast */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Shadow for readability */
+        font-family: 'Roboto', sans-serif; /* Use Roboto font */
+        scroll-behavior: smooth; /* Enable smooth scrolling */
+    }
+
+    html {
+        height: 100%; /* Ensure the HTML element spans the full height */
+    }
+
+    .welcome-content {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+        padding: 2rem;
+        border-radius: 12px; /* Rounded corners */
+        max-width: 600px;
+        margin: 50px auto; /* Center the content and add spacing */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow around the box */
+        color: black; /* Black text for contrast */
+    }
+
+    .welcome-content h1 {
+        font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
+        color: #ff4500; /* Red color */
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); /* Soft shadow for better visibility */
+        font-size: 3rem; /* Increase font size for emphasis */
+        margin-bottom: 1rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #333;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    .btn-custom {
+        margin: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.25rem;
+        border: 2px solid black; /* Black border for contrast */
+        background-color: transparent; /* Transparent background */
+        color: black; /* Black text color */
+        border-radius: 25px; /* Rounded buttons */
+        transition: all 0.3s ease; /* Smooth hover effect */
+    }
+
+    /* Hover effects for buttons */
+    .btn-custom:hover {
+        background-color: black; /* Black background on hover */
+        color: white; /* White text on hover */
+    }
+
+    .chef-container {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .chef-radios {
+        display: flex; /* Align radio buttons horizontally */
+        justify-content: center;
+        gap: 20px; /* Add spacing between buttons */
+    }
+
+    .radio-container input {
+        margin-right: 10px; /* Space between the radio button and label */
+    }
+
+    ul.errors {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 15px 0;
+        color: #d32f2f;
+        text-align: left;
+    }
+</style>
+
+<div class="welcome-content">
+    <!-- Register Heading -->
     <h1>Register</h1>
+
+    <!-- Registration Form -->
     <form method="POST">
         {{ form.hidden_tag() }}
-        
-        <!-- E-mail invoerveld -->
+
+        <!-- Email -->
         <div>
             <label for="email">E-mail</label>
             {{ form.email(class="form-control") }}
             {% if form.email.errors %}
                 <ul class="errors">
                     {% for error in form.email.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
 
-        <!-- Volledige naam invoerveld -->
+        <!-- Full Name -->
         <div>
             <label for="name">Full name</label>
             {{ form.name(class="form-control") }}
             {% if form.name.errors %}
                 <ul class="errors">
                     {% for error in form.name.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
 
-        <!-- Geboortedatum invoerveld -->
+        <!-- Date of Birth -->
         <div>
-          <label for="date_of_birth">Date of birth</label>
-          {{ form.date_of_birth(class="form-control") }}
-          {% if form.date_of_birth.errors %}
-              <ul class="errors">
-                  {% for error in form.date_of_birth.errors %}
-                      <li class="text-danger">{{ error }}</li>
-                  {% endfor %}
-              </ul>
-          {% endif %}
-      </div>
+            <label for="date_of_birth">Date of birth</label>
+            {{ form.date_of_birth(class="form-control") }}
+            {% if form.date_of_birth.errors %}
+                <ul class="errors">
+                    {% for error in form.date_of_birth.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
 
-        <!-- Adres velden -->
+        <!-- Address Fields -->
         <div>
             <label for="street">Street</label>
             {{ form.street(class="form-control") }}
             {% if form.street.errors %}
                 <ul class="errors">
                     {% for error in form.street.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -62,7 +159,7 @@
             {% if form.housenr.errors %}
                 <ul class="errors">
                     {% for error in form.housenr.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -74,7 +171,7 @@
             {% if form.postalcode.errors %}
                 <ul class="errors">
                     {% for error in form.postalcode.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -86,7 +183,7 @@
             {% if form.city.errors %}
                 <ul class="errors">
                     {% for error in form.city.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -98,26 +195,26 @@
             {% if form.country.errors %}
                 <ul class="errors">
                     {% for error in form.country.errors %}
-                        <li class="text-danger">{{ error }}</li>
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
 
-        <!-- Telefoonnummer veld -->
+        <!-- Telephone -->
         <div>
-          <label for="telephonenr">Telephone</label>
-          {{ form.telephonenr(class="form-control") }}
-          {% if form.telephonenr.errors %}
-              <ul class="errors">
-                  {% for error in form.telephonenr.errors %}
-                      <li class="text-danger">{{ error }}</li>
-                  {% endfor %}
-              </ul>
-          {% endif %}
-      </div>
+            <label for="telephonenr">Telephone</label>
+            {{ form.telephonenr(class="form-control") }}
+            {% if form.telephonenr.errors %}
+                <ul class="errors">
+                    {% for error in form.telephonenr.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
 
-        <!-- Vraag of de gebruiker een chef is met radioknoppen -->
+        <!-- Chef Radio Buttons -->
         <div class="chef-container">
             <label>Are you a chef?</label>
             <div class="chef-radios">
@@ -133,36 +230,11 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Submit knop -->
+
+        <!-- Submit Button -->
         <div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-custom">Register</button>
         </div>
     </form>
-
-    <style>
-        /* Centraal positioneren van de form en de knoppen */
-        .chef-container {
-            display: flex;
-            justify-content: center; /* Centraal in de breedte */
-            align-items: center; /* Centraal in de hoogte */
-            flex-direction: column; /* Zorg ervoor dat de label boven de knoppen staat */
-            margin-top: 20px;
-        }
-
-        /* Styling voor de radioknoppen naast elkaar */
-        .chef-radios {
-            display: flex; /* Zorgt ervoor dat de knoppen naast elkaar komen te staan */
-            gap: 20px; /* Ruimte tussen de knoppen */
-        }
-
-        .radio-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-container input {
-            margin-right: 10px; /* Ruimte tussen het radio-knopje en het label */
-        }
-    </style>
+</div>
 {% endblock %}
