@@ -11,6 +11,8 @@
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f9;
             color: #333;
+            margin: 0;
+            margin-top: 80px; /* Zorg dat de content niet overlapt met de header */
         }
 
         .container {
@@ -56,24 +58,68 @@
             opacity: 1;
             transition: opacity 0.5s ease;
         }
+
+        header {
+            background-color: black;
+            padding: 0.5rem 2rem; /* Verminder de hoogte van de header */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between; /* Logo links, navigatie rechts */
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    
+        header img {
+            max-height: 60px; /* Maak het logo iets kleiner */
+            object-fit: contain; /* Zorg dat het logo goed wordt weergegeven */
+            margin: 5px 0; /* Geef het logo iets meer ruimte */
+        }
+    
+        header nav a {
+            color: white;
+            margin-left: 1rem; /* Spacing tussen de navigatielinks */
+            text-decoration: none;
+            font-size: 0.95rem; /* Pas de grootte van de tekst aan */
+        }
+    
+        header nav a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Flash messages -->
-    <div class="container-fluid mt-5">
-        <div class="flash-messages">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+    <!-- Header -->
+    <header>
+        <!-- Logo -->
+        <div>
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" 
+                 alt="Dishcovery Logo">
         </div>
+        <!-- Navigatie -->
+        <nav>
+            <a href="{{ url_for('main.index') }}">HOME</a>
+            <a href="{{ url_for('main.login') }}">Login</a>
+            <a href="{{ url_for('main.register') }}">Register</a>
+        </nav>
+    </header>
+
+    <!-- Flash messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
 
     <!-- Content Block -->
