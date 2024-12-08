@@ -153,17 +153,13 @@ def list_recipes():
 
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
-    print("Entered the add_recipe route!")  # Debugging statement
     if 'email' not in session or session.get('role') != 'chef':
-        print("User is not logged in or not a chef.")
         flash('You need to log in as a chef to add recipes.', 'danger')
         return redirect(url_for('main.login'))
 
     form = RecipeForm()
-    print("Form initialized.")
 
     if form.validate_on_submit():
-        print("Form submitted and validated!")  # Debugging
         try:
             # Map voor afbeeldingen
             upload_folder = os.path.join(current_app.root_path, 'static/images')
@@ -186,8 +182,6 @@ def add_recipe():
                 for ingredient, quantity in zip(ingredients, quantities) if ingredient and quantity
             ]
 
-            print("Ingredient list to save:", ingredient_list)  # Debugging
-
             # Maak een nieuw Recipe object
             new_recipe = Recipe(
                 recipename=form.recipename.data,
@@ -199,21 +193,21 @@ def add_recipe():
                 allergiesrec=form.allergiesrec.data,
                 image=relative_path
             )
-            print("Recipe object created:", new_recipe)  # Debugging
 
             db.session.add(new_recipe)
             db.session.commit()
             flash('Recipe added successfully!', 'success')
         except Exception as e:
             db.session.rollback()
-            print("Error saving recipe to DB:", e)
             flash(f"Error saving recipe: {e}", 'danger')
 
         return redirect(url_for('main.my_uploads'))
     else:
         if form.errors:
-            print("Form errors detected:", form.errors)  # Debugging
+            pass  # No debugging print, but you can handle form errors here if needed.
+
     return render_template('add_recipe.html', form=form)
+
 
 @main.route('/my_recipes')
 def my_recipes():
