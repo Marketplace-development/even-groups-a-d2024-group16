@@ -32,7 +32,6 @@ class RecipeForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     duration = IntegerField('Duration (in minutes)', validators=[DataRequired()])
     price = StringField('Price (in €)', validators=[DataRequired()])
-    ingredients = TextAreaField('Ingredients', validators=[DataRequired()])
     allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
     image = FileField('Recipe Image', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!'),

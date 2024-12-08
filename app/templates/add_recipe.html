@@ -5,77 +5,75 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Menu
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
-                        {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
-                        {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
-                        {% endif %}
-                    </ul>
-                </li>
-                <!-- Logout Button -->
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
-                {% endif %}
+                <!-- Menu and login/logout code hier -->
             </ul>
         </div>
     </div>
 </nav>
-    
+
 <div class="container mt-4">
     <h1>Add a New Recipe</h1>
     <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
+        
+        <!-- Recipename -->
         <div class="mb-3">
             {{ form.recipename.label(class="form-label") }}
             {{ form.recipename(class="form-control") }}
         </div>
+        
+        <!-- Description -->
         <div class="mb-3">
             {{ form.description.label(class="form-label") }}
             {{ form.description(class="form-control") }}
         </div>
+        
+        <!-- Duration -->
         <div class="mb-3">
             {{ form.duration.label(class="form-label") }}
             {{ form.duration(class="form-control") }}
         </div>
+        
+        <!-- Price -->
         <div class="mb-3">
             {{ form.price.label(class="form-label") }}
             {{ form.price(class="form-control") }}
         </div>
+
+        <!-- Dynamische velden voor ingrediënten en hoeveelheden -->
         <div class="mb-3">
-            {{ form.ingredients.label(class="form-label") }}
-            {{ form.ingredients(class="form-control") }}
+            <label class="form-label">Ingredients and Quantities</label>
+            <div id="ingredient-fields">
+                <div class="row mb-2">
+                    <div class="col">
+                        <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
+                    </div>
+                    <div class="col">
+                        <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
         </div>
+
+        <!-- Allergies rec -->
         <div class="mb-3">
             {{ form.allergiesrec.label(class="form-label") }}
             {{ form.allergiesrec(class="form-control") }}
         </div>
+
+        <!-- Afbeeldingsupload -->
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
             {{ form.image(class="form-control") }}
@@ -83,7 +81,36 @@
                 <small class="text-danger">{{ form.image.errors[0] }}</small>
             {% endif %}
         </div>
+
+        <!-- Submit-knop -->
         <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
 </div>
+
+<!-- JavaScript om dynamisch ingrediënten en hoeveelheden toe te voegen of te verwijderen -->
+<script>
+    document.getElementById('add-ingredient').addEventListener('click', function() {
+        const container = document.getElementById('ingredient-fields');
+        const newField = document.createElement('div');
+        newField.classList.add('row', 'mb-2');
+        newField.innerHTML = `
+            <div class="col">
+                <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
+            </div>
+            <div class="col">
+                <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+            </div>
+        `;
+        container.appendChild(newField);
+    });
+
+    document.getElementById('ingredient-fields').addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('remove-ingredient')) {
+            e.target.closest('.row').remove();
+        }
+    });
+</script>
 {% endblock %}

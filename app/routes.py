@@ -1,4 +1,5 @@
 import os  # Voor bestandspaden en mapbeheer
+import json
 from datetime import datetime  # Voor datum- en tijdstempels
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
@@ -149,51 +150,70 @@ def list_recipes():
     # Render de template en geef de recepten mee
     return render_template('listing.html', recipes=recipes)
 
+
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
+    print("Entered the add_recipe route!")  # Debugging statement
     if 'email' not in session or session.get('role') != 'chef':
+        print("User is not logged in or not a chef.")
         flash('You need to log in as a chef to add recipes.', 'danger')
         return redirect(url_for('main.login'))
 
     form = RecipeForm()
+    print("Form initialized.")
+
     if form.validate_on_submit():
-        # Map voor afbeeldingen
-        upload_folder = os.path.join(current_app.root_path, 'static/images')
-        
-        # Controleer of de map bestaat
-        if not os.path.exists(upload_folder):
-            os.makedirs(upload_folder)
+        print("Form submitted and validated!")  # Debugging
+        try:
+            # Map voor afbeeldingen
+            upload_folder = os.path.join(current_app.root_path, 'static/images')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
 
-        # Sla de afbeelding veilig op
-        image_file = form.image.data
-        filename = secure_filename(image_file.filename)
-        file_path = os.path.join(upload_folder, filename)
-        image_file.save(file_path)
+            # Sla afbeelding veilig op
+            image_file = form.image.data
+            filename = secure_filename(image_file.filename)
+            file_path = os.path.join(upload_folder, filename)
+            image_file.save(file_path)
+            relative_path = f'images/{filename}'
 
-        # Sla alleen het relatieve pad op in de database
-        relative_path = f'images/{filename}'
+            # Haal ingrediënten en hoeveelheden op
+            ingredients = request.form.getlist('ingredients[]')
+            quantities = request.form.getlist('quantities[]')
 
-        ingredients = form.ingredients.data
+            ingredient_list = [
+                {"ingredient": ingredient.strip(), "quantity": quantity.strip()}
+                for ingredient, quantity in zip(ingredients, quantities) if ingredient and quantity
+            ]
 
-        # Voeg recept toe aan de database
-        new_recipe = Recipe(
-            recipename=form.recipename.data,
-            chef_email=session['email'],
-            description=form.description.data,
-            duration=form.duration.data,
-            price=form.price.data,
-            ingredients=ingredients,
-            allergiesrec=form.allergiesrec.data,
-            image=relative_path  # Alleen het bestandspad opslaan
-        )
-        db.session.add(new_recipe)
-        db.session.commit()
-        flash('Recipe added successfully!', 'success')
+            print("Ingredient list to save:", ingredient_list)  # Debugging
+
+            # Maak een nieuw Recipe object
+            new_recipe = Recipe(
+                recipename=form.recipename.data,
+                chef_email=session['email'],
+                description=form.description.data,
+                duration=form.duration.data,
+                price=form.price.data,
+                ingredients=ingredient_list,  # Opslaan als JSONB
+                allergiesrec=form.allergiesrec.data,
+                image=relative_path
+            )
+            print("Recipe object created:", new_recipe)  # Debugging
+
+            db.session.add(new_recipe)
+            db.session.commit()
+            flash('Recipe added successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print("Error saving recipe to DB:", e)
+            flash(f"Error saving recipe: {e}", 'danger')
+
         return redirect(url_for('main.my_uploads'))
-
+    else:
+        if form.errors:
+            print("Form errors detected:", form.errors)  # Debugging
     return render_template('add_recipe.html', form=form)
-
-
 
 @main.route('/my_recipes')
 def my_recipes():
