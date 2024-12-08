@@ -48,11 +48,16 @@
     </div>
 </nav>
     
-    
 <div class="container mt-5">
     <h1 class="text-center">Purchase {{ recipe.recipename }}</h1>
     <div class="recipe-detail">
-        <img src="{{ recipe.image }}" alt="{{ recipe.recipename }}" class="img-fluid">
+        <!-- Display Recipe Image -->
+        {% if recipe.image %}
+            <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid">
+        {% else %}
+            <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid">
+        {% endif %}
+        
         <h2>Details</h2>
         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
@@ -66,3 +71,4 @@
     </form>
 </div>
 {% endblock %}
+
