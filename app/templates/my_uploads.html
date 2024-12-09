@@ -68,8 +68,12 @@
                         <div class="recipe-details">
                             <h3>{{ recipe.recipename }}</h3>
                             <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                            <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                            <p><strong>Ingredients:</strong></p>
+                            <ul>
+                                {% for ingredient in recipe.ingredients_list %}
+                                    <li>{{ ingredient }}</li>
+                                {% endfor %}
+                            </ul>                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
                             <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
 
                             <!-- Bewerk-knop toevoegen -->

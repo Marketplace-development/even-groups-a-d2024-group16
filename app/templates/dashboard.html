@@ -73,7 +73,13 @@
                     <p class="text-muted">by {{ data.recipe.chef_email }}</p> <!-- Show Chef's Email -->
 
                     <p><strong>Cooking Time:</strong> {{ data.recipe.duration }} minutes</p>
-                    <p><strong>Ingredients:</strong> {{ data.recipe.ingredients }}</p>
+                    <!-- Ingrediënten -->
+                    <p><strong>Ingredients:</strong></p>
+                    <ul>
+                        {% for ingredient in data.ingredients_list %}
+                            <li>{{ ingredient }}</li>
+                        {% endfor %}
+                    </ul>             
                     <p><strong>Price:</strong> €{{ data.recipe.price }}</p>
                     <p><strong>Allergies:</strong> {{ data.recipe.allergiesrec }}</p>
 

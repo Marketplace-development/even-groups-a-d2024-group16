@@ -74,9 +74,26 @@
                 {{ form.price(class="form-control") }}
             </div>
 
+
+            <!-- Dynamische velden voor ingrediënten -->
             <div class="mb-3">
-                <label for="ingredients" class="form-label">Ingredients</label>
-                {{ form.ingredients(class="form-control") }}
+                <label class="form-label">Ingredients and Quantities</label>
+                <div id="ingredient-fields">
+                    {% for ingredient in ingredients %}
+                    <div class="row mb-2">
+                        <div class="col">
+                            <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient" value="{{ ingredient['ingredient'] }}">
+                        </div>
+                        <div class="col">
+                            <input type="text" name="quantities[]" class="form-control" placeholder="Quantity" value="{{ ingredient['quantity'] }}">
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
             </div>
 
             <div class="mb-3">

@@ -60,7 +60,17 @@
         
         <h2>Details</h2>
         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+        <!-- Display Ingredients -->
+        <p><strong>Ingredients:</strong></p>
+        <ul>
+            {% if ingredients_list %}
+                {% for ingredient in ingredients_list %}
+                    <li>{{ ingredient }}</li>
+                {% endfor %}
+            {% else %}
+                <li>No ingredients provided</li>
+            {% endif %}
+        </ul>
         <p><strong>Price:</strong> €{{ recipe.price }}</p>
         <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
     </div>

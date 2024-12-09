@@ -48,38 +48,50 @@
     </div>
 </nav>
 
-    <!-- Recipe Details Section -->
-    <div class="container mt-5">
-        <h1 class="text-center">{{ recipe.recipename }}</h1>
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <!-- Recipe Image -->
-                {% if recipe.image %}
-                    <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
-                {% endif %}
-            </div>
-            <div class="col-md-6">
-                <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
-                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-                <p><strong>Average Rating:</strong> 
-                    {% if avg_rating %}
-                        {{ avg_rating }}/5
-                    {% else %}
-                        No ratings yet.
-                    {% endif %}
-                </p>
-
-                <!-- Buy Now Button -->
-                {% if session.get('role') == 'customer' %}
-                    <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success mt-3">Buy Now</a>
-                {% endif %}
-            </div>
+<!-- Recipe Details Section -->
+<div class="container mt-5">
+    <h1 class="text-center">{{ recipe.recipename }}</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Recipe Image -->
+            {% if recipe.image %}
+                <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+            {% endif %}
         </div>
+        <div class="col-md-6">
+            <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
+            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+            
+            <p><strong>Ingredients:</strong></p>
+            <ul>
+                {% if ingredients_list %}
+                    {% for ingredient in ingredients_list %}
+                        <li>{{ ingredient }}</li>
+                    {% endfor %}
+                {% else %}
+                    <li>No ingredients provided</li>
+                {% endif %}
+            </ul>
+
+            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+            <p><strong>Average Rating:</strong> 
+                {% if avg_rating %}
+                    {{ avg_rating }}/5
+                {% else %}
+                    No ratings yet.
+                {% endif %}
+            </p>
+
+            <!-- Buy Now Button -->
+            {% if session.get('role') == 'customer' %}
+                <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success mt-3">Buy Now</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
         <!-- Reviews Section -->
         <div class="mt-5">

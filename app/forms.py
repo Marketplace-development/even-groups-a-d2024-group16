@@ -33,6 +33,8 @@ class RecipeForm(FlaskForm):
     duration = IntegerField('Duration (in minutes)', validators=[DataRequired()])
     price = StringField('Price (in €)', validators=[DataRequired()])
     allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
+    ingredients = TextAreaField('Ingredients (JSON format)', validators=[DataRequired()])
+
     image = FileField('Recipe Image', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!'),
         Optional()  # De afbeelding is nu optioneel

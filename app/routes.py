@@ -103,9 +103,10 @@ def dashboard():
     # Fetch all recipes
     recipes = Recipe.query.all()
 
-    # Fetch reviews and average ratings for each recipe
+    # Combine reviews, ratings en ingrediënten
     recipe_data = []
     for recipe in recipes:
+        # Reviews en gemiddelde beoordeling
         reviews = Review.query.filter_by(recipename=recipe.recipename).all()
         avg_rating = (
             db.session.query(db.func.avg(Review.rating))
@@ -114,10 +115,22 @@ def dashboard():
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
+        # Ingrediënten verwerken
+        ingredients_list = []
+        if recipe.ingredients:
+            try:
+                ingredients = json.loads(recipe.ingredients)  # Parse JSON string
+                for item in ingredients:
+                    ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+            except json.JSONDecodeError:
+                flash(f"Error decoding ingredients for recipe {recipe.recipename}.", "warning")
+        
+        # Voeg alle data toe aan `recipe_data`
         recipe_data.append({
             'recipe': recipe,
             'reviews': reviews,
-            'avg_rating': avg_rating
+            'avg_rating': avg_rating,
+            'ingredients_list': ingredients_list
         })
 
     return render_template(
@@ -226,6 +239,16 @@ def my_recipes():
     for transaction in transactions:
         recipe = Recipe.query.filter_by(recipename=transaction.recipename, chef_email=transaction.chef_email).first()
         if recipe:
+            # Parse JSON ingredients
+            ingredients_list = []
+            if recipe.ingredients:
+                try:
+                    ingredients = json.loads(recipe.ingredients)
+                    for item in ingredients:
+                        ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+                except (json.JSONDecodeError, KeyError):
+                    ingredients_list = ["Invalid ingredient format"]
+
             chef = User.query.filter_by(email=recipe.chef_email).first()
             purchased_recipes.append({
                 "recipename": recipe.recipename,
@@ -233,13 +256,12 @@ def my_recipes():
                 "description": recipe.description,
                 "duration": recipe.duration,
                 "price": recipe.price,
-                "ingredients": recipe.ingredients,
+                "ingredients_list": ingredients_list,  # Parsed ingredients list
                 "allergiesrec": recipe.allergiesrec,
                 "image": recipe.image
             })
 
     return render_template('my_recipes.html', recipes=purchased_recipes)
-
 
 
 @main.route('/recipe/<recipename>', methods=['GET'])
@@ -252,10 +274,21 @@ def recipe_detail(recipename):
     user_email = session.get('email')
     user_review = Review.query.filter_by(recipename=recipename, consumer_email=user_email).first()
 
+    # Parse JSON ingredients for detail view
+    ingredients_list = []
+    if recipe.ingredients:
+        try:
+            ingredients = json.loads(recipe.ingredients)
+            for item in ingredients:
+                ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+        except (json.JSONDecodeError, KeyError):
+            ingredients_list = ["Invalid ingredient format"]
+
     return render_template(
         'recipe_detail.html',
         recipe=recipe,
-        user_review=user_review
+        user_review=user_review,
+        ingredients_list=ingredients_list
     )
 
 
@@ -269,18 +302,28 @@ def my_uploads():
 
     chef_email = session['email']
     uploads = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
-    return render_template('my_uploads.html', recipes=uploads)
 
+    # Verwerk de recepten en parse de ingrediënten
+    uploads_data = []
+    for recipe in uploads:
+        ingredients_list = []
+        if recipe.ingredients:
+            try:
+                # Parse de JSON-string voor ingrediënten
+                ingredients = json.loads(recipe.ingredients)
+                for item in ingredients:
+                    ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+            except (json.JSONDecodeError, KeyError):
+                # Voeg een standaardbericht toe als het format niet klopt
+                ingredients_list = ["Invalid ingredient format"]
 
-@main.route('/my_library')
-def my_library():
-    if 'email' not in session or session.get('role') != 'chef':
-        flash('You need to log in as a chef to access this page.', 'danger')
-        return redirect(url_for('main.login'))
+        # Voeg de data toe aan de lijst
+        uploads_data.append({
+            'recipe': recipe,
+            'ingredients_list': ingredients_list
+        })
 
-    chef_email = session['email']
-    library_recipes = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
-    return render_template('my_library.html', recipes=library_recipes)
+    return render_template('my_uploads.html', uploads_data=uploads_data)
 
 
 
@@ -298,7 +341,17 @@ def buy_recipe(recipename):
         flash('You need to be logged in to buy a recipe.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Als het een POST-verzoek is (bij klikken op "Confirm Purchase")
+    # Verwerk ingrediënten uit JSON
+    ingredients_list = []
+    if recipe.ingredients:
+        try:
+            ingredients = json.loads(recipe.ingredients)  # Parse JSON string
+            for item in ingredients:
+                ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+        except (json.JSONDecodeError, KeyError):
+            ingredients_list = ["Invalid ingredient format"]
+
+    # Verwerk aankoop bij POST-verzoek
     if request.method == 'POST':
         user_email = session['email']
         chef_email = recipe.chef_email
@@ -328,7 +381,12 @@ def buy_recipe(recipename):
         return redirect(url_for('main.my_recipes'))
 
     # Render de buy_recipe pagina bij GET-verzoek
-    return render_template('buy_recipe.html', recipe=recipe)
+    return render_template(
+        'buy_recipe.html',
+        recipe=recipe,
+        ingredients_list=ingredients_list
+    )
+
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
 def add_review(recipename):
@@ -383,56 +441,53 @@ def add_review(recipename):
 @main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])
 def edit_recipe(recipename):
     recipe = Recipe.query.filter_by(recipename=recipename).first()
-    if recipe is None:
-        flash('Recipe not found', 'danger')
+    if not recipe:
+        flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_uploads'))
 
-    form = RecipeForm()
+    # Decodeer JSON ingrediënten voor vooraf ingevulde velden
+    ingredients = []
+    if recipe.ingredients:
+        try:
+            ingredients = json.loads(recipe.ingredients)
+        except json.JSONDecodeError:
+            flash('Error loading ingredients.', 'danger')
 
-    # Vul het formulier met de huidige gegevens van het recept bij een GET-verzoek
-    if request.method == 'GET':
-        form.recipename.data = recipe.recipename
-        form.description.data = recipe.description
-        form.ingredients.data = recipe.ingredients
-        form.price.data = recipe.price
-        form.allergiesrec.data = recipe.allergiesrec
-        form.duration.data = recipe.duration  # Zorg ervoor dat je duration ook vult
+    form = RecipeForm(obj=recipe)
 
-    # Verwerk het formulier bij een POST-verzoek
     if form.validate_on_submit():
-        # Werk de receptgegevens bij
         recipe.recipename = form.recipename.data
         recipe.description = form.description.data
-        recipe.ingredients = form.ingredients.data
+        recipe.duration = form.duration.data
         recipe.price = form.price.data
         recipe.allergiesrec = form.allergiesrec.data
-        recipe.duration = form.duration.data  # Update de cooking time (duur)
 
-        # Als er een nieuwe afbeelding is geüpload, werk het bestand bij
+        # Sla nieuwe ingrediënten op in JSON
+        ingredient_names = request.form.getlist('ingredients[]')
+        ingredient_quantities = request.form.getlist('quantities[]')
+        updated_ingredients = []
+        for name, quantity in zip(ingredient_names, ingredient_quantities):
+            if name and quantity:
+                updated_ingredients.append({'ingredient': name, 'quantity': quantity})
+        recipe.ingredients = json.dumps(updated_ingredients)
+
+        # Update afbeelding indien gewijzigd
         if form.image.data:
             upload_folder = os.path.join(current_app.root_path, 'static/images')
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
+            os.makedirs(upload_folder, exist_ok=True)
 
             image_file = form.image.data
             filename = secure_filename(image_file.filename)
-            file_path = os.path.join(upload_folder, filename)
-            image_file.save(file_path)
+            filepath = os.path.join(upload_folder, filename)
+            image_file.save(filepath)
+            recipe.image = f'images/{filename}'
 
-            # Update het bestandspad naar de afbeelding in de database
-            relative_path = f'images/{filename}'
-            recipe.image = relative_path
-
-        try:
-            db.session.commit()  # Pas de wijzigingen toe op de database
-            flash('Recipe updated successfully!', 'success')
-        except Exception as e:
-            db.session.rollback()  # Rollback in geval van een fout
-            flash(f'Error updating recipe: {str(e)}', 'danger')
-
+        db.session.commit()
+        flash('Recipe updated successfully!', 'success')
         return redirect(url_for('main.my_uploads'))
 
-    return render_template('edit_recipe.html', form=form, recipe=recipe)
+    return render_template('edit_recipe.html', form=form, recipe=recipe, ingredients=ingredients)
+
 
 
 @main.route('/edit_profile', methods=['GET', 'POST'])
@@ -483,4 +538,20 @@ def recipe_reviews(recipename):
     )
     avg_rating = round(avg_rating, 1) if avg_rating else None
 
-    return render_template('recipe_reviews.html', recipe=recipe, reviews=reviews, avg_rating=avg_rating)
+    # Parse JSON ingredients for display
+    ingredients_list = []
+    if recipe.ingredients:
+        try:
+            ingredients = json.loads(recipe.ingredients)
+            for item in ingredients:
+                ingredients_list.append(f"{item['quantity']} {item['ingredient']}")
+        except (json.JSONDecodeError, KeyError):
+            ingredients_list = ["Invalid ingredient format"]
+
+    return render_template(
+        'recipe_reviews.html',
+        recipe=recipe,
+        reviews=reviews,
+        avg_rating=avg_rating,
+        ingredients_list=ingredients_list
+    )

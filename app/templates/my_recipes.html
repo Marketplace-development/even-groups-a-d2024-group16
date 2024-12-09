@@ -67,8 +67,12 @@
                                 <h5 class="card-title">{{ recipe.recipename }}</h5>
                                 <p class="card-text text-muted">by {{ recipe.chef_name }}</p>
                                 <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                                <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                                <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                                <p><strong>Ingredients:</strong></p>
+                                <ul>
+                                    {% for ingredient in recipe.ingredients_list %}
+                                        <li>{{ ingredient }}</li>
+                                    {% endfor %}
+                                </ul>                                <p><strong>Price:</strong> €{{ recipe.price }}</p>
                                 <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
                                 <div class="mt-auto d-flex justify-content-between">
                                     <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success">View Recipe</a>
