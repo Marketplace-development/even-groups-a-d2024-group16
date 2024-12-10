@@ -77,7 +77,7 @@
                     <p><strong>Ingredients:</strong></p>
                     <ul>
                         {% for ingredient in data.ingredients_list %}
-                            <li>{{ ingredient }}</li>
+                            <li>{{ ingredient.quantity }} {{ ingredient.unit }} of {{ ingredient.ingredient }}</li>
                         {% endfor %}
                     </ul>             
                     <p><strong>Price:</strong> €{{ data.recipe.price }}</p>
