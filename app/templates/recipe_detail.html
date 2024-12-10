@@ -74,28 +74,6 @@
             </div>
         </div>
 
-        <!-- Reviews Section -->
-        <div class="mt-5">
-            {% if user_review %}
-                <div class="alert alert-info">
-                    <h4>Your Review:</h4>
-                    <p><strong>Rating:</strong> {{ user_review.rating }}/5</p>
-                    <p><strong>Comment:</strong> {{ user_review.comment }}</p>
-                    <p><small>Reviewed on {{ user_review.reviewdate }}</small></p>
-                </div>
-            {% else %}
-                <div class="alert alert-warning">
-                    <h4>You haven't written a review yet.</h4>
-                    <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-warning">Write a Review</a>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- View All Reviews Button -->
-        <div class="text-center mt-4">
-            <a href="{{ url_for('main.recipe_reviews', recipename=recipe.recipename) }}" class="btn btn-secondary">View All Reviews</a>
-        </div>
-
         <!-- Back Button -->
         <div class="text-center mt-4">
             <a href="{{ url_for('main.my_recipes') }}" class="btn btn-primary">Back to My Recipes</a>
