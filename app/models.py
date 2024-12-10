@@ -16,7 +16,6 @@ class User(db.Model):
     city = db.Column(db.String, nullable=True)
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
-    is_consumer = db.Column(db.Boolean, default=True, nullable=False)
     is_chef = db.Column(db.Boolean, default=False, nullable=False)
 
     # Relaties
