@@ -93,13 +93,14 @@
                     </p>
 
                     <!-- View Reviews Button -->
-                    <a href="{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}" class="btn btn-secondary">View Reviews</a>
+                    <a href="{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}" class="btn btn-warning mb-2">View Reviews</a>
 
-                    <!-- Only show "Buy Now" button for customers -->
+                    <!-- Alleen de "Buy Now"-knop voor klanten -->
                     {% if session.get('role') == 'customer' %}
-                        <a href="{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}" class="btn btn-success">Buy Now</a>
+                        <a href="{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}" class="btn btn-success mt-2">Buy Now</a>
                     {% elif session.get('role') == 'chef' and data.recipe.chef_email == session.get('email') %}
-                        <a href="{{ url_for('main.edit_recipe', recipename=data.recipe.recipename) }}" class="btn btn-primary">Edit Recipe</a>
+                        <!-- Alleen de "Edit Recipe"-knop tonen voor de chef die het recept heeft geüpload -->
+                        <a href="{{ url_for('main.edit_recipe', recipename=data.recipe.recipename) }}" class="btn btn-primary mt-2">Edit Recipe</a>
                     {% endif %}
                 </div>
             </div>

@@ -327,9 +327,7 @@ def my_uploads():
             'ingredients_list': ingredients_list
         })
 
-    return render_template('my_uploads.html', uploads_data=uploads_data)
-
-
+    return render_template('my_uploads.html', uploads_data=uploads_data)  # uploads_data doorgeven aan sjabloon
 
 @main.route('/buy_recipe/<recipename>', methods=['GET', 'POST'])
 def buy_recipe(recipename):
