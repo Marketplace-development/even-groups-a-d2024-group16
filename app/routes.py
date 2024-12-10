@@ -174,52 +174,56 @@ def add_recipe():
 
     if form.validate_on_submit():
         try:
-            # Map voor afbeeldingen
+            # Maak de uploadmap als die niet bestaat
             upload_folder = os.path.join(current_app.root_path, 'static/images')
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
+            os.makedirs(upload_folder, exist_ok=True)
 
-            # Sla afbeelding veilig op
+            # Verwerk de afbeelding
             image_file = form.image.data
-            filename = secure_filename(image_file.filename)
-            file_path = os.path.join(upload_folder, filename)
-            image_file.save(file_path)
-            relative_path = f'images/{filename}'
+            filename = secure_filename(image_file.filename) if image_file else None
+            relative_path = None
+            if filename:
+                file_path = os.path.join(upload_folder, filename)
+                image_file.save(file_path)
+                relative_path = f'images/{filename}'
 
-            # Haal ingrediënten en hoeveelheden op
+            # Haal de ingrediënten en hoeveelheden op
             ingredients = request.form.getlist('ingredients[]')
             quantities = request.form.getlist('quantities[]')
 
+            # Maak een lijst van ingrediënten in JSON-indeling
             ingredient_list = [
                 {"ingredient": ingredient.strip(), "quantity": quantity.strip()}
                 for ingredient, quantity in zip(ingredients, quantities) if ingredient and quantity
             ]
+            print("Processed ingredients:", ingredient_list)
 
-            # Maak een nieuw Recipe object
+            # Maak een nieuw receptobject
             new_recipe = Recipe(
                 recipename=form.recipename.data,
                 chef_email=session['email'],
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
-                ingredients=ingredient_list,  # Opslaan als JSONB
+                ingredients=json.dumps(ingredient_list),  # Converteer naar JSON-string
                 allergiesrec=form.allergiesrec.data,
                 image=relative_path
             )
 
+            # Voeg toe aan de database en sla op
             db.session.add(new_recipe)
             db.session.commit()
             flash('Recipe added successfully!', 'success')
+            return redirect(url_for('main.my_uploads'))
+
         except Exception as e:
             db.session.rollback()
             flash(f"Error saving recipe: {e}", 'danger')
-
-        return redirect(url_for('main.my_uploads'))
-    else:
-        if form.errors:
-            pass  # No debugging print, but you can handle form errors here if needed.
+            print("Error:", str(e))
 
     return render_template('add_recipe.html', form=form)
+
+
 
 
 @main.route('/my_recipes')
@@ -390,18 +394,18 @@ def buy_recipe(recipename):
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
 def add_review(recipename):
-    # Ensure user is logged in
+    # Zorg dat de gebruiker is ingelogd
     if 'email' not in session:
         flash('You need to log in to add a review.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Get the recipe
+    # Haal het recept op
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_recipes'))
 
-    # Fetch the transaction linked to the recipe
+    # Controleer of de transactie bestaat
     transaction = Transaction.query.filter_by(
         recipename=recipename,
         consumer_email=session['email']
@@ -411,41 +415,49 @@ def add_review(recipename):
         flash('No transaction found for this recipe.', 'danger')
         return redirect(url_for('main.my_recipes'))
 
+    # Haal de chef_email uit het recept
+    chef_email = recipe.chef_email
+
     if request.method == 'POST':
-        # Retrieve data from the form
+        # Haal gegevens uit het formulier
         rating = request.form.get('rating')
         comment = request.form.get('comment')
 
-        # Validate inputs
+        # Controleer of alle velden zijn ingevuld
         if not rating or not comment:
             flash('All fields are required.', 'danger')
             return redirect(url_for('main.add_review', recipename=recipename))
 
-        # Save the review to the database
-        new_review = Review(
-            comment=comment,
-            rating=int(rating),
-            consumer_email=session['email'],
-            recipename=recipename,
-            transactionid=transaction.transactionid  # Associate with the transaction
-        )
-        db.session.add(new_review)
-        db.session.commit()
+        # Maak een nieuwe review aan
+        try:
+            new_review = Review(
+                comment=comment,
+                rating=int(rating),
+                consumer_email=session['email'],
+                recipename=recipename,
+                chef_email=chef_email,  # Voeg de chef_email toe
+                transactionid=transaction.transactionid
+            )
+            db.session.add(new_review)
+            db.session.commit()
 
-        flash('Review submitted successfully!', 'success')
-        return redirect(url_for('main.recipe_detail', recipename=recipename))
+            flash('Review submitted successfully!', 'success')
+            return redirect(url_for('main.recipe_detail', recipename=recipename))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error submitting review: {e}", 'danger')
 
     return render_template('add_review.html', recipe=recipe, transaction=transaction)
 
-
 @main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])
 def edit_recipe(recipename):
+    # Zoek het recept op
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_uploads'))
 
-    # Decodeer JSON ingrediënten voor vooraf ingevulde velden
+    # Decodeer ingrediënten uit JSON
     ingredients = []
     if recipe.ingredients:
         try:
@@ -453,41 +465,53 @@ def edit_recipe(recipename):
         except json.JSONDecodeError:
             flash('Error loading ingredients.', 'danger')
 
+    # Maak formulier met bestaande gegevens
     form = RecipeForm(obj=recipe)
 
     if form.validate_on_submit():
-        recipe.recipename = form.recipename.data
-        recipe.description = form.description.data
-        recipe.duration = form.duration.data
-        recipe.price = form.price.data
-        recipe.allergiesrec = form.allergiesrec.data
+        try:
+            # Werk receptgegevens bij
+            recipe.recipename = form.recipename.data
+            recipe.description = form.description.data
+            recipe.duration = form.duration.data
+            recipe.price = form.price.data
+            recipe.allergiesrec = form.allergiesrec.data
 
-        # Sla nieuwe ingrediënten op in JSON
-        ingredient_names = request.form.getlist('ingredients[]')
-        ingredient_quantities = request.form.getlist('quantities[]')
-        updated_ingredients = []
-        for name, quantity in zip(ingredient_names, ingredient_quantities):
-            if name and quantity:
-                updated_ingredients.append({'ingredient': name, 'quantity': quantity})
-        recipe.ingredients = json.dumps(updated_ingredients)
+            # Werk ingrediënten bij
+            ingredient_names = request.form.getlist('ingredients[]')
+            ingredient_quantities = request.form.getlist('quantities[]')
+            updated_ingredients = [
+                {"ingredient": name.strip(), "quantity": quantity.strip()}
+                for name, quantity in zip(ingredient_names, ingredient_quantities) if name and quantity
+            ]
+            recipe.ingredients = json.dumps(updated_ingredients)
 
-        # Update afbeelding indien gewijzigd
-        if form.image.data:
-            upload_folder = os.path.join(current_app.root_path, 'static/images')
-            os.makedirs(upload_folder, exist_ok=True)
+            # Werk afbeelding bij indien gewijzigd
+            if form.image.data:
+                upload_folder = os.path.join(current_app.root_path, 'static/images')
+                os.makedirs(upload_folder, exist_ok=True)
 
-            image_file = form.image.data
-            filename = secure_filename(image_file.filename)
-            filepath = os.path.join(upload_folder, filename)
-            image_file.save(filepath)
-            recipe.image = f'images/{filename}'
+                image_file = form.image.data
+                filename = secure_filename(image_file.filename)
+                file_path = os.path.join(upload_folder, filename)
+                image_file.save(file_path)
+                recipe.image = f'images/{filename}'
 
-        db.session.commit()
-        flash('Recipe updated successfully!', 'success')
-        return redirect(url_for('main.my_uploads'))
+            # Sla wijzigingen op
+            db.session.commit()
+            flash('Recipe updated successfully!', 'success')
+            return redirect(url_for('main.my_uploads'))
 
-    return render_template('edit_recipe.html', form=form, recipe=recipe, ingredients=ingredients)
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating recipe: {e}", 'danger')
 
+    return render_template(
+        'edit_recipe.html',
+        form=form,
+        recipe=recipe,
+        ingredients=ingredients
+    )
 
 
 @main.route('/edit_profile', methods=['GET', 'POST'])

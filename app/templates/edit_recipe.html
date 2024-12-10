@@ -49,67 +49,100 @@
 </nav>
     
     
-        <div class="container mt-5">
-        <h1>Edit Recipe: {{ recipe.recipename }}</h1>
-        <form method="POST" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
+<div class="container mt-4">
+    <h1>Edit Recipe</h1>
+    <form method="POST" action="{{ url_for('main.edit_recipe', recipename=recipe.recipename) }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
 
-            <div class="mb-3">
-                <label for="recipename" class="form-label">Recipe Name</label>
-                {{ form.recipename(class="form-control") }}
-            </div>
+        <!-- Recipename -->
+        <div class="mb-3">
+            {{ form.recipename.label(class="form-label") }}
+            {{ form.recipename(class="form-control", value=recipe.recipename) }}
+        </div>
 
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                {{ form.description(class="form-control") }}
-            </div>
+        <!-- Description -->
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", value=recipe.description) }}
+        </div>
 
-            <div class="mb-3">
-                <label for="duration" class="form-label">Cooking Time (minutes)</label>
-                {{ form.duration(class="form-control") }}
-            </div>
+        <!-- Duration -->
+        <div class="mb-3">
+            {{ form.duration.label(class="form-label") }}
+            {{ form.duration(class="form-control", value=recipe.duration) }}
+        </div>
 
-            <div class="mb-3">
-                <label for="price" class="form-label">Price (€)</label>
-                {{ form.price(class="form-control") }}
-            </div>
+        <!-- Price -->
+        <div class="mb-3">
+            {{ form.price.label(class="form-label") }}
+            {{ form.price(class="form-control", value=recipe.price) }}
+        </div>
 
-
-            <!-- Dynamische velden voor ingrediënten -->
-            <div class="mb-3">
-                <label class="form-label">Ingredients and Quantities</label>
-                <div id="ingredient-fields">
-                    {% for ingredient in ingredients %}
+        <!-- Ingredients -->
+        <div class="mb-3">
+            <label class="form-label">Ingredients and Quantities</label>
+            <div id="ingredient-fields">
+                {% for item in ingredients %}
                     <div class="row mb-2">
                         <div class="col">
-                            <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient" value="{{ ingredient['ingredient'] }}">
+                            <input type="text" name="ingredients[]" class="form-control" value="{{ item['ingredient'] }}" placeholder="Ingredient">
                         </div>
                         <div class="col">
-                            <input type="text" name="quantities[]" class="form-control" placeholder="Quantity" value="{{ ingredient['quantity'] }}">
+                            <input type="text" name="quantities[]" class="form-control" value="{{ item['quantity'] }}" placeholder="Quantity">
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
-                <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
+                {% endfor %}
             </div>
+            <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
+        </div>
 
-            <div class="mb-3">
-                <label for="allergiesrec" class="form-label">Allergies</label>
-                {{ form.allergiesrec(class="form-control") }}
+        <!-- Allergies -->
+        <div class="mb-3">
+            {{ form.allergiesrec.label(class="form-label") }}
+            {{ form.allergiesrec(class="form-control", value=recipe.allergiesrec) }}
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(class="form-control") }}
+            {% if recipe.image %}
+                <img src="{{ url_for('static', filename=recipe.image) }}" alt="Recipe Image" class="img-fluid mt-3">
+            {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+<!-- JavaScript for dynamic ingredient fields -->
+<script>
+    document.getElementById('add-ingredient').addEventListener('click', function() {
+        const container = document.getElementById('ingredient-fields');
+        const newField = document.createElement('div');
+        newField.classList.add('row', 'mb-2');
+        newField.innerHTML = `
+            <div class="col">
+                <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
             </div>
-
-            <div class="mb-3">
-                <label for="image" class="form-label">Upload Image (Optional)</label>
-                {{ form.image(class="form-control") }}
-                {% if recipe.image %}
-                    <p>Current Image: <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-thumbnail" style="width: 100px; height: auto;"></p>
-                {% endif %}
+            <div class="col">
+                <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
             </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+            </div>
+        `;
+        container.appendChild(newField);
+    });
 
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-    </div>
+    document.getElementById('ingredient-fields').addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('remove-ingredient')) {
+            e.target.closest('.row').remove();
+        }
+    });
+</script>
 {% endblock %}

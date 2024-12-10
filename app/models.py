@@ -16,7 +16,7 @@ class User(db.Model):
     city = db.Column(db.String, nullable=True)
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
-    is_chef = db.Column(db.Boolean, default=False, nullable=False)
+    is_chef = db.Column(db.Boolean, default=False, nullable=True)  # Update consistent met database
 
     # Relaties
     recipes = db.relationship('Recipe', backref='chef', lazy=True)
@@ -39,12 +39,12 @@ class User(db.Model):
 class Recipe(db.Model):
     __tablename__ = 'recipe'
 
-    recipename = db.Column(db.String, primary_key=True)
-    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='CASCADE'), primary_key=True)
+    recipename = db.Column(db.String, nullable=False)
+    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='CASCADE'), nullable=False)
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
-    ingredients = db.Column(JSONB, nullable=True)
+    price = db.Column(db.Integer, nullable=True)
+    ingredients = db.Column(JSONB, nullable=True)  # Consistent met JSONB in database
     allergiesrec = db.Column(db.String, nullable=True)
     image = db.Column(db.Text, nullable=True)
 
@@ -56,6 +56,7 @@ class Recipe(db.Model):
         return f"<Recipe(recipename={self.recipename}, chef_email={self.chef_email})>"
 
 
+
 class Transaction(db.Model):
     __tablename__ = 'transaction'
 
@@ -63,19 +64,20 @@ class Transaction(db.Model):
     transactiondate = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     consumer_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=True)
-    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=True)
+    chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='SET NULL'), nullable=False)
     recipename = db.Column(db.String, nullable=False)
 
     __table_args__ = (
         db.ForeignKeyConstraint(
             ['recipename', 'chef_email'],
             ['recipe.recipename', 'recipe.chef_email'],
-            ondelete='SET NULL'
+            ondelete='CASCADE'
         ),
     )
 
     def __repr__(self):
         return f"<Transaction(transactionid={self.transactionid}, recipename={self.recipename})>"
+
 
 
 
