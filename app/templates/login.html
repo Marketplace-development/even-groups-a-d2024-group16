@@ -26,13 +26,14 @@
     /* Ensure all container elements fit inside the viewport */
     .welcome-content {
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.8); /* Slightly increase opacity for better readability */
+        background-color: rgba(0, 0, 0, 0.9); /* Black background for contrast */
         padding: 2rem;
         border-radius: 12px; /* Rounded corners */
         max-width: 600px;
-        margin: 20vh auto; /* Center the content both vertically and horizontally */
+        margin: 10vh auto;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-        color: black; /* Black text for contrast */
+        color: white; /* White text for better readability */
+        border: 4px ridge #ff4500; /* Orange border */
     }
 
     /* Fix white bar issue on smaller screens */
@@ -44,29 +45,63 @@
 
     .welcome-content h1 {
         font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
-        color: #ff4500; /* Red color */
+        color: #ff4500; /* Orange color */
         font-size: 3rem; /* Increase font size for emphasis */
     }
 
     .welcome-content p {
-        color: black; /* Ensure the text is readable on the white background */
+        color: white; /* Ensure the text is readable on the white background */
+        font-size: 16px;
+    }
+
+    .welcome-content a {
+        color: #ff4500; /* Orange link color */
+        text-decoration: underline; /* Underline for links */
+    }
+
+    .welcome-content label {
+        font-size: 18px;
+        color: white; /* White text for labels */
     }
 
     .btn-custom {
         margin: 0.5rem;
         padding: 0.75rem 1.5rem;
         font-size: 1.25rem;
-        border: 2px solid black; /* Black border for contrast */
+        border: 2px solid #ff4500; /* Orange border for the button */
         background-color: transparent; /* Transparent background */
-        color: black; /* Black text color */
+        color: white; /* White text color */
         border-radius: 25px; /* Rounded buttons */
         transition: all 0.3s ease; /* Smooth hover effect */
     }
 
     /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: black; /* Black background on hover */
+        background-color: #ff4500; /* Orange background on hover */
         color: white; /* White text on hover */
+    }
+
+    .form-control {
+        width: 80%;
+        padding: 10px;
+        border: 3px ridge #ff4500; /* Orange border for input fields */
+        border-radius: 8px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    /* Highlight input borders */
+    .form-control:focus {
+        border-color: #ff4500; /* Orange border on focus */
+        outline: none;
+        box-shadow: 0 0 6px rgba(255, 69, 0, 0.8); /* Optionele gloed bij focus */
+    }
+
+    .errors {
+        color: #ff4500; /* Orange for error messages */
+        padding: 0;
+        margin-top: 5px;
+        list-style-type: none;
     }
 </style>
 
@@ -78,8 +113,8 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         <div style="margin-bottom: 30px; display: flex; justify-content: center; flex-direction: column; align-items: center;">
-            <label for="email" style="font-size: 18px; color: black;">User Email</label>
-            {{ form.email(class="form-control", id="email", style="width: 80%; padding: 10px; border: 1px solid #333; border-radius: 8px; font-size: 16px; margin-top: 10px;") }}
+            <label for="email" style="font-size: 18px; color: white;">User email</label>
+            {{ form.email(class="form-control", id="email") }}
             {% if form.email.errors %}
                 <ul class="errors" style="color: #d32f2f; padding: 0; margin-top: 5px; list-style-type: none;">
                     {% for error in form.email.errors %}
@@ -96,7 +131,7 @@
     </form>
 
     <!-- Register Link -->
-    <p style="text-align: center; color: black; font-size: 16px; margin-top: 20px;">
+    <p style="text-align: center; color: white; font-size: 16px; margin-top: 20px;">
         Don't have an account yet? <a href="{{ url_for('main.register') }}" style="color: #ff4500; text-decoration: underline;">Register here</a>
     </p>
 </div>
