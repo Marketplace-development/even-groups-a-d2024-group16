@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, Numeric
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, NUMERIC
 
 db = SQLAlchemy()
 
@@ -36,17 +36,22 @@ class User(db.Model):
     def __repr__(self):
         return f"<User(email={self.email}, name={self.name})>"
 
+
 class Recipe(db.Model):
     __tablename__ = 'recipe'
 
     recipename = db.Column(db.String, nullable=False)
     chef_email = db.Column(db.String, db.ForeignKey('User.email', ondelete='CASCADE'), nullable=False)
+    chef_name = db.Column(db.String, nullable=False)  # Toegevoegd om overeen te komen met SQL-schema
     description = db.Column(db.String, nullable=True)
     duration = db.Column(db.Integer, nullable=True)
-    price = db.Column(db.Integer, nullable=True)
-    ingredients = db.Column(JSONB, nullable=True)  # Consistent met JSONB in database
+    price = db.Column(NUMERIC(10, 2), nullable=True)  # Wijziging naar NUMERIC voor prijs met decimalen
+    ingredients = db.Column(JSONB, nullable=True)  # Blijft als JSONB zoals het oorspronkelijk was
     allergiesrec = db.Column(db.String, nullable=True)
     image = db.Column(db.Text, nullable=True)
+    origin = db.Column(db.String, nullable=True)  # Toegevoegd voor herkomst
+    category = db.Column(db.String, nullable=True)  # Toegevoegd voor categorie
+    preparation = db.Column(db.String, nullable=True)  # Toegevoegd voor bereidingswijze
 
     __table_args__ = (
         PrimaryKeyConstraint('recipename', 'chef_email'),

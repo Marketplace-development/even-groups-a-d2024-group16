@@ -27,6 +27,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Login')
 
+
 class RecipeForm(FlaskForm):
     recipename = StringField('Recipe Name', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
@@ -34,11 +35,20 @@ class RecipeForm(FlaskForm):
     price = StringField('Price (in €)', validators=[DataRequired()])
     allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
 
+    # Nieuwe velden voor origin, category en preparation
+    origin = StringField('Origin', validators=[Optional()])  # Optioneel
+    category = StringField('Category', validators=[Optional()])  # Optioneel
+    preparation = TextAreaField('Preparation Instructions', validators=[Optional()])  # Optioneel
+
+    # Afbeelding van het recept, optioneel veld
     image = FileField('Recipe Image', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!'),
         Optional()  # De afbeelding is nu optioneel
     ])
+
     submit = SubmitField('Save Changes')
+
+
 
 class ReviewForm(FlaskForm):
     comment = TextAreaField('Comment', validators=[DataRequired()])

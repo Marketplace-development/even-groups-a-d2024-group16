@@ -205,19 +205,27 @@ def add_recipe():
                 if ingredient and quantity and unit
             ]
 
-            # Debugging output (optional)
-            print("Processed ingredients:", ingredient_list)
+            # Fetch the chef's name from the User model based on the email in the session
+            chef = User.query.filter_by(email=session['email']).first()
+            if chef:
+                chef_name = chef.name  # Get the chef's name from the database
+            else:
+                chef_name = None  # In case no chef is found (you can handle this case as needed)
 
             # Create a new recipe object
             new_recipe = Recipe(
                 recipename=form.recipename.data,
                 chef_email=session['email'],
+                chef_name=chef_name,  # Automatically filled chef's name from the database
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
-                ingredients=json.dumps(ingredient_list),  # Convert list to JSON string
+                ingredients=ingredient_list,  # Storing ingredients as JSONB
                 allergiesrec=form.allergiesrec.data,
-                image=relative_path
+                image=relative_path,
+                origin=form.origin.data,  # Added origin field
+                category=form.category.data,  # Added category field
+                preparation=form.preparation.data  # Added preparation field
             )
 
             # Add to the database and save

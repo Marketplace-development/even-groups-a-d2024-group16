@@ -47,31 +47,31 @@
     <h1>Add a New Recipe</h1>
     <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
-
+    
         <!-- Recipe Name -->
         <div class="mb-3">
             {{ form.recipename.label(class="form-label") }}
             {{ form.recipename(class="form-control") }}
         </div>
-
+    
         <!-- Description -->
         <div class="mb-3">
             {{ form.description.label(class="form-label") }}
             {{ form.description(class="form-control") }}
         </div>
-
+    
         <!-- Duration -->
         <div class="mb-3">
             {{ form.duration.label(class="form-label") }}
             {{ form.duration(class="form-control") }}
         </div>
-
+    
         <!-- Price -->
         <div class="mb-3">
             {{ form.price.label(class="form-label") }}
             {{ form.price(class="form-control") }}
         </div>
-
+    
         <!-- Ingredients Section -->
         <div class="mb-3">
             <label class="form-label">Ingredients, Quantities, and Units (4 people)</label>
@@ -102,13 +102,31 @@
             </div>
             <button type="button" id="add-ingredient" class="btn btn-primary mt-2">Add Ingredient</button>
         </div>
-
+    
         <!-- Allergies -->
         <div class="mb-3">
             {{ form.allergiesrec.label(class="form-label") }}
             {{ form.allergiesrec(class="form-control") }}
         </div>
-
+    
+        <!-- Origin -->
+        <div class="mb-3">
+            {{ form.origin.label(class="form-label") }}
+            {{ form.origin(class="form-control") }}
+        </div>
+    
+        <!-- Preparation -->
+        <div class="mb-3">
+            {{ form.preparation.label(class="form-label") }}
+            {{ form.preparation(class="form-control") }}
+        </div>
+    
+        <!-- Category -->
+        <div class="mb-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control") }}
+        </div>
+    
         <!-- Image Upload -->
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
@@ -117,7 +135,7 @@
                 <small class="text-danger">{{ form.image.errors[0] }}</small>
             {% endif %}
         </div>
-
+    
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
