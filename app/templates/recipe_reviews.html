@@ -5,16 +5,14 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Menu
@@ -30,18 +28,15 @@
                         {% endif %}
                     </ul>
                 </li>
-                <!-- Logout Button -->
                 {% if session.get('email') %}
                     <li class="nav-item">
                         <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a></li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -65,10 +60,10 @@
             <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
             
             <p><strong>Ingredients:</strong></p>
-            <ul>
+            <ul style="list-style-position: inside;">
                 {% if ingredients_list %}
                     {% for ingredient in ingredients_list %}
-                        <li>{{ ingredient }}</li>
+                        <li>{{ ingredient.quantity }} {{ ingredient.unit }}{% if ingredient.unit %} of{% endif %} {{ ingredient.ingredient }}</li>
                     {% endfor %}
                 {% else %}
                     <li>No ingredients provided</li>
@@ -93,27 +88,26 @@
     </div>
 </div>
 
-        <!-- Reviews Section -->
-        <div class="mt-5">
-            <h3>Reviews</h3>
-            {% if reviews %}
-                <ul class="list-group">
-                    {% for review in reviews %}
-                        <li class="list-group-item">
-                            <strong>{{ review.consumer_email }}</strong> - <span class="text-warning">{{ review.rating }}/5</span>
-                            <p class="mb-1">{{ review.comment }}</p>
-                            <small class="text-muted">Reviewed on {{ review.reviewdate }}</small>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No reviews yet. Be the first to review this recipe!</p>
-            {% endif %}
-        </div>
+<!-- Reviews Section -->
+<div class="mt-5">
+    <h3>Reviews</h3>
+    {% if reviews %}
+        <ul class="list-group">
+            {% for review in reviews %}
+                <li class="list-group-item">
+                    <strong>{{ review.consumer_email }}</strong> - <span class="text-warning">{{ review.rating }}/5</span>
+                    <p class="mb-1">{{ review.comment }}</p>
+                    <small class="text-muted">Reviewed on {{ review.reviewdate }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No reviews yet. Be the first to review this recipe!</p>
+    {% endif %}
+</div>
 
-        <!-- Back to Dashboard Button -->
-        <div class="text-center mt-4">
-            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
-        </div>
-    </div>
+<!-- Back to Dashboard Button -->
+<div class="text-center mt-4">
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+</div>
 {% endblock %}

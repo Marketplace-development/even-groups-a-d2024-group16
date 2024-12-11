@@ -6,7 +6,6 @@
 <!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
         </a>
@@ -17,23 +16,17 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-
-                <!-- Menu knop met drie witte strepen en "MENU" tekst -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <!-- Drie witte strepen voor het menu-icoon -->
                         <div style="display: flex; align-items: center;">
                             <div style="line-height: 1;">
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white;"></div>
                             </div>
-                            <!-- Tekst "MENU" naast de strepen -->
                             <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
                         </div>
                     </a>
-                    
-                    <!-- Dropdown menu met 'kotjes' -->
                     <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
@@ -46,7 +39,6 @@
                         <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
                     </ul>
                 </li>
-
             </ul>
         </div>
     </div>
@@ -62,10 +54,8 @@
             {% for upload in uploads_data %}
                 <div class="recipe-card">
                     {% if upload.recipe.image %}
-                        <!-- Gebruik url_for om de juiste URL te genereren -->
                         <img src="{{ url_for('static', filename=upload.recipe.image) }}" alt="{{ upload.recipe.recipename }}" class="recipe-image">
                     {% else %}
-                        <!-- Gebruik een standaardafbeelding als er geen afbeelding is -->
                         <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
                     {% endif %}
                     <div class="recipe-details">
@@ -79,6 +69,15 @@
                         </ul>
                         <p><strong>Price:</strong> €{{ upload.recipe.price }}</p>
                         <p><strong>Allergies:</strong> {{ upload.recipe.allergiesrec }}</p>
+
+                        <!-- Average Rating -->
+                        <p><strong>Average Rating:</strong>
+                            {% if upload.avg_rating %}
+                                {{ upload.avg_rating }}/5
+                            {% else %}
+                                No ratings yet.
+                            {% endif %}
+                        </p>
 
                         <!-- View Reviews-knop toevoegen -->
                         <a href="{{ url_for('main.recipe_reviews', recipename=upload.recipe.recipename) }}" class="btn btn-warning mb-2">View Reviews</a>

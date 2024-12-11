@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,23 +17,17 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-
-                <!-- Menu knop met drie witte strepen en "MENU" tekst -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <!-- Drie witte strepen voor het menu-icoon -->
                         <div style="display: flex; align-items: center;">
                             <div style="line-height: 1;">
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white;"></div>
                             </div>
-                            <!-- Tekst "MENU" naast de strepen -->
                             <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
                         </div>
                     </a>
-                    
-                    <!-- Dropdown menu met 'kotjes' -->
                     <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
@@ -46,7 +40,6 @@
                         <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
                     </ul>
                 </li>
-
             </ul>
         </div>
     </div>
@@ -81,9 +74,9 @@
             {{ form.price(class="form-control") }}
         </div>
 
-        <!-- Dynamische velden voor ingrediënten en hoeveelheden -->
+        <!-- Dynamische velden voor ingrediënten, hoeveelheden en maateenheden -->
         <div class="mb-3">
-            <label class="form-label">Ingredients and Quantities</label>
+            <label class="form-label">Ingredients, Quantities, and Units (4 people)</label>
             <div id="ingredient-fields">
                 <div class="row mb-2">
                     <div class="col">
@@ -91,6 +84,9 @@
                     </div>
                     <div class="col">
                         <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+                    </div>
+                    <div class="col">
+                        <input type="text" name="units[]" class="form-control" placeholder="Unit (e.g., grams, ml)">
                     </div>
                     <div class="col-auto">
                         <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
@@ -120,7 +116,7 @@
     </form>
 </div>
 
-<!-- JavaScript om dynamisch ingrediënten en hoeveelheden toe te voegen of te verwijderen -->
+<!-- JavaScript om dynamisch ingrediënten, hoeveelheden en eenheden toe te voegen of te verwijderen -->
 <script>
     document.getElementById('add-ingredient').addEventListener('click', function() {
         const container = document.getElementById('ingredient-fields');
@@ -132,6 +128,9 @@
             </div>
             <div class="col">
                 <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+            </div>
+            <div class="col">
+                <input type="text" name="units[]" class="form-control" placeholder="Unit (e.g., grams, ml)">
             </div>
             <div class="col-auto">
                 <button type="button" class="btn btn-danger remove-ingredient">Remove</button>

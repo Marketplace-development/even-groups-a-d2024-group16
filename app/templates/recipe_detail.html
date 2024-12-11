@@ -5,78 +5,87 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
-        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <!-- Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Menu
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
-                        {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
-                        {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
-                        {% endif %}
-                    </ul>
-                </li>
-                <!-- Logout Button -->
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+        <!-- Navbar content hier -->
     </div>
 </nav>
-    
-    <div class="container mt-5">
-        <h1 class="text-center">{{ recipe.recipename }}</h1>
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <!-- Recipe Image -->
-                {% if recipe.image %}
-                    <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
-                {% else %}
-                    <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
-                {% endif %}
-            </div>
-            <div class="col-md-6">
-                <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
-                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                <p><strong>Ingredients:</strong></p>
-                <ul>
-                    {% for ingredient in ingredients_list %}
-                        <li>{{ ingredient }}</li>
-                    {% endfor %}
-                </ul>                
-                <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-                <p><strong>Description:</strong> {{ recipe.description }}</p>
-            </div>
-        </div>
 
-        <!-- Back Button -->
-        <div class="text-center mt-4">
-            <a href="{{ url_for('main.my_recipes') }}" class="btn btn-primary">Back to My Recipes</a>
+<div class="container mt-5">
+    <h1 class="text-center">{{ recipe.recipename }}</h1>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <!-- Recipe Image -->
+            {% if recipe.image %}
+                <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
+            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+
+            <!-- Aantal personen invoer -->
+            <div class="mb-3">
+                <label for="numPersons" class="form-label"><strong>Aantal personen:</strong></label>
+                <input type="number" id="numPersons" class="form-control" value="4" min="1" max="20" onchange="updateQuantities()">
+            </div>
+
+            <!-- Ingredients Table -->
+            <h5><strong>Ingredients:</strong></h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Ingredient</th>
+                        <th>Quantity & Unit</th>
+                    </tr>
+                </thead>
+                <tbody id="ingredientsTableBody">
+                    {% for ingredient in ingredients_list %}
+                        <tr>
+                            <td>{{ ingredient.ingredient }}</td>
+                            <td data-quantity="{{ ingredient.quantity }}" data-unit="{{ ingredient.unit }}">
+                                {{ ingredient.quantity }} {{ ingredient.unit }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+            <p><strong>Description:</strong> {{ recipe.description }}</p>
         </div>
     </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.my_recipes') }}" class="btn btn-primary">Back to My Recipes</a>
+    </div>
+</div>
+
+<script>
+    // JavaScript functie om de hoeveelheden aan te passen
+    function updateQuantities() {
+        // Haal het aantal personen op uit het invoerveld
+        const numPersons = document.getElementById('numPersons').value;
+
+        // Selecteer alle rijen in de ingrediënten tabel
+        const rows = document.querySelectorAll('#ingredientsTableBody tr');
+
+        rows.forEach(row => {
+            // Haal de originele hoeveelheid (voor 4 personen) op uit het 'data-quantity' attribuut
+            const originalQuantity = row.querySelector('td[data-quantity]').getAttribute('data-quantity');
+
+            // Haal de maateenheid op uit het 'data-unit' attribuut
+            const unit = row.querySelector('td[data-unit]').getAttribute('data-unit');
+
+            // Bereken de nieuwe hoeveelheid op basis van het aantal personen
+            const newQuantity = (originalQuantity / 4) * numPersons;
+
+            // Werk de hoeveelheid en eenheid bij in de tabel
+            row.querySelector('td[data-quantity]').textContent = `${newQuantity.toFixed(2)} ${unit}`;
+        });
+    }
+</script>
+
 {% endblock %}
