@@ -5,6 +5,15 @@ Dishcovery - Welcome
 {% endblock %}
 
 {% block content %}
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Logo, niet klikbaar -->
+        <span class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
+        </span>
+    </div>
+</nav>
 <!-- Include Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
@@ -30,21 +39,13 @@ Dishcovery - Welcome
     /* Ensure all container elements fit inside the viewport */
     .welcome-content {
         text-align: center;
-        background-color: rgba(0, 0, 0, 0.9); /* Zwarte achtergrond met een beetje transparantie */
+        background-color: rgba(255, 255, 255, 0.8); /* Slightly increase opacity for better readability */
         padding: 2rem;
         border-radius: 12px; /* Rounded corners */
-        max-width: 700px;
+        max-width: 600px;
         margin: 20vh auto; /* Center the content both vertically and horizontally */
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-        color: white; /* Witte tekstkleur */
-        border: 5px ridge #ff4500; /* Oranje rand */
-    }
-
-    .welcome-header {
-        display: flex; /* Gebruik flexbox om items naast elkaar te positioneren */
-        align-items: center; /* Horizontaal centreren */
-        justify-content: center; /* Plaats items netjes gecentreerd */
-        gap: 1rem; /* Ruimte tussen tekst en logo */
+        color: black; /* Black text for contrast */
     }
 
     /* Fix white bar issue on smaller screens */
@@ -53,61 +54,42 @@ Dishcovery - Welcome
         overflow-y: auto; /* Enable vertical scrolling without white bars */
     }
 
-    .welcome-header h1 {
+    .welcome-content h1 {
         font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
-        color: white;
+        color: #ff4500; /* Red color */
         font-size: 3rem; /* Increase font size for emphasis */
-        margin: 0; /* Verwijder standaard marges */
-    }
-
-    .welcome-header img {
-        max-width: 150px; /* Pas de grootte van het logo aan */
-        height: auto; /* Zorg dat het logo zijn verhoudingen behoudt */
     }
 
     .welcome-content p {
-        color: white; /* Ensure the text is readable on the white background */
+        color: black; /* Ensure the text is readable on the white background */
     }
 
     .btn-custom {
         margin: 0.5rem;
         padding: 0.75rem 1.5rem;
         font-size: 1.25rem;
-        border: 2px solid #ff4500; /* White border for contrast */
+        border: 2px solid black; /* Black border for contrast */
         background-color: transparent; /* Transparent background */
-        color: white; /* White text color */
+        color: black; /* Black text color */
         border-radius: 25px; /* Rounded buttons */
         transition: all 0.3s ease; /* Smooth hover effect */
-    
     }
 
     /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: #ff4500; 
-        color: white; 
+        background-color: black; /* Black background on hover */
+        color: white; /* White text on hover */
     }
 
     .btn-outline-light:hover {
-        background-color: white; /* Black background on hover */
-        color: black; /* White text on hover */
-    }
-
-    .logo-container {
-        margin-bottom: 1rem;
-    }
-
-    .logo-container img {
-        max-width: 150px; /* Pas de grootte van het logo aan */
+        background-color: black; /* Black background on hover */
+        color: white; /* White text on hover */
     }
 </style>
 
 <div class="welcome-content">
-    <!-- Flexbox header: tekst en logo naast elkaar -->
-    <div class="welcome-header">
-        <h1>Welcome to</h1>
-        <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo">
-    </div>
     <!-- Welcome message -->
+    <h1 class="mb-4">Welcome to Dishcovery</h1>
     <p class="text-center lead mb-4">Discover and share the most delicious recipes. Log in or create an account to get started!</p>
 
     <!-- Buttons -->

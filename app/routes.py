@@ -205,6 +205,10 @@ def add_recipe():
                 if ingredient and quantity and unit
             ]
 
+            # Get preparation steps from the form and combine them into a single string, separated by pipes
+            preparation_steps = request.form.getlist('preparation_steps[]')
+            preparation_instructions = '|'.join([step.strip() for step in preparation_steps if step.strip()])
+
             # Fetch the chef's name from the User model based on the email in the session
             chef = User.query.filter_by(email=session['email']).first()
             if chef:
@@ -225,7 +229,7 @@ def add_recipe():
                 image=relative_path,
                 origin=form.origin.data,  # Added origin field
                 category=form.category.data,  # Added category field
-                preparation=form.preparation.data  # Added preparation field
+                preparation=preparation_instructions  # Store preparation as one long string, separated by pipes
             )
 
             # Add to the database and save
@@ -242,7 +246,6 @@ def add_recipe():
 
     # Render the template and pass the ingredient dictionary
     return render_template('add_recipe.html', form=form, ingredienten=ingredienten, allergenen=allergenen)
-
 
 
 

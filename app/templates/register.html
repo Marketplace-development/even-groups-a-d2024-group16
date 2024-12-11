@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Logo, niet klikbaar -->
+        <span class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
+        </span>
+    </div>
+</nav>
 <!-- Include Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
@@ -23,17 +32,16 @@
         scroll-behavior: smooth; /* Enable smooth scrolling */
     }
 
-    /* Container styling */
+    /* Ensure all container elements fit inside the viewport */
     .welcome-content {
         text-align: center;
-        background-color: rgba(0, 0, 0, 0.9); /* Black background */
+        background-color: rgba(255, 255, 255, 0.8); /* Slightly increase opacity for better readability */
         padding: 2rem;
         border-radius: 12px; /* Rounded corners */
         max-width: 600px;
-        margin: 15vh auto; /* Center vertically and horizontally */
+        margin: 20vh auto; /* Center the content both vertically and horizontally */
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-        color: white; /* White text */
-        border: 5px ridge #ff4500; /* Orange border */
+        color: black; /* Black text for contrast */
     }
 
     /* Fix white bar issue on smaller screens */
@@ -42,51 +50,39 @@
         overflow-y: auto; /* Enable vertical scrolling without white bars */
     }
 
-    /* General heading styles */
     .welcome-content h1 {
         font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
-        color: #ff4500; /* Orange color */
+        color: #ff4500; /* Red color */
         font-size: 3rem; /* Increase font size for emphasis */
         margin-bottom: 1rem;
     }
 
-    /* Input field styling */
     .form-control {
         width: 100%;
         padding: 10px;
-        border: 3px ridge #ff4500; /* Orange border */
+        border: 1px solid #333;
         border-radius: 8px;
         margin-bottom: 15px;
         font-size: 16px;
-        color: black; /* Black text inside input */
     }
 
-    /* Highlight border on focus */
-    .form-control:focus {
-        border-color: #ff4500; /* Orange border on focus */
-        outline: none;
-        box-shadow: 0 0 6px rgba(255, 69, 0, 0.8); /* Subtle glow effect */
-    }
-
-    /* Submit button styling */
     .btn-custom {
         margin: 0.5rem;
         padding: 0.75rem 1.5rem;
         font-size: 1.25rem;
-        border: 3px solid #ff4500; /* Orange border */
+        border: 2px solid black; /* Black border for contrast */
         background-color: transparent; /* Transparent background */
-        color: white; /* White text */
+        color: black; /* Black text color */
         border-radius: 25px; /* Rounded buttons */
         transition: all 0.3s ease; /* Smooth hover effect */
     }
 
     /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: #ff4500; /* Orange background */
+        background-color: black; /* Black background on hover */
         color: white; /* White text on hover */
     }
 
-    /* Radio button container */
     .chef-container {
         margin-top: 1rem;
         text-align: center;
@@ -102,18 +98,12 @@
         margin-right: 10px; /* Space between the radio button and label */
     }
 
-    /* Error message styling */
     ul.errors {
         list-style: none;
         padding: 0;
         margin: 0 0 15px 0;
         color: #d32f2f;
         text-align: left;
-    }
-
-    /* Adjust spacing at the top */
-    .welcome-content {
-        margin-top: 10vh; /* Reduce vertical spacing */
     }
 </style>
 
@@ -127,7 +117,7 @@
 
         <!-- Email -->
         <div>
-            <label for="email" style="color: white;">E-mail</label>
+            <label for="email">E-mail</label>
             {{ form.email(class="form-control") }}
             {% if form.email.errors %}
                 <ul class="errors">
@@ -140,7 +130,7 @@
 
         <!-- Full Name -->
         <div>
-            <label for="name" style="color: white;">Full name</label>
+            <label for="name">Full name</label>
             {{ form.name(class="form-control") }}
             {% if form.name.errors %}
                 <ul class="errors">
@@ -153,7 +143,7 @@
 
         <!-- Date of Birth -->
         <div>
-            <label for="date_of_birth" style="color: white;">Date of birth</label>
+            <label for="date_of_birth">Date of birth</label>
             {{ form.date_of_birth(class="form-control") }}
             {% if form.date_of_birth.errors %}
                 <ul class="errors">
@@ -166,7 +156,7 @@
 
         <!-- Address Fields -->
         <div>
-            <label for="street" style="color: white;">Street</label>
+            <label for="street">Street</label>
             {{ form.street(class="form-control") }}
             {% if form.street.errors %}
                 <ul class="errors">
@@ -178,7 +168,7 @@
         </div>
 
         <div>
-            <label for="housenr" style="color: white;">House number</label>
+            <label for="housenr">House number</label>
             {{ form.housenr(class="form-control") }}
             {% if form.housenr.errors %}
                 <ul class="errors">
@@ -190,7 +180,7 @@
         </div>
 
         <div>
-            <label for="postalcode" style="color: white;">Postalcode</label>
+            <label for="postalcode">Postalcode</label>
             {{ form.postalcode(class="form-control") }}
             {% if form.postalcode.errors %}
                 <ul class="errors">
@@ -202,7 +192,7 @@
         </div>
 
         <div>
-            <label for="city" style="color: white;">City</label>
+            <label for="city">City</label>
             {{ form.city(class="form-control") }}
             {% if form.city.errors %}
                 <ul class="errors">
@@ -214,7 +204,7 @@
         </div>
 
         <div>
-            <label for="country" style="color: white;">Country</label>
+            <label for="country">Country</label>
             {{ form.country(class="form-control") }}
             {% if form.country.errors %}
                 <ul class="errors">
@@ -227,7 +217,7 @@
 
         <!-- Telephone -->
         <div>
-            <label for="telephonenr" style="color: white;">Telephone</label>
+            <label for="telephonenr">Telephone</label>
             {{ form.telephonenr(class="form-control") }}
             {% if form.telephonenr.errors %}
                 <ul class="errors">
@@ -240,7 +230,7 @@
 
         <!-- Chef Radio Buttons -->
         <div class="chef-container">
-            <label style="color: white;">Are you a chef?</label>
+            <label>Are you a chef?</label>
             <div class="chef-radios">
                 <div class="radio-container">
                     <input type="radio" id="yes" name="is_chef" value="true" 

@@ -71,7 +71,25 @@
             {{ form.price.label(class="form-label") }}
             {{ form.price(class="form-control") }}
         </div>
+
+        <!-- Category -->
+        <div class="mb-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control") }}
+        </div>
+
+        <!-- Allergies -->
+        <div class="mb-3">
+            {{ form.allergiesrec.label(class="form-label") }}
+            {{ form.allergiesrec(class="form-control") }}
+        </div>
     
+        <!-- Origin -->
+        <div class="mb-3">
+            {{ form.origin.label(class="form-label") }}
+            {{ form.origin(class="form-control") }}
+        </div>
+
         <!-- Ingredients Section -->
         <div class="mb-3">
             <label class="form-label">Ingredients, Quantities, and Units (4 people)</label>
@@ -103,30 +121,22 @@
             <button type="button" id="add-ingredient" class="btn btn-primary mt-2">Add Ingredient</button>
         </div>
     
-        <!-- Allergies -->
+        <!-- Preparation Steps Section -->
         <div class="mb-3">
-            {{ form.allergiesrec.label(class="form-label") }}
-            {{ form.allergiesrec(class="form-control") }}
+            <label class="form-label">Preparation Steps</label>
+            <div id="preparation-steps">
+                <div class="row mb-2 step-row">
+                    <div class="col">
+                        <textarea name="preparation_steps[]" class="form-control" placeholder="Step 1" required></textarea>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-step" class="btn btn-primary mt-2">Add Step</button>
         </div>
-    
-        <!-- Origin -->
-        <div class="mb-3">
-            {{ form.origin.label(class="form-label") }}
-            {{ form.origin(class="form-control") }}
-        </div>
-    
-        <!-- Preparation -->
-        <div class="mb-3">
-            {{ form.preparation.label(class="form-label") }}
-            {{ form.preparation(class="form-control") }}
-        </div>
-    
-        <!-- Category -->
-        <div class="mb-3">
-            {{ form.category.label(class="form-label") }}
-            {{ form.category(class="form-control") }}
-        </div>
-    
+
         <!-- Image Upload -->
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
@@ -141,13 +151,16 @@
     </form>
 </div>
 
-<!-- JavaScript for Adding and Removing Ingredients -->
+<!-- JavaScript for Adding and Removing Ingredients and Preparation Steps -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const ingredientContainer = document.getElementById('ingredient-fields');
         const addIngredientButton = document.getElementById('add-ingredient');
+        const preparationContainer = document.getElementById('preparation-steps');
+        const addStepButton = document.getElementById('add-step');
+        let stepCount = 2;  // Begin stapnummering bij 2 omdat stap 1 al bestaat
 
-        // Add new ingredient row
+        // Voeg nieuwe ingredienten rij toe
         addIngredientButton.addEventListener('click', function () {
             const newField = document.createElement('div');
             newField.classList.add('row', 'mb-2', 'ingredient-row');
@@ -177,14 +190,14 @@
             ingredientContainer.appendChild(newField);
         });
 
-        // Remove ingredient row
+        // Verwijder ingredient rij
         ingredientContainer.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('remove-ingredient')) {
                 e.target.closest('.ingredient-row').remove();
             }
         });
 
-        // Auto-fill unit when ingredient is selected
+        // Vul unit in wanneer een ingredient wordt geselecteerd
         ingredientContainer.addEventListener('change', function (e) {
             if (e.target && e.target.classList.contains('ingredient-select')) {
                 const selectedOption = e.target.options[e.target.selectedIndex];
@@ -192,6 +205,46 @@
                 unitField.value = selectedOption.dataset.unit || '';
             }
         });
+
+        // Voeg nieuwe voorbereidingstap toe
+        addStepButton.addEventListener('click', function () {
+            const newStepField = document.createElement('div');
+            newStepField.classList.add('row', 'mb-2', 'step-row');
+            newStepField.innerHTML = `
+                <div class="col">
+                    <textarea name="preparation_steps[]" class="form-control" placeholder="Step ${stepCount}" required></textarea>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+                </div>
+            `;
+            preparationContainer.appendChild(newStepField);
+
+            // Verhoog de stapnummer voor de volgende stap
+            stepCount++;
+        });
+
+        // Verwijder voorbereidingstap
+        preparationContainer.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('remove-step')) {
+                e.target.closest('.step-row').remove();
+                // Herbereken de stapnummers nadat een stap is verwijderd
+                updateStepNumbers();
+            }
+        });
+
+        // Update de stapnummers na het verwijderen van een stap
+        function updateStepNumbers() {
+            const steps = preparationContainer.querySelectorAll('.step-row');
+            let currentStep = 1;
+            steps.forEach(function (step) {
+                const textarea = step.querySelector('textarea');
+                textarea.placeholder = `Step ${currentStep}`;
+                currentStep++;
+            });
+            stepCount = currentStep;  // Zorg ervoor dat de volgende stap het juiste nummer krijgt
+        }
     });
 </script>
 {% endblock %}
+

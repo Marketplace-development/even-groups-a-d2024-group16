@@ -51,7 +51,7 @@ class Recipe(db.Model):
     image = db.Column(db.Text, nullable=True)
     origin = db.Column(db.String, nullable=True)  # Toegevoegd voor herkomst
     category = db.Column(db.String, nullable=True)  # Toegevoegd voor categorie
-    preparation = db.Column(db.String, nullable=True)  # Toegevoegd voor bereidingswijze
+    preparation = db.Column(db.Text, nullable=True)  # Toegevoegd voor bereidingswijze
 
     __table_args__ = (
         PrimaryKeyConstraint('recipename', 'chef_email'),
