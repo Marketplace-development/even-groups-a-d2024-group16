@@ -1,1 +1,180 @@
-pr
+{% extends 'base.html' %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Menu
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                <!-- Logout Button -->
+                {% if session.get('email') %}
+                    <li class="nav-item">
+                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+    
+    
+        <h1>Edit Profile</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- E-mail (readonly) -->
+        <div>
+            <label for="email">E-mail (cannot be changed)</label>
+            {{ form.email(class="form-control", value=user.email, readonly=True) }}
+        </div>
+
+        <!-- Naam -->
+        <div>
+            <label for="name">Full Name</label>
+            {{ form.name(class="form-control", value=user.name) }}
+            {% if form.name.errors %}
+                <ul class="errors">
+                    {% for error in form.name.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Geboortedatum -->
+        <div>
+            <label for="date_of_birth">Date of Birth</label>
+            {{ form.date_of_birth(class="form-control", value=user.date_of_birth) }}
+            {% if form.date_of_birth.errors %}
+                <ul class="errors">
+                    {% for error in form.date_of_birth.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Adresvelden -->
+        <div>
+            <label for="street">Street</label>
+            {{ form.street(class="form-control", value=user.street) }}
+            {% if form.street.errors %}
+                <ul class="errors">
+                    {% for error in form.street.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="housenr">House Number</label>
+            {{ form.housenr(class="form-control", value=user.housenr) }}
+            {% if form.housenr.errors %}
+                <ul class="errors">
+                    {% for error in form.housenr.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="postalcode">Postal Code</label>
+            {{ form.postalcode(class="form-control", value=user.postalcode) }}
+            {% if form.postalcode.errors %}
+                <ul class="errors">
+                    {% for error in form.postalcode.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="city">City</label>
+            {{ form.city(class="form-control", value=user.city) }}
+            {% if form.city.errors %}
+                <ul class="errors">
+                    {% for error in form.city.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="country">Country</label>
+            {{ form.country(class="form-control", value=user.country) }}
+            {% if form.country.errors %}
+                <ul class="errors">
+                    {% for error in form.country.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Telefoonnummer -->
+        <div>
+            <label for="telephonenr">Telephone</label>
+            {{ form.telephonenr(class="form-control", value=user.telephonenr) }}
+            {% if form.telephonenr.errors %}
+                <ul class="errors">
+                    {% for error in form.telephonenr.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Opslaan knop -->
+        <div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+
+    <style>
+        form {
+            max-width: 600px;
+            margin: auto;
+            margin-top: 30px;
+        }
+        .errors {
+            list-style: none;
+            padding: 0;
+        }
+        .errors li {
+            font-size: 0.9em;
+        }
+    </style>
+{% endblock %}
+
