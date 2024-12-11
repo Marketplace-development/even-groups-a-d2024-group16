@@ -3,18 +3,15 @@
 {% block title %}Add Recipe{% endblock %}
 
 {% block content %}
-<!-- Navigatiebalk -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
-        
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
@@ -45,64 +42,74 @@
     </div>
 </nav>
 
-<div class="container mt-4">
+<!-- Add Recipe Form -->
+<div class="container mt-5 pt-4">
     <h1>Add a New Recipe</h1>
     <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
-        
-        <!-- Recipename -->
+
+        <!-- Recipe Name -->
         <div class="mb-3">
             {{ form.recipename.label(class="form-label") }}
             {{ form.recipename(class="form-control") }}
         </div>
-        
+
         <!-- Description -->
         <div class="mb-3">
             {{ form.description.label(class="form-label") }}
             {{ form.description(class="form-control") }}
         </div>
-        
+
         <!-- Duration -->
         <div class="mb-3">
             {{ form.duration.label(class="form-label") }}
             {{ form.duration(class="form-control") }}
         </div>
-        
+
         <!-- Price -->
         <div class="mb-3">
             {{ form.price.label(class="form-label") }}
             {{ form.price(class="form-control") }}
         </div>
 
-        <!-- Dynamische velden voor ingrediënten, hoeveelheden en maateenheden -->
+        <!-- Ingredients Section -->
         <div class="mb-3">
             <label class="form-label">Ingredients, Quantities, and Units (4 people)</label>
             <div id="ingredient-fields">
-                <div class="row mb-2">
+                <div class="row mb-2 ingredient-row">
                     <div class="col">
-                        <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
+                        <select name="ingredients[]" class="form-control ingredient-select">
+                            <option value="">Select Ingredient</option>
+                            {% for category, items in ingredienten.items() %}
+                                <optgroup label="{{ category }}">
+                                    {% for ingredient, unit in items.items() %}
+                                        <option value="{{ ingredient }}" data-unit="{{ unit }}">{{ ingredient }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col">
-                        <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+                        <input type="text" name="quantities[]" class="form-control" placeholder="Quantity" required>
                     </div>
                     <div class="col">
-                        <input type="text" name="units[]" class="form-control" placeholder="Unit (e.g., grams, ml)">
+                        <input type="text" name="units[]" class="form-control unit-field" placeholder="Unit" readonly>
                     </div>
                     <div class="col-auto">
                         <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
                     </div>
                 </div>
             </div>
-            <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
+            <button type="button" id="add-ingredient" class="btn btn-primary mt-2">Add Ingredient</button>
         </div>
 
-        <!-- Allergies rec -->
+        <!-- Allergies -->
         <div class="mb-3">
             {{ form.allergiesrec.label(class="form-label") }}
             {{ form.allergiesrec(class="form-control") }}
         </div>
 
-        <!-- Afbeeldingsupload -->
+        <!-- Image Upload -->
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
             {{ form.image(class="form-control") }}
@@ -111,38 +118,62 @@
             {% endif %}
         </div>
 
-        <!-- Submit-knop -->
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
 </div>
 
-<!-- JavaScript om dynamisch ingrediënten, hoeveelheden en eenheden toe te voegen of te verwijderen -->
+<!-- JavaScript for Adding and Removing Ingredients -->
 <script>
-    document.getElementById('add-ingredient').addEventListener('click', function() {
-        const container = document.getElementById('ingredient-fields');
-        const newField = document.createElement('div');
-        newField.classList.add('row', 'mb-2');
-        newField.innerHTML = `
-            <div class="col">
-                <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
-            </div>
-            <div class="col">
-                <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
-            </div>
-            <div class="col">
-                <input type="text" name="units[]" class="form-control" placeholder="Unit (e.g., grams, ml)">
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-            </div>
-        `;
-        container.appendChild(newField);
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const ingredientContainer = document.getElementById('ingredient-fields');
+        const addIngredientButton = document.getElementById('add-ingredient');
 
-    document.getElementById('ingredient-fields').addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('remove-ingredient')) {
-            e.target.closest('.row').remove();
-        }
+        // Add new ingredient row
+        addIngredientButton.addEventListener('click', function () {
+            const newField = document.createElement('div');
+            newField.classList.add('row', 'mb-2', 'ingredient-row');
+            newField.innerHTML = `
+                <div class="col">
+                    <select name="ingredients[]" class="form-control ingredient-select">
+                        <option value="">Select Ingredient</option>
+                        {% for category, items in ingredienten.items() %}
+                            <optgroup label="{{ category }}">
+                                {% for ingredient, unit in items.items() %}
+                                    <option value="{{ ingredient }}" data-unit="{{ unit }}">{{ ingredient }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" name="quantities[]" class="form-control" placeholder="Quantity" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="units[]" class="form-control unit-field" placeholder="Unit" readonly>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                </div>
+            `;
+            ingredientContainer.appendChild(newField);
+        });
+
+        // Remove ingredient row
+        ingredientContainer.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('remove-ingredient')) {
+                e.target.closest('.ingredient-row').remove();
+            }
+        });
+
+        // Auto-fill unit when ingredient is selected
+        ingredientContainer.addEventListener('change', function (e) {
+            if (e.target && e.target.classList.contains('ingredient-select')) {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const unitField = e.target.closest('.ingredient-row').querySelector('.unit-field');
+                unitField.value = selectedOption.dataset.unit || '';
+            }
+        });
     });
 </script>
 {% endblock %}

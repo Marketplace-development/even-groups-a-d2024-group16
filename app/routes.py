@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij upl
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
 from app.forms import RecipeForm, ReviewForm, EditProfileForm
+from app.ingredients import ingredienten, allergenen
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -175,11 +176,11 @@ def add_recipe():
 
     if form.validate_on_submit():
         try:
-            # Maak de uploadmap als die niet bestaat
+            # Ensure the upload folder exists
             upload_folder = os.path.join(current_app.root_path, 'static/images')
             os.makedirs(upload_folder, exist_ok=True)
 
-            # Verwerk de afbeelding
+            # Process the image
             image_file = form.image.data
             filename = secure_filename(image_file.filename) if image_file else None
             relative_path = None
@@ -188,42 +189,51 @@ def add_recipe():
                 image_file.save(file_path)
                 relative_path = f'images/{filename}'
 
-            # Haal de ingrediënten, hoeveelheden en maateenheden op
+            # Get ingredients, quantities, and units from the form
             ingredients = request.form.getlist('ingredients[]')
             quantities = request.form.getlist('quantities[]')
             units = request.form.getlist('units[]')
 
-            # Maak een lijst van ingrediënten in JSON-indeling
+            # Build the ingredient list in JSON format
             ingredient_list = [
-                {"ingredient": ingredient.strip(), "quantity": quantity.strip(), "unit": unit.strip()}
-                for ingredient, quantity, unit in zip(ingredients, quantities, units) if ingredient and quantity and unit
+                {
+                    "ingredient": ingredient.strip(),
+                    "quantity": quantity.strip(),
+                    "unit": unit.strip()
+                }
+                for ingredient, quantity, unit in zip(ingredients, quantities, units)
+                if ingredient and quantity and unit
             ]
+
+            # Debugging output (optional)
             print("Processed ingredients:", ingredient_list)
 
-            # Maak een nieuw receptobject
+            # Create a new recipe object
             new_recipe = Recipe(
                 recipename=form.recipename.data,
                 chef_email=session['email'],
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
-                ingredients=json.dumps(ingredient_list),  # Converteer naar JSON-string
+                ingredients=json.dumps(ingredient_list),  # Convert list to JSON string
                 allergiesrec=form.allergiesrec.data,
                 image=relative_path
             )
 
-            # Voeg toe aan de database en sla op
+            # Add to the database and save
             db.session.add(new_recipe)
             db.session.commit()
             flash('Recipe added successfully!', 'success')
             return redirect(url_for('main.my_uploads'))
 
         except Exception as e:
+            # Rollback the database changes if an error occurs
             db.session.rollback()
             flash(f"Error saving recipe: {e}", 'danger')
             print("Error:", str(e))
 
-    return render_template('add_recipe.html', form=form)
+    # Render the template and pass the ingredient dictionary
+    return render_template('add_recipe.html', form=form, ingredienten=ingredienten, allergenen=allergenen)
 
 
 
