@@ -52,53 +52,132 @@
     </div>
 </nav>
 
-<!-- Dashboard Content -->
-<div class="container mt-5">
-    <h1 class="text-center">Welcome to your Dashboard!</h1>
-    <p class="text-center">Here you can view all available recipes and their reviews.</p>
+<div class="container mt-5 pt-4">
+    <h1 class="text-center">Welcome to Dishcovery!</h1>
+    <p class="text-center">Explore recipes from amazing chefs and discover new flavours today.</p>
 
-    <!-- Recipe List -->
-    <div class="recipes-container">
-        {% for data in recipe_data %}
-            <a href="{% if session.get('role') == 'customer' %}{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}{% elif session.get('role') == 'chef' %}{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}{% endif %}" class="recipe-card">
-                <!-- Display Recipe Image -->
-                <div class="recipe-image-container">
-                    {% if data.recipe.image %}
-                        <img src="{{ url_for('static', filename=data.recipe.image) }}" alt="{{ data.recipe.recipename }}" class="recipe-image">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
-                    {% endif %}
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3 bg-light p-4 shadow-sm rounded">
+            <h5 class="mb-3">Filters</h5>
+            <form method="GET" action="{{ url_for('main.dashboard') }}">
+                <div class="mb-3">
+                    <label for="ingredients" class="form-label">Ingredients</label>
+                    <select name="ingredients[]" id="ingredients" class="form-control" multiple>
+                        {% for category, items in ingredienten.items() %}
+                            <optgroup label="{{ category }}">
+                                {% for ingredient in items %}
+                                    <option value="{{ ingredient }}">{{ ingredient }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
                 </div>
+                <div class="mb-3">
+                    <label for="min_rating" class="form-label">Min. Rating</label>
+                    <select name="min_rating" id="min_rating" class="form-control">
+                        <option value="">Any</option>
+                        {% for i in range(1, 6) %}
+                            <option value="{{ i }}">{{ i }}+</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="duration" class="form-label">Max. Duration (min)</label>
+                    <input type="number" name="duration" id="duration" class="form-control" placeholder="e.g., 30">
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Max. Price (€)</label>
+                    <input type="number" step="0.01" name="price" id="price" class="form-control" placeholder="e.g., 20.00">
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select name="category" id="category" class="form-control">
+                        <option value="">Any</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="origin" class="form-label">Origin</label>
+                    <select name="origin" id="origin" class="form-control">
+                        <option value="">Any</option>
+                        {% for origin in origins %}
+                            <option value="{{ origin }}">{{ origin }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Allergies</label>
+                    <select name="allergies[]" id="allergies" class="form-control" multiple>
+                        {% for allergy in allergens %}
+                            <option value="{{ allergy }}">{{ allergy }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+            </form>
+        </div>
 
-                <div class="recipe-details">
-                    <h3 class="recipe-name">{{ data.recipe.recipename }}</h3>
-                    <p class="chef-name text-muted">by {{ data.recipe.chef_name }}</p> <!-- Show Chef's Name -->
-                </div>
-            </a>
-        {% else %}
-            <p class="text-center">No recipes available at the moment.</p>
-        {% endfor %}
+        <!-- Recipes Section -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                {% for data in recipe_data %}
+                    <div class="col-md-6">
+                        <a href="{% if session.get('role') == 'customer' %}{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}{% elif session.get('role') == 'chef' %}{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}{% endif %}" class="text-decoration-none">
+                            <div class="card shadow-sm h-100">
+                                {% if data.recipe.image %}
+                                    <img src="{{ url_for('static', filename=data.recipe.image) }}" class="card-img-top" alt="{{ data.recipe.recipename }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                                {% endif %}
+                                <div class="card-body text-center">
+                                    <p class="text-muted">by {{ data.recipe.chef_name }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-center">No recipes available at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Custom CSS to remove the underline from links -->
+
 <style>
-    .recipe-card {
-        text-decoration: none; /* Verwijder de onderstreping van de hele link */
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .recipe-name, .chef-name {
-        text-decoration: none; /* Zorg ervoor dat de naam van het gerecht en de chef niet onderstreept worden */
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+        border-radius: 15px;
+    }
+
+    .text-decoration-none {
+        color: inherit;
+    }
+
+    .text-decoration-none:hover {
+        color: inherit;
     }
 </style>
-
 {% endblock %}
-
-
-
-
-
-
-
 
 <!-- DIT IS DE CODE MET ALLE GEGEVENS, GEBRUIK DIT ALS JE FILTERS WILT TESTEN
 Navigatiebalk 
@@ -206,6 +285,7 @@ Navigatiebalk
             <p class="text-center">No recipes available at the moment.</p>
         {% endfor %}
     </div>
+    
 </div>
 -->
 

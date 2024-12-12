@@ -151,20 +151,3 @@ ingredienten = {
         "Sumak": "gram"
     }
 }
-
-allergenen = [
-    "Glutenbevattende granen",
-    "Schaaldieren",
-    "Eieren",
-    "Vis",
-    "Pinda's",
-    "Soja",
-    "Melk (lactose)",
-    "Noten",
-    "Selderij",
-    "Mosterd",
-    "Sesamzaad",
-    "Zwaveldioxide en sulfieten",
-    "Lupine",
-    "Weekdieren"
-]

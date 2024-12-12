@@ -6,8 +6,10 @@ from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij upl
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
 from app.forms import RecipeForm, ReviewForm, EditProfileForm
-from app.ingredients import ingredienten, allergenen
-
+from app.ingredients import ingredienten
+from app.dropdowns import get_allergens, get_categories, get_origins
+from sqlalchemy import and_, or_
+from app.filters import apply_filters
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
@@ -99,14 +101,35 @@ def dashboard():
         flash('User not found.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Fetch all recipes
-    recipes = Recipe.query.all()
+    # Haal gegevens op voor dropdowns
+    categories = get_categories()
+    origins = get_origins()
+    allergens = get_allergens()
 
-    # Combine reviews, ratings en ingrediënten
+    # Filters ophalen
+    filters = {
+        'ingredients': request.args.getlist('ingredients'),
+        'min_rating': request.args.get('min_rating'),
+        'duration': request.args.get('duration'),
+        'price': request.args.get('price'),
+        'category': request.args.get('category'),
+        'origin': request.args.get('origin'),
+        'allergies': request.args.getlist('allergies')
+    }
+
+    # Query starten
+    query = Recipe.query
+
+    # Filters toepassen, behalve min_rating
+    query = apply_filters(query, filters)
+
+    # Gefilterde recepten ophalen
+    recipes = query.all()
+
+    # Verwerk recepten en voeg avg_rating toe
     recipe_data = []
     for recipe in recipes:
-        # Reviews en gemiddelde beoordeling
-        reviews = Review.query.filter_by(recipename=recipe.recipename).all()
+        # Bereken gemiddelde beoordeling
         avg_rating = (
             db.session.query(db.func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
@@ -114,35 +137,37 @@ def dashboard():
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
-        # Ingrediënten verwerken (direct werken met de dictionary)
+        # Ingrediënten verwerken
         ingredients_list = []
         if recipe.ingredients:
-            try:
-                # Loop door de ingrediënten dictionary (geen JSON decoding nodig)
-                for ingredient, details in recipe.ingredients.items():
-                    # Voeg de volledige ingredient data toe, inclusief hoeveelheid en eenheid
-                    ingredients_list.append({
-                        'quantity': details['quantity'],
-                        'unit': details.get('unit', ''),  # Voeg unit toe, als die bestaat
-                        'ingredient': ingredient
-                    })
-            except KeyError:
-                flash(f"Error processing ingredients for recipe {recipe.recipename}.", "warning")
+            for ingredient, details in recipe.ingredients.items():
+                ingredients_list.append({
+                    'quantity': details['quantity'],
+                    'unit': details.get('unit', ''),
+                    'ingredient': ingredient
+                })
 
-        # Voeg alle data toe aan `recipe_data`
         recipe_data.append({
             'recipe': recipe,
-            'reviews': reviews,
             'avg_rating': avg_rating,
             'ingredients_list': ingredients_list
         })
+
+    # Filter op min_rating na het berekenen van avg_rating
+    if filters.get('min_rating'):
+        min_rating = float(filters['min_rating'])
+        recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
 
     return render_template(
         'dashboard.html',
         user=user,
         recipe_data=recipe_data,
-        role=session.get('role')
+        categories=categories,
+        origins=origins,
+        allergens=allergens,
+        ingredienten=ingredienten
     )
+
 
 
 
@@ -175,13 +200,16 @@ def add_recipe():
 
     form = RecipeForm()
 
+    # Haal allergenen op uit de database of een statische lijst
+    allergens = get_allergens()
+
     if form.validate_on_submit():
         try:
-            # Ensure the upload folder exists
+            # Zorg ervoor dat de uploadmap bestaat
             upload_folder = os.path.join(current_app.root_path, 'static/images')
             os.makedirs(upload_folder, exist_ok=True)
 
-            # Process the image
+            # Verwerk de afbeelding
             image_file = form.image.data
             filename = secure_filename(image_file.filename) if image_file else None
             relative_path = None
@@ -190,59 +218,67 @@ def add_recipe():
                 image_file.save(file_path)
                 relative_path = f'images/{filename}'
 
-            # Get ingredients, quantities, and units from the form
+            # Haal ingrediënten, hoeveelheden en eenheden op uit het formulier
             ingredients = request.form.getlist('ingredients[]')
             quantities = request.form.getlist('quantities[]')
             units = request.form.getlist('units[]')
 
-            # Build a single dictionary for the ingredients
+            # Maak een dictionary voor de ingrediënten
             ingredient_dict = {}
             for ingredient, quantity, unit in zip(ingredients, quantities, units):
-                if ingredient and quantity and unit:  # Ensure all fields are filled
+                if ingredient and quantity and unit:  # Zorg dat alle velden zijn ingevuld
                     ingredient_dict[ingredient.strip()] = {
                         "quantity": quantity.strip(),
                         "unit": unit.strip()
                     }
 
-            # Get preparation steps from the form and combine them into a single string, separated by pipes
+            # Haal geselecteerde allergenen op uit de dropdown
+            selected_allergens = request.form.getlist('allergiesrec[]')
+            allergens_string = ', '.join(selected_allergens)  # Opslaan als een door komma's gescheiden string
+
+            # Haal bereidingsstappen op en combineer ze in één string, gescheiden door pipes
             preparation_steps = request.form.getlist('preparation_steps[]')
             preparation_instructions = '|'.join([step.strip() for step in preparation_steps if step.strip()])
 
-            # Fetch the chef's name from the User model based on the email in the session
+            # Haal de naam van de chef op
             chef = User.query.filter_by(email=session['email']).first()
             chef_name = chef.name if chef else None
 
-            # Create a new recipe object
+            # Maak een nieuw receptobject
             new_recipe = Recipe(
                 recipename=form.recipename.data,
                 chef_email=session['email'],
-                chef_name=chef_name,  # Automatically filled chef's name from the database
+                chef_name=chef_name,  # Naam van de chef automatisch ophalen
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
-                ingredients=ingredient_dict,  # Store ingredients as a dictionary
-                allergiesrec=form.allergiesrec.data,
+                ingredients=ingredient_dict,
+                allergiesrec=allergens_string,  # Opslaan als string
                 image=relative_path,
-                origin=form.origin.data,  # Added origin field
-                category=form.category.data,  # Added category field
-                preparation=preparation_instructions  # Store preparation as one long string, separated by pipes
+                origin=form.origin.data,  # Herkomstveld toevoegen
+                category=form.category.data,  # Categorieveld toevoegen
+                preparation=preparation_instructions  # Bereidingswijze als een lange string
             )
 
-            # Add to the database and save
+            # Voeg toe aan de database en sla op
             db.session.add(new_recipe)
             db.session.commit()
             flash('Recipe added successfully!', 'success')
             return redirect(url_for('main.my_uploads'))
 
         except Exception as e:
-            # Rollback the database changes if an error occurs
+            # Rol de wijzigingen terug bij een fout
             db.session.rollback()
             flash(f"Error saving recipe: {e}", 'danger')
             print("Error:", str(e))
 
-    # Render the template and pass the ingredient dictionary
-    return render_template('add_recipe.html', form=form, ingredienten=ingredienten, allergenen=allergenen)
-
+    # Render de template en geef de allergenen, ingrediënten, en formulier door
+    return render_template(
+        'add_recipe.html',
+        form=form,
+        ingredienten=ingredienten,
+        allergens=allergens  # Geef allergenen door aan de template
+    )
 
 
 @main.route('/my_recipes')
