@@ -34,11 +34,9 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                    </li>
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a></li>
                     <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                    </li>
+                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -74,20 +72,61 @@
             {{ form.price(class="form-control", value=recipe.price) }}
         </div>
 
+        <!-- Origin -->
+        <div class="mb-3">
+            {{ form.origin.label(class="form-label") }}
+            {{ form.origin(class="form-control", value=recipe.origin) }}
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control", value=recipe.category) }}
+        </div>
+
+        <!-- Preparation Instructions -->
+        <div class="mb-3">
+            <label class="form-label">Preparation Instructions</label>
+            <div id="preparation-steps">
+                {% if recipe.preparation %}
+                    {% for step in recipe.preparation.split('|') %}
+                        <div class="row mb-2 step-row">
+                            <div class="col">
+                                <textarea name="preparation_steps[]" class="form-control" placeholder="Step" required>{{ step }}</textarea>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="row mb-2 step-row">
+                        <div class="col">
+                            <textarea name="preparation_steps[]" class="form-control" placeholder="Step 1" required></textarea>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <button type="button" id="add-step" class="btn btn-primary mt-2">Add Step</button>
+        </div>
+
         <!-- Ingredients -->
         <div class="mb-3">
             <label class="form-label">Ingredients and Quantities</label>
             <div id="ingredient-fields">
-                {% for item in ingredients %}
+                {% for ingredient, data in ingredients.items() %}
                     <div class="row mb-2">
                         <div class="col">
-                            <input type="text" name="ingredients[]" class="form-control" value="{{ item['ingredient'] }}" placeholder="Ingredient">
+                            <input type="text" name="ingredients[]" class="form-control" value="{{ ingredient }}" placeholder="Ingredient">
                         </div>
                         <div class="col">
-                            <input type="text" name="quantities[]" class="form-control" value="{{ item['quantity'] }}" placeholder="Quantity">
+                            <input type="text" name="quantities[]" class="form-control" value="{{ data['quantity'] }}" placeholder="Quantity">
                         </div>
                         <div class="col">
-                            <input type="text" name="units[]" class="form-control" value="{{ item['unit'] }}" placeholder="Unit">
+                            <input type="text" name="units[]" class="form-control" value="{{ data['unit'] }}" placeholder="Unit">
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
@@ -118,33 +157,65 @@
     </form>
 </div>
 
-<!-- JavaScript for dynamic ingredient fields -->
 <script>
-    document.getElementById('add-ingredient').addEventListener('click', function() {
-        const container = document.getElementById('ingredient-fields');
-        const newField = document.createElement('div');
-        newField.classList.add('row', 'mb-2');
-        newField.innerHTML = `
-            <div class="col">
-                <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
-            </div>
-            <div class="col">
-                <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
-            </div>
-            <div class="col">
-                <input type="text" name="units[]" class="form-control" placeholder="Unit">
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-            </div>
-        `;
-        container.appendChild(newField);
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const ingredientContainer = document.getElementById('ingredient-fields');
+        const addIngredientButton = document.getElementById('add-ingredient');
+        const preparationContainer = document.getElementById('preparation-steps');
+        const addStepButton = document.getElementById('add-step');
+        let stepCount = 2;
 
-    document.getElementById('ingredient-fields').addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('remove-ingredient')) {
-            e.target.closest('.row').remove();
-        }
+        // Add new ingredient row
+        addIngredientButton.addEventListener('click', function () {
+            const newField = document.createElement('div');
+            newField.classList.add('row', 'mb-2');
+            newField.innerHTML = `
+                <div class="col">
+                    <input type="text" name="ingredients[]" class="form-control" placeholder="Ingredient">
+                </div>
+                <div class="col">
+                    <input type="text" name="quantities[]" class="form-control" placeholder="Quantity">
+                </div>
+                <div class="col">
+                    <input type="text" name="units[]" class="form-control" placeholder="Unit">
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                </div>
+            `;
+            ingredientContainer.appendChild(newField);
+        });
+
+        // Remove ingredient row
+        ingredientContainer.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('remove-ingredient')) {
+                e.target.closest('.row').remove();
+            }
+        });
+
+        // Add new preparation step
+        addStepButton.addEventListener('click', function () {
+            const newStepField = document.createElement('div');
+            newStepField.classList.add('row', 'mb-2');
+            newStepField.innerHTML = `
+                <div class="col">
+                    <textarea name="preparation_steps[]" class="form-control" placeholder="Step ${stepCount}" required></textarea>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger remove-step">Remove Step</button>
+                </div>
+            `;
+            preparationContainer.appendChild(newStepField);
+            stepCount++;
+        });
+
+        // Remove preparation step
+        preparationContainer.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('remove-step')) {
+                e.target.closest('.row').remove();
+            }
+        });
     });
 </script>
 {% endblock %}
+

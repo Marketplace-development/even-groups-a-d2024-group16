@@ -498,15 +498,17 @@ def add_review(recipename):
 
     return render_template('add_review.html', recipe=recipe, transaction=transaction)
 
+
 @main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])
 def edit_recipe(recipename):
-    # Zoek het recept op
+    # Zoek het recept op in de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
+    
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_uploads'))
 
-    # Ingrediënten ophalen uit de database (ze zijn nu een dictionary)
+    # Ingrediënten ophalen uit de database (ze zijn een dictionary)
     ingredients = recipe.ingredients if recipe.ingredients else {}
 
     # Maak formulier met bestaande gegevens
@@ -520,11 +522,17 @@ def edit_recipe(recipename):
             recipe.duration = form.duration.data
             recipe.price = form.price.data
             recipe.allergiesrec = form.allergiesrec.data
+            recipe.origin = form.origin.data
+            recipe.category = form.category.data
+            
+            # Preparation steps ophalen en combineren met een pipe
+            preparation_steps = request.form.getlist('preparation_steps[]')
+            recipe.preparation = '|'.join([step.strip() for step in preparation_steps if step.strip()])
 
             # Werk ingrediënten bij
             ingredient_names = request.form.getlist('ingredients[]')
             ingredient_quantities = request.form.getlist('quantities[]')
-            ingredient_units = request.form.getlist('units[]')  # Haal de eenheden op
+            ingredient_units = request.form.getlist('units[]')
 
             updated_ingredients = {}
             for name, quantity, unit in zip(ingredient_names, ingredient_quantities, ingredient_units):
@@ -563,6 +571,7 @@ def edit_recipe(recipename):
         recipe=recipe,
         ingredients=ingredients
     )
+
 
 
 
