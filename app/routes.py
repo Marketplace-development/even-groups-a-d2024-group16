@@ -113,21 +113,21 @@ def dashboard():
             .scalar()
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
-        
-        # Ingrediënten verwerken (dit is waar je de code invoegt)
+
+        # Ingrediënten verwerken (direct werken met de dictionary)
         ingredients_list = []
         if recipe.ingredients:
             try:
-                ingredients = json.loads(recipe.ingredients)  # Parse JSON string
-                for item in ingredients:
+                # Loop door de ingrediënten dictionary (geen JSON decoding nodig)
+                for ingredient, details in recipe.ingredients.items():
                     # Voeg de volledige ingredient data toe, inclusief hoeveelheid en eenheid
                     ingredients_list.append({
-                        'quantity': item['quantity'],
-                        'unit': item['unit'],
-                        'ingredient': item['ingredient']
+                        'quantity': details['quantity'],
+                        'unit': details.get('unit', ''),  # Voeg unit toe, als die bestaat
+                        'ingredient': ingredient
                     })
-            except json.JSONDecodeError:
-                flash(f"Error decoding ingredients for recipe {recipe.recipename}.", "warning")
+            except KeyError:
+                flash(f"Error processing ingredients for recipe {recipe.recipename}.", "warning")
 
         # Voeg alle data toe aan `recipe_data`
         recipe_data.append({
@@ -143,6 +143,7 @@ def dashboard():
         recipe_data=recipe_data,
         role=session.get('role')
     )
+
 
 
 @main.route('/logout', methods=['GET'])
@@ -194,16 +195,14 @@ def add_recipe():
             quantities = request.form.getlist('quantities[]')
             units = request.form.getlist('units[]')
 
-            # Build the ingredient list in JSON format
-            ingredient_list = [
-                {
-                    "ingredient": ingredient.strip(),
-                    "quantity": quantity.strip(),
-                    "unit": unit.strip()
-                }
-                for ingredient, quantity, unit in zip(ingredients, quantities, units)
-                if ingredient and quantity and unit
-            ]
+            # Build a single dictionary for the ingredients
+            ingredient_dict = {}
+            for ingredient, quantity, unit in zip(ingredients, quantities, units):
+                if ingredient and quantity and unit:  # Ensure all fields are filled
+                    ingredient_dict[ingredient.strip()] = {
+                        "quantity": quantity.strip(),
+                        "unit": unit.strip()
+                    }
 
             # Get preparation steps from the form and combine them into a single string, separated by pipes
             preparation_steps = request.form.getlist('preparation_steps[]')
@@ -211,10 +210,7 @@ def add_recipe():
 
             # Fetch the chef's name from the User model based on the email in the session
             chef = User.query.filter_by(email=session['email']).first()
-            if chef:
-                chef_name = chef.name  # Get the chef's name from the database
-            else:
-                chef_name = None  # In case no chef is found (you can handle this case as needed)
+            chef_name = chef.name if chef else None
 
             # Create a new recipe object
             new_recipe = Recipe(
@@ -224,7 +220,7 @@ def add_recipe():
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
-                ingredients=ingredient_list,  # Storing ingredients as JSONB
+                ingredients=ingredient_dict,  # Store ingredients as a dictionary
                 allergiesrec=form.allergiesrec.data,
                 image=relative_path,
                 origin=form.origin.data,  # Added origin field
@@ -266,18 +262,17 @@ def my_recipes():
     for transaction in transactions:
         recipe = Recipe.query.filter_by(recipename=transaction.recipename, chef_email=transaction.chef_email).first()
         if recipe:
-            # Parse JSON ingredients
+            # Ingrediënten verwerken (uit de dictionary in plaats van JSON)
             ingredients_list = []
             if recipe.ingredients:
                 try:
-                    ingredients = json.loads(recipe.ingredients)
-                    for item in ingredients:
-                        # Voeg de maateenheid toe bij de hoeveelheid en ingrediënt
-                        quantity = item['quantity']
-                        ingredient = item['ingredient']
-                        unit = item.get('unit', '')  # Zorg ervoor dat de maateenheid wordt opgehaald (default is een lege string)
+                    # Loop door de ingrediënten dictionary
+                    for ingredient, details in recipe.ingredients.items():
+                        # Voeg de hoeveelheid, maateenheid en ingrediënt toe aan de lijst
+                        quantity = details['quantity']
+                        unit = details.get('unit', '')  # Als er geen eenheid is, gebruik een lege string
                         ingredients_list.append(f"{quantity} {unit} of {ingredient}")
-                except (json.JSONDecodeError, KeyError):
+                except KeyError:
                     ingredients_list = ["Invalid ingredient format"]
 
             chef = User.query.filter_by(email=recipe.chef_email).first()
@@ -287,7 +282,7 @@ def my_recipes():
                 "description": recipe.description,
                 "duration": recipe.duration,
                 "price": recipe.price,
-                "ingredients_list": ingredients_list,  # Parsed ingredients list
+                "ingredients_list": ingredients_list,  # Geprocessed ingredientenlijst
                 "allergiesrec": recipe.allergiesrec,
                 "image": recipe.image
             })
@@ -295,8 +290,10 @@ def my_recipes():
     return render_template('my_recipes.html', recipes=purchased_recipes)
 
 
+
 @main.route('/recipe/<recipename>', methods=['GET'])
 def recipe_detail(recipename):
+    # Haal het recept op uit de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
@@ -305,30 +302,30 @@ def recipe_detail(recipename):
     user_email = session.get('email')
     user_review = Review.query.filter_by(recipename=recipename, consumer_email=user_email).first()
 
-    # Parse JSON ingredients for detail view
+    # Ingrediënten verwerken uit dictionary voor detailweergave
     ingredients_list = []
     if recipe.ingredients:
         try:
-            ingredients = json.loads(recipe.ingredients)
-            for item in ingredients:
-                # Zorg ervoor dat we de eenheid en de hoeveelheden apart ophalen
-                quantity = item.get('quantity', '')
-                unit = item.get('unit', '')  # Hier voegen we de eenheid toe
-                ingredient = item.get('ingredient', '')
+            # Loop door de ingrediënten dictionary
+            for ingredient, details in recipe.ingredients.items():
+                # Haal de hoeveelheid, maateenheid en het ingrediënt op
+                quantity = details['quantity']
+                unit = details.get('unit', '')  # Als er geen eenheid is, gebruik een lege string
                 ingredients_list.append({
                     'quantity': quantity,
                     'unit': unit,
                     'ingredient': ingredient
                 })
-        except (json.JSONDecodeError, KeyError):
+        except KeyError:
             ingredients_list = [{"quantity": "", "unit": "", "ingredient": "Invalid ingredient format"}]
 
     return render_template(
         'recipe_detail.html',
         recipe=recipe,
         user_review=user_review,
-        ingredients_list=ingredients_list  # Zorg ervoor dat we een lijst van dictionaries sturen
+        ingredients_list=ingredients_list  # De lijst van ingredienten als dictionaries
     )
+
 
 
 
@@ -347,12 +344,13 @@ def my_uploads():
         ingredients_list = []
         if recipe.ingredients:
             try:
-                # Parse de JSON-string voor ingrediënten
-                ingredients = json.loads(recipe.ingredients)
-                for item in ingredients:
+                # De ingrediënten zijn al een dictionary, dus we hoeven ze niet te parsen
+                for ingredient, details in recipe.ingredients.items():
                     # Voeg de hoeveelheid, maateenheid en ingrediënt toe aan de lijst
-                    ingredients_list.append(f"{item['quantity']} {item.get('unit', '')} of {item['ingredient']}")
-            except (json.JSONDecodeError, KeyError):
+                    quantity = details.get("quantity", "")
+                    unit = details.get("unit", "")
+                    ingredients_list.append(f"{quantity} {unit} of {ingredient}")
+            except KeyError:
                 # Voeg een standaardbericht toe als het format niet klopt
                 ingredients_list = ["Invalid ingredient format"]
 
@@ -375,6 +373,7 @@ def my_uploads():
 
 
 
+
 @main.route('/buy_recipe/<recipename>', methods=['GET', 'POST'])
 def buy_recipe(recipename):
     # Haal het recept op uit de database
@@ -389,19 +388,19 @@ def buy_recipe(recipename):
         flash('You need to be logged in to buy a recipe.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Verwerk ingrediënten uit JSON
+    # Verwerk ingrediënten (nu uit de opgeslagen dictionary, niet meer JSON)
     ingredients_list = []
     if recipe.ingredients:
         try:
-            ingredients = json.loads(recipe.ingredients)  # Parse JSON string
-            for item in ingredients:
+            # Loop door de ingrediënten dictionary
+            for ingredient, details in recipe.ingredients.items():
                 # Voeg zowel de hoeveelheid, maateenheid als ingrediënt toe aan de lijst
                 ingredients_list.append({
-                    'quantity': item['quantity'],
-                    'unit': item.get('unit', ''),  # Voeg een lege string toe als er geen unit is
-                    'ingredient': item['ingredient']
+                    'quantity': details['quantity'],
+                    'unit': details.get('unit', ''),  # Voeg een lege string toe als er geen unit is
+                    'ingredient': ingredient
                 })
-        except (json.JSONDecodeError, KeyError):
+        except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
     # Verwerk aankoop bij POST-verzoek
@@ -439,6 +438,7 @@ def buy_recipe(recipename):
         recipe=recipe,
         ingredients_list=ingredients_list
     )
+
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
@@ -506,13 +506,8 @@ def edit_recipe(recipename):
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_uploads'))
 
-    # Decodeer ingrediënten uit JSON
-    ingredients = []
-    if recipe.ingredients:
-        try:
-            ingredients = json.loads(recipe.ingredients)
-        except json.JSONDecodeError:
-            flash('Error loading ingredients.', 'danger')
+    # Ingrediënten ophalen uit de database (ze zijn nu een dictionary)
+    ingredients = recipe.ingredients if recipe.ingredients else {}
 
     # Maak formulier met bestaande gegevens
     form = RecipeForm(obj=recipe)
@@ -531,12 +526,16 @@ def edit_recipe(recipename):
             ingredient_quantities = request.form.getlist('quantities[]')
             ingredient_units = request.form.getlist('units[]')  # Haal de eenheden op
 
-            updated_ingredients = [
-                {"ingredient": name.strip(), "quantity": quantity.strip(), "unit": unit.strip()}
-                for name, quantity, unit in zip(ingredient_names, ingredient_quantities, ingredient_units)
-                if name and quantity and unit
-            ]
-            recipe.ingredients = json.dumps(updated_ingredients)
+            updated_ingredients = {}
+            for name, quantity, unit in zip(ingredient_names, ingredient_quantities, ingredient_units):
+                if name and quantity and unit:
+                    updated_ingredients[name.strip()] = {
+                        "quantity": quantity.strip(),
+                        "unit": unit.strip()
+                    }
+
+            # Werk de ingrediënten bij in de database
+            recipe.ingredients = updated_ingredients
 
             # Werk afbeelding bij indien gewijzigd
             if form.image.data:
@@ -564,6 +563,7 @@ def edit_recipe(recipename):
         recipe=recipe,
         ingredients=ingredients
     )
+
 
 
 @main.route('/edit_profile', methods=['GET', 'POST'])
@@ -623,19 +623,19 @@ def recipe_reviews(recipename):
     )
     avg_rating = round(avg_rating, 1) if avg_rating else None
 
-    # Verwerk de ingrediënten voor weergave
+    # Verwerk de ingrediënten voor weergave (nu direct als dictionary)
     ingredients_list = []
     if recipe.ingredients:
         try:
-            ingredients = json.loads(recipe.ingredients)
-            for item in ingredients:
+            # Loop door de ingrediënten dictionary (geen JSON decoding nodig)
+            for ingredient, details in recipe.ingredients.items():
                 # Voeg de quantity, unit en ingredient toe aan de lijst
                 ingredients_list.append({
-                    'quantity': item['quantity'],
-                    'unit': item.get('unit', ''),  # Voeg unit toe, als die bestaat
-                    'ingredient': item['ingredient']
+                    'quantity': details['quantity'],
+                    'unit': details.get('unit', ''),  # Voeg unit toe, als die bestaat
+                    'ingredient': ingredient
                 })
-        except (json.JSONDecodeError, KeyError):
+        except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
     # Render de recipe_reviews pagina
