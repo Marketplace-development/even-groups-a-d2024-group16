@@ -67,7 +67,9 @@
                         {% for category, items in ingredienten.items() %}
                             <optgroup label="{{ category }}">
                                 {% for ingredient in items %}
-                                    <option value="{{ ingredient }}">{{ ingredient }}</option>
+                                    <option value="{{ ingredient }}" {% if ingredient in request.args.getlist('ingredients') %}selected{% endif %}>
+                                        {{ ingredient }}
+                                    </option>
                                 {% endfor %}
                             </optgroup>
                         {% endfor %}
@@ -111,8 +113,10 @@
                 <div class="mb-3">
                     <label for="allergies" class="form-label">Allergies</label>
                     <select name="allergies[]" id="allergies" class="form-control" multiple>
-                        {% for allergy in allergens %}
-                            <option value="{{ allergy }}">{{ allergy }}</option>
+                        {% for allergen in allergens %}
+                            <option value="{{ allergen }}" {% if allergen in request.args.getlist('allergies') %}selected{% endif %}>
+                                {{ allergen }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -133,6 +137,7 @@
                                     <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
                                 {% endif %}
                                 <div class="card-body text-center">
+                                    <h5 class="card-title">{{ data.recipe.recipename }}</h5>
                                     <p class="text-muted">by {{ data.recipe.chef_name }}</p>
                                 </div>
                             </div>

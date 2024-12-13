@@ -106,30 +106,32 @@ def dashboard():
     origins = get_origins()
     allergens = get_allergens()
 
-    # Filters ophalen
+    # Haal filters op
     filters = {
         'ingredients': request.args.getlist('ingredients'),
+        'allergies': request.args.getlist('allergies'),
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
         'price': request.args.get('price'),
         'category': request.args.get('category'),
         'origin': request.args.get('origin'),
-        'allergies': request.args.getlist('allergies')
     }
+
+    # Debugging filters
+    print("Filters applied:", filters)
 
     # Query starten
     query = Recipe.query
 
-    # Filters toepassen, behalve min_rating
+    # Filters toepassen
     query = apply_filters(query, filters)
 
     # Gefilterde recepten ophalen
     recipes = query.all()
 
-    # Verwerk recepten en voeg avg_rating toe
+    # Verwerk recepten en voeg extra gegevens toe
     recipe_data = []
     for recipe in recipes:
-        # Bereken gemiddelde beoordeling
         avg_rating = (
             db.session.query(db.func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
@@ -137,7 +139,7 @@ def dashboard():
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
-        # Ingrediënten verwerken
+        # Ingrediëntenlijst verwerken
         ingredients_list = []
         if recipe.ingredients:
             for ingredient, details in recipe.ingredients.items():
@@ -153,7 +155,7 @@ def dashboard():
             'ingredients_list': ingredients_list
         })
 
-    # Filter op min_rating na het berekenen van avg_rating
+    # Min-rating filteren
     if filters.get('min_rating'):
         min_rating = float(filters['min_rating'])
         recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
@@ -167,8 +169,6 @@ def dashboard():
         allergens=allergens,
         ingredienten=ingredienten
     )
-
-
 
 
 @main.route('/logout', methods=['GET'])
@@ -543,35 +543,38 @@ def add_review(recipename):
 
 @main.route('/edit_recipe/<recipename>', methods=['GET', 'POST'])
 def edit_recipe(recipename):
-    # Zoek het recept op in de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_uploads'))
 
-    # Ingrediënten ophalen uit de database (ze zijn een dictionary)
     ingredients = recipe.ingredients if recipe.ingredients else {}
-
-    # Maak formulier met bestaande gegevens
     form = RecipeForm(obj=recipe)
+
+    # Haal dropdownwaarden op
+    categories = get_categories()
+    origins = get_origins()
+    allergens = get_allergens()
 
     if form.validate_on_submit():
         try:
-            # Werk receptgegevens bij
             recipe.recipename = form.recipename.data
             recipe.description = form.description.data
             recipe.duration = form.duration.data
             recipe.price = form.price.data
-            recipe.allergiesrec = form.allergiesrec.data
             recipe.origin = form.origin.data
             recipe.category = form.category.data
-            
-            # Preparation steps ophalen en combineren met een pipe
+
+            # Update allergies
+            selected_allergens = request.form.getlist('allergiesrec[]')
+            recipe.allergiesrec = ', '.join(selected_allergens)
+
+            # Update preparation steps
             preparation_steps = request.form.getlist('preparation_steps[]')
             recipe.preparation = '|'.join([step.strip() for step in preparation_steps if step.strip()])
 
-            # Werk ingrediënten bij
+            # Update ingredients
             ingredient_names = request.form.getlist('ingredients[]')
             ingredient_quantities = request.form.getlist('quantities[]')
             ingredient_units = request.form.getlist('units[]')
@@ -583,11 +586,9 @@ def edit_recipe(recipename):
                         "quantity": quantity.strip(),
                         "unit": unit.strip()
                     }
-
-            # Werk de ingrediënten bij in de database
             recipe.ingredients = updated_ingredients
 
-            # Werk afbeelding bij indien gewijzigd
+            # Update image
             if form.image.data:
                 upload_folder = os.path.join(current_app.root_path, 'static/images')
                 os.makedirs(upload_folder, exist_ok=True)
@@ -598,7 +599,6 @@ def edit_recipe(recipename):
                 image_file.save(file_path)
                 recipe.image = f'images/{filename}'
 
-            # Sla wijzigingen op
             db.session.commit()
             flash('Recipe updated successfully!', 'success')
             return redirect(url_for('main.my_uploads'))
@@ -611,9 +611,11 @@ def edit_recipe(recipename):
         'edit_recipe.html',
         form=form,
         recipe=recipe,
-        ingredients=ingredients
+        ingredients=ingredients,
+        categories=categories,
+        origins=origins,
+        allergens=allergens
     )
-
 
 
 

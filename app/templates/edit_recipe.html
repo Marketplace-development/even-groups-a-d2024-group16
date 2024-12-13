@@ -72,27 +72,49 @@
             {{ form.price(class="form-control", value=recipe.price) }}
         </div>
 
-        <!-- Origin -->
+        <!-- Origin Dropdown -->
         <div class="mb-3">
-            {{ form.origin.label(class="form-label") }}
-            {{ form.origin(class="form-control", value=recipe.origin) }}
+            <label for="origin" class="form-label">Origin</label>
+            <select name="origin" id="origin" class="form-control">
+                <option value="">Select an Origin</option>
+                {% for origin in origins %}
+                    <option value="{{ origin }}" {% if recipe.origin == origin %}selected{% endif %}>{{ origin }}</option>
+                {% endfor %}
+            </select>
         </div>
 
-        <!-- Category -->
+        <!-- Category Dropdown -->
         <div class="mb-3">
-            {{ form.category.label(class="form-label") }}
-            {{ form.category(class="form-control", value=recipe.category) }}
+            <label for="category" class="form-label">Category</label>
+            <select name="category" id="category" class="form-control">
+                <option value="">Select a Category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}" {% if recipe.category == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Allergies Multi-select -->
+        <div class="mb-3">
+            <label for="allergies" class="form-label">Allergies</label>
+            <select name="allergiesrec[]" id="allergies" class="form-control" multiple>
+                {% for allergen in allergens %}
+                    <option value="{{ allergen }}" {% if allergen in recipe.allergiesrec.split(', ') %}selected{% endif %}>
+                        {{ allergen }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <!-- Preparation Instructions -->
         <div class="mb-3">
-            <label class="form-label">Preparation Instructions</label>
+            <label class="form-label">Preparation Steps</label>
             <div id="preparation-steps">
                 {% if recipe.preparation %}
                     {% for step in recipe.preparation.split('|') %}
                         <div class="row mb-2 step-row">
                             <div class="col">
-                                <textarea name="preparation_steps[]" class="form-control" placeholder="Step" required>{{ step }}</textarea>
+                                <textarea name="preparation_steps[]" class="form-control" placeholder="Step">{{ step }}</textarea>
                             </div>
                             <div class="col-auto">
                                 <button type="button" class="btn btn-danger remove-step">Remove Step</button>
@@ -102,7 +124,7 @@
                 {% else %}
                     <div class="row mb-2 step-row">
                         <div class="col">
-                            <textarea name="preparation_steps[]" class="form-control" placeholder="Step 1" required></textarea>
+                            <textarea name="preparation_steps[]" class="form-control" placeholder="Step 1"></textarea>
                         </div>
                         <div class="col-auto">
                             <button type="button" class="btn btn-danger remove-step">Remove Step</button>
@@ -113,7 +135,7 @@
             <button type="button" id="add-step" class="btn btn-primary mt-2">Add Step</button>
         </div>
 
-        <!-- Ingredients -->
+        <!-- Ingredients Section -->
         <div class="mb-3">
             <label class="form-label">Ingredients and Quantities</label>
             <div id="ingredient-fields">
@@ -137,12 +159,6 @@
             <button type="button" id="add-ingredient" class="btn btn-primary">Add Ingredient</button>
         </div>
 
-        <!-- Allergies -->
-        <div class="mb-3">
-            {{ form.allergiesrec.label(class="form-label") }}
-            {{ form.allergiesrec(class="form-control", value=recipe.allergiesrec) }}
-        </div>
-
         <!-- Image Upload -->
         <div class="mb-3">
             {{ form.image.label(class="form-label") }}
@@ -156,6 +172,7 @@
         <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
 </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
