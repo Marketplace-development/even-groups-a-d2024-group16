@@ -38,6 +38,7 @@
                         {% if session.get('role') == 'customer' %}
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_favorites') }}" style="border-radius: 5px;">My Favorites</a></li>
                         {% elif session.get('role') == 'chef' %}
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_uploads') }}" style="border-radius: 5px;">My Uploads</a></li>
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.add_recipe') }}" style="border-radius: 5px;">Add Recipe</a></li>
@@ -148,6 +149,17 @@
                 <div class="col-md-6">
                     <a href="{% if session.get('role') == 'customer' %}{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}{% elif session.get('role') == 'chef' %}{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}{% endif %}" class="text-decoration-none">
                         <div class="card shadow-sm h-100">
+                            <!-- Favorietenknop -->
+                            <form action="{{ url_for('main.toggle_favorite', recipename=data.recipe.recipename) }}" method="post" style="text-align: right;">
+                                <button type="submit" class="btn btn-light">
+                                    {% if data.recipe.recipename in user.favorites %}
+                                        <i class="fas fa-heart text-danger"></i>
+                                    {% else %}
+                                        <i class="far fa-heart text-secondary"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+
                             <!-- Recipe Image -->
                             {% if data.recipe.image %}
                                 <img src="{{ url_for('static', filename=data.recipe.image) }}" class="card-img-top" alt="{{ data.recipe.recipename }}">

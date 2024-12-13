@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}My Favorites{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">My Favorite Recipes</h1>
+    <div class="row">
+        {% for recipe in favorites %}
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ recipe.recipename }}</h5>
+                    <p class="text-muted">by {{ recipe.chef_name }}</p>
+                    <p class="text-success fw-bold">€{{ recipe.price }}</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center">You have no favorite recipes.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
