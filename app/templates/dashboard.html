@@ -176,8 +176,13 @@
                                 <div>
                                     {% for star in range(1, 6) %}
                                         {% if star <= data.avg_rating %}
+                                            <!-- Volle ster -->
                                             <i class="fas fa-star text-warning"></i>
+                                        {% elif star - 0.5 <= data.avg_rating %}
+                                            <!-- Halve ster -->
+                                            <i class="fas fa-star-half-alt text-warning"></i>
                                         {% else %}
+                                            <!-- Lege ster -->
                                             <i class="far fa-star text-warning"></i>
                                         {% endif %}
                                     {% endfor %}
