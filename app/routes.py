@@ -384,25 +384,25 @@ def my_uploads():
         return redirect(url_for('main.login'))
 
     chef_email = session['email']
-    uploads = Recipe.query.filter_by(chef_email=chef_email).all()  # Filter recepten van de chef
+    uploads = Recipe.query.filter_by(chef_email=chef_email).all()
 
-    # Verwerk de recepten en parse de ingrediënten
+    # Berekeningen
     uploads_data = []
+    total_revenue = 0
+    revenue_data = []
     for recipe in uploads:
+        # Parse ingrediënten
         ingredients_list = []
         if recipe.ingredients:
             try:
-                # De ingrediënten zijn al een dictionary, dus we hoeven ze niet te parsen
                 for ingredient, details in recipe.ingredients.items():
-                    # Voeg de hoeveelheid, maateenheid en ingrediënt toe aan de lijst
                     quantity = details.get("quantity", "")
                     unit = details.get("unit", "")
                     ingredients_list.append(f"{quantity} {unit} of {ingredient}")
             except KeyError:
-                # Voeg een standaardbericht toe als het format niet klopt
                 ingredients_list = ["Invalid ingredient format"]
 
-        # Bereken de gemiddelde beoordeling voor het recept
+        # Bereken gemiddelde beoordeling
         avg_rating = (
             db.session.query(db.func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
@@ -410,53 +410,80 @@ def my_uploads():
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
-        # Voeg de gegevens toe aan de lijst
+        # Bereken totale omzet per gerecht
+        total_recipe_revenue = (
+            db.session.query(db.func.sum(Transaction.price))
+            .filter(Transaction.recipename == recipe.recipename, Transaction.chef_email == chef_email)
+            .scalar()
+        ) or 0
+        total_revenue += total_recipe_revenue
+
+        revenue_data.append({
+            'recipename': recipe.recipename,
+            'total_revenue': total_recipe_revenue
+        })
+
         uploads_data.append({
             'recipe': recipe,
             'ingredients_list': ingredients_list,
-            'avg_rating': avg_rating
+            'avg_rating': avg_rating,
+            'allergies': recipe.allergiesrec  # Voeg allergies toe
         })
 
-    return render_template('my_uploads.html', uploads_data=uploads_data)  # uploads_data doorgeven aan sjabloon
+    # Sorteer de recepten op basis van omzet en haal de top 5 bestverkochte recepten
+    revenue_data = sorted(revenue_data, key=lambda x: x['total_revenue'], reverse=True)[:5]
 
+    # Bereken overall average rating
+    overall_avg_rating = (
+        db.session.query(db.func.avg(Review.rating))
+        .filter(Review.chef_email == chef_email)
+        .scalar()
+    )
+    overall_avg_rating = round(overall_avg_rating, 1) if overall_avg_rating else 0
+
+    return render_template('my_uploads.html',
+                           uploads_data=uploads_data,
+                           overall_avg_rating=overall_avg_rating,
+                           total_revenue=total_revenue,
+                           revenue_data=revenue_data)
 
 
 
 @main.route('/buy_recipe/<recipename>', methods=['GET', 'POST'])
 def buy_recipe(recipename):
-    # Haal het recept op uit de database
+    # Fetch recipe from the database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
 
     if recipe is None:
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    # Check of de gebruiker is ingelogd
+    # Check if user is logged in
     if 'email' not in session:
         flash('You need to be logged in to buy a recipe.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Verwerk ingrediënten (nu uit de opgeslagen dictionary, niet meer JSON)
+    # Process ingredients
     ingredients_list = []
     if recipe.ingredients:
         try:
-            # Loop door de ingrediënten dictionary
             for ingredient, details in recipe.ingredients.items():
-                # Voeg zowel de hoeveelheid, maateenheid als ingrediënt toe aan de lijst
                 ingredients_list.append({
                     'quantity': details['quantity'],
-                    'unit': details.get('unit', ''),  # Voeg een lege string toe als er geen unit is
+                    'unit': details.get('unit', ''),
                     'ingredient': ingredient
                 })
         except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
-    # Verwerk aankoop bij POST-verzoek
+    # Fetch reviews for the recipe
+    reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
+
+    # Handle POST request for purchase
     if request.method == 'POST':
         user_email = session['email']
         chef_email = recipe.chef_email
 
-        # Controleer of de gebruiker dit recept al gekocht heeft
         existing_transaction = Transaction.query.filter_by(
             consumer_email=user_email,
             recipename=recipename
@@ -466,7 +493,6 @@ def buy_recipe(recipename):
             flash('You have already purchased this recipe.', 'warning')
             return redirect(url_for('main.dashboard'))
 
-        # Maak de transactie aan
         transaction = Transaction(
             transactiondate=datetime.now(),
             price=recipe.price,
@@ -480,13 +506,12 @@ def buy_recipe(recipename):
         flash('Recipe purchased successfully!', 'success')
         return redirect(url_for('main.my_recipes'))
 
-    # Render de buy_recipe pagina bij GET-verzoek
     return render_template(
         'buy_recipe.html',
         recipe=recipe,
-        ingredients_list=ingredients_list
+        ingredients_list=ingredients_list,
+        reviews=reviews
     )
-
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])

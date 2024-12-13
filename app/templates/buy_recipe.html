@@ -1,48 +1,55 @@
 {% extends 'base.html' %}
 
-{% block title %}Buy {{ recipe.recipename }}{% endblock %}
-
 {% block content %}
+
+<!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
+        <!-- Logo -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
+
+        <!-- Toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+        <!-- Navigatie-inhoud -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                <!-- Menu knop -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Menu
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+
+                    <!-- Dropdown menu -->
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
                         {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_uploads') }}" style="border-radius: 5px;">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.add_recipe') }}" style="border-radius: 5px;">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
                         {% endif %}
+                        <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
                     </ul>
                 </li>
-                {% if session.get('email') %}
-                    <li class="nav-item">
-                        <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a></li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a></li>
-                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
-    
+
+<!-- Pagina-inhoud -->
 <div class="container mt-5">
     <h1 class="text-center">Purchase {{ recipe.recipename }}</h1>
     <div class="recipe-detail">
@@ -55,6 +62,9 @@
         
         <h2>Details</h2>
         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+        <p><strong>Category:</strong> {{ recipe.category }}</p>
+        <p><strong>Origin:</strong> {{ recipe.origin }}</p>
+        <p><strong>Description:</strong> {{ recipe.description }}</p>
 
         <!-- Ingredients Table -->
         <h5><strong>Ingredients:</strong></h5>
@@ -83,5 +93,23 @@
         <button type="submit" class="btn btn-success">Confirm Purchase</button>
         <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
     </form>
+
+    <!-- Reviews Section -->
+    <div class="reviews mt-5">
+        <h3>Reviews</h3>
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
+                        <p><strong>Comment:</strong> {{ review.comment }}</p>
+                        <p><small><em>By: {{ review.consumer_email }} on {{ review.reviewdate.strftime('%Y-%m-%d') }}</em></small></p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No reviews available for this recipe yet.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

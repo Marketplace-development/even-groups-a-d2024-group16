@@ -7,7 +7,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,9 +46,26 @@
     
 <!-- Content -->
 <div class="container mt-5">
-    <h1 class="text-center">My Uploaded Recipes</h1>
+    <h1 class="text-center mb-4">My Uploaded Recipes</h1> 
 
-    <!-- Controleer of er recepten zijn geüpload door de chef -->
+    <!-- Layout voor de diagrammen naast elkaar -->
+    <div class="row mb-4">
+        <!-- Gemiddelde beoordeling (cirkeldiagram) -->
+        <div class="col-md-6 text-center">
+            <h5>Overall Average Rating</h5>
+            <canvas id="ratingChart" style="max-width: 250px; max-height: 250px; margin: 0 auto; margin-top: 20px;"></canvas>
+            <div id="ratingScore" style="font-size: 18px; font-weight: bold; margin-top: 10px;">{{ overall_avg_rating }}/5</div>
+        </div>
+
+        <!-- Totale omzet (staafdiagram) -->
+        <div class="col-md-6 text-center">
+            <h5>Total Revenue & Revenue by Recipe</h5>
+            <canvas id="revenueChart" width="400" height="250"></canvas>
+        </div>
+    </div>
+
+    <h2 class="text-center mb-4">Uploaded Recipes</h2>
+
     {% if uploads_data %}
         <div class="recipes-container">
             {% for upload in uploads_data %}
@@ -61,16 +78,7 @@
                     <div class="recipe-details">
                         <h3>{{ upload.recipe.recipename }}</h3>
                         <p><strong>Cooking Time:</strong> {{ upload.recipe.duration }} minutes</p>
-                        <p><strong>Ingredients:</strong></p>
-                        <ul>
-                            {% for ingredient in upload.ingredients_list %}
-                                <li>{{ ingredient }}</li>
-                            {% endfor %}
-                        </ul>
                         <p><strong>Price:</strong> €{{ upload.recipe.price }}</p>
-                        <p><strong>Allergies:</strong> {{ upload.recipe.allergiesrec }}</p>
-
-                        <!-- Average Rating -->
                         <p><strong>Average Rating:</strong>
                             {% if upload.avg_rating %}
                                 {{ upload.avg_rating }}/5
@@ -78,6 +86,15 @@
                                 No ratings yet.
                             {% endif %}
                         </p>
+
+                        <p><strong>Ingredients:</strong></p>
+                        <ul>
+                            {% for ingredient in upload.ingredients_list %}
+                                <li>{{ ingredient }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <p><strong>Allergies:</strong> {{ upload.recipe.allergiesrec }}</p>
 
                         <!-- View Reviews-knop toevoegen -->
                         <a href="{{ url_for('main.recipe_reviews', recipename=upload.recipe.recipename) }}" class="btn btn-warning mb-2">View Reviews</a>
@@ -92,4 +109,99 @@
         <p class="text-center">You haven't uploaded any recipes yet.</p>
     {% endif %}
 </div>
+
+<!-- Voeg Chart.js en de datalabels plugin toe -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    // Gemiddelde beoordeling (cirkeldiagram)
+    const ctx1 = document.getElementById('ratingChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Average Rating', 'Remaining to 5'],
+            datasets: [{
+                data: [{{ overall_avg_rating }}, {{ 5 - overall_avg_rating }}],
+                backgroundColor: ['#4CAF50', '#E0E0E0']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false // Geen legend weergeven
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    },
+                    formatter: (value, ctx) => {
+                        let percentage = ((value / 5) * 100).toFixed(1);
+                        return ctx.chart.data.labels[ctx.dataIndex] === 'Average Rating' ? `${percentage}%` : '';
+                    }
+                }
+            },
+            cutout: '0%', // Maak de cirkel vol
+        }
+    });
+
+    // Totale omzet (staafdiagram) voor top 5 bestverkochte recepten
+    const ctx2 = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: [{% for recipe in revenue_data %}'{{ recipe.recipename }}'{% if not loop.last %}, {% endif %}{% endfor %}, 'Total Revenue'],  // Voeg 'Total Revenue' als laatste label toe
+            datasets: [{
+                label: 'Revenue (€) by Recipe',
+                data: [{% for recipe in revenue_data %}{{ recipe.total_revenue }}{% if not loop.last %}, {% endif %}{% endfor %}, null],  // Plaats een null voor de totale omzet om hem op het einde te krijgen
+                backgroundColor: '#FFA726',
+                borderColor: '#FB8C00',
+                borderWidth: 1
+            },
+            {
+                label: 'Total Revenue',
+                data: [{% for recipe in revenue_data %}null{% if not loop.last %}, {% endif %}{% endfor %}, {{ total_revenue }}],  // Zet de totale omzet als laatste waarde in de array
+                backgroundColor: '#42A5F5',
+                borderColor: '#1E88E5',
+                borderWidth: 1,
+                borderRadius: 5,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        maxRotation: 0, // Voorkom dat de labels draaien
+                        minRotation: 0,  // Zorg ervoor dat de labels recht blijven staan
+                        autoSkip: false  // Zorg ervoor dat alle labels zichtbaar zijn
+                    }
+                }
+            }
+        }
+    });
+</script>
+
 {% endblock %}
+
+
+
