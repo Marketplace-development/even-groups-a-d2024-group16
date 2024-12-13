@@ -90,6 +90,8 @@ def login():
     return render_template('login.html', form=form)
 
     
+from app.sort import apply_sorting
+
 @main.route('/dashboard')
 def dashboard():
     if 'email' not in session:
@@ -117,14 +119,16 @@ def dashboard():
         'origin': request.args.get('origin'),
     }
 
-    # Debugging filters
-    print("Filters applied:", filters)
+    sort_by = request.args.get('sort_by', 'price_quality_ratio')  # Default sorteeroptie
 
     # Query starten
     query = Recipe.query
 
     # Filters toepassen
     query = apply_filters(query, filters)
+
+    # Sorteerfunctie toepassen
+    query = apply_sorting(query, sort_by)
 
     # Gefilterde recepten ophalen
     recipes = query.all()
@@ -167,8 +171,10 @@ def dashboard():
         categories=categories,
         origins=origins,
         allergens=allergens,
-        ingredienten=ingredienten
+        ingredienten=ingredienten,
+        sort_by=sort_by
     )
+
 
 
 @main.route('/logout', methods=['GET'])

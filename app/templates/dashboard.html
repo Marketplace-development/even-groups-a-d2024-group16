@@ -55,7 +55,24 @@
 <div class="container mt-5 pt-4">
     <h1 class="text-center">Welcome to Dishcovery!</h1>
     <p class="text-center">Explore recipes from amazing chefs and discover new flavours today.</p>
-
+        <!-- Sorteeropties -->
+        <form method="GET" action="{{ url_for('main.dashboard') }}" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="sort_by" class="form-label">Sort by</label>
+                    <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
+                        <option value="price_quality">Price-Quality Ratio (default)</option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>Price (Low to High)</option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>Price (High to Low)</option>
+                        <option value="rating_high_to_low" {% if request.args.get('sort_by') == 'rating_high_to_low' %}selected{% endif %}>Rating (High to Low)</option>
+                        <option value="prep_time_asc" {% if sort_by == 'prep_time_asc' %}selected{% endif %}>Preparation Time (Low to High)</option>
+                        <option value="prep_time_desc" {% if sort_by == 'prep_time_desc' %}selected{% endif %}>Preparation Time (High to Low)</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    
     <div class="row">
         <!-- Filters Sidebar -->
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
@@ -138,30 +155,40 @@
                                 <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
                             {% endif %}
                 
+                            <!-- Card Body -->
                             <div class="card-body text-center">
+                                <!-- Recipe Name -->
                                 <h5 class="card-title">{{ data.recipe.recipename }}</h5>
-                                <p class="text-muted mb-2">by {{ data.recipe.chef_name }}</p>
                 
-                                <!-- Average Rating with Stars -->
-                                <div>
-                                    {% if data.avg_rating %}
-                                        <span>
-                                            {% for i in range(1, 6) %}
-                                                <i class="fas fa-star {% if i <= data.avg_rating %}text-warning{% else %}text-muted{% endif %}"></i>
-                                            {% endfor %}
-                                            ({{ data.avg_rating }}/5)
-                                        </span>
-                                    {% else %}
-                                        <span class="text-muted">No ratings yet</span>
-                                    {% endif %}
+                                <!-- Chef Name -->
+                                <p class="text-muted">by {{ data.recipe.chef_name }}</p>
+                
+                                <!-- Duration -->
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <span>{{ data.recipe.duration }} min</span>
                                 </div>
                 
                                 <!-- Price -->
-                                <p class="text-primary mt-2"><strong>€{{ data.recipe.price }}</strong></p>
+                                <p class="text-success fw-bold">€{{ data.recipe.price }}</p>
+                
+                                <!-- Rating -->
+                                <div>
+                                    {% for star in range(1, 6) %}
+                                        {% if star <= data.avg_rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if not data.avg_rating %}
+                                        <span class="text-muted">(No rating)</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </a>
-                </div>
+                </div>                
                 
                 {% else %}
                     <p class="text-center">No recipes available at the moment.</p>
