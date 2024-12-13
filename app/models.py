@@ -17,8 +17,7 @@ class User(db.Model):
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
     is_chef = db.Column(db.Boolean, default=False, nullable=True)  # Update consistent met database
-    #attribuut voor favoriete recepten
-    favorites = db.Column(db.JSON, nullable=True, default=list)
+
     # Relaties
     recipes = db.relationship('Recipe', backref='chef', lazy=True)
     consumer_transactions = db.relationship(

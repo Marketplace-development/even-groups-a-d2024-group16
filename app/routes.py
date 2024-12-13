@@ -103,9 +103,6 @@ def dashboard():
         flash('User not found.', 'danger')
         return redirect(url_for('main.login'))
 
-    #zorg ervoor dat favorites altijd een lijst is
-    user.favorites = user.favorites or []  # Als favorites None is, zet het om naar een lege lijst
-    
     # Haal gegevens op voor dropdowns
     categories = get_categories()
     origins = get_origins()
@@ -708,49 +705,3 @@ def recipe_reviews(recipename):
         avg_rating=avg_rating,
         ingredients_list=ingredients_list
     )
-
-@main.route('/toggle_favorite/<recipename>', methods=['POST'])
-def toggle_favorite(recipename):
-    # Controleer of de gebruiker is ingelogd
-    if 'email' not in session:
-        flash('You need to log in to manage favorites.', 'danger')
-        return redirect(url_for('main.login'))
-
-    user = User.query.filter_by(email=session['email']).first()
-    if not user:
-        flash('User not found.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    # Controleer of het recept bestaat
-    recipe = Recipe.query.filter_by(recipename=recipename).first()
-    if not recipe:
-        flash('Recipe not found.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    # Voeg het recept toe aan favorieten of verwijder het
-    if not user.favorites:
-        user.favorites = []
-    if recipename in user.favorites:
-        user.favorites.remove(recipename)
-        flash(f'{recipename} removed from favorites.', 'info')
-    else:
-        user.favorites.append(recipename)
-        flash(f'{recipename} added to favorites!', 'success')
-
-    db.session.commit()
-    return redirect(url_for('main.dashboard'))
-
-@main.route('/my_favorites', methods=['GET'])
-def my_favorites():
-    if 'email' not in session:
-        flash('You need to log in to view favorites.', 'danger')
-        return redirect(url_for('main.login'))
-
-    user = User.query.filter_by(email=session['email']).first()
-    if not user or not user.favorites:
-        flash('No favorites found.', 'info')
-        return render_template('my_favorites.html', favorites=[])
-
-    # Haal recepten op die overeenkomen met favorieten
-    favorites = Recipe.query.filter(Recipe.recipename.in_(user.favorites)).all()
-    return render_template('my_favorites.html', favorites=favorites)
