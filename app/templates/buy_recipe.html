@@ -56,17 +56,24 @@
         <h2>Details</h2>
         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
 
-        <!-- Display Ingredients -->
-        <p><strong>Ingredients:</strong></p>
-        <ul style="list-style-position: inside;">
-            {% if ingredients_list %}
+        <!-- Ingredients Table -->
+        <h5><strong>Ingredients:</strong></h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity & Unit</th>
+                </tr>
+            </thead>
+            <tbody id="ingredientsTableBody">
                 {% for ingredient in ingredients_list %}
-                    <li>{{ ingredient.quantity }} {{ ingredient.unit }}{% if ingredient.unit %} of{% endif %} {{ ingredient.ingredient }}</li>
+                    <tr>
+                        <td>{{ ingredient.ingredient }}</td>
+                        <td>{{ ingredient.quantity }} {{ ingredient.unit }}</td>
+                    </tr>
                 {% endfor %}
-            {% else %}
-                <li>No ingredients provided</li>
-            {% endif %}
-        </ul>
+            </tbody>
+        </table>
 
         <p><strong>Price:</strong> €{{ recipe.price }}</p>
         <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
