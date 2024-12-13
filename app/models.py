@@ -47,7 +47,7 @@ class Recipe(db.Model):
     duration = db.Column(db.Integer, nullable=True)
     price = db.Column(NUMERIC(10, 2), nullable=True)  # Wijziging naar NUMERIC voor prijs met decimalen
     ingredients = db.Column(JSONB, nullable=True)  # Blijft als JSONB zoals het oorspronkelijk was
-    allergiesrec = db.Column(db.String, nullable=True)
+    allergiesrec = db.Column(db.Text, nullable=True)
     image = db.Column(db.Text, nullable=True)
     origin = db.Column(db.String, nullable=True)  # Toegevoegd voor herkomst
     category = db.Column(db.String, nullable=True)  # Toegevoegd voor categorie

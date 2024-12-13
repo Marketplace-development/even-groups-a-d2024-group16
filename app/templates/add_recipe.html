@@ -72,22 +72,44 @@
             {{ form.price(class="form-control") }}
         </div>
 
-        <!-- Category -->
+        <!-- Category Dropdown -->
         <div class="mb-3">
-            {{ form.category.label(class="form-label") }}
-            {{ form.category(class="form-control") }}
+            <label for="category" class="form-label">Category</label>
+            <select name="category" id="category" class="form-control">
+                <option value="">Select a Category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}" {% if form.category.data == category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
-        <!-- Allergies -->
+       <!-- Allergies Dropdown -->
         <div class="mb-3">
-            {{ form.allergiesrec.label(class="form-label") }}
-            {{ form.allergiesrec(class="form-control") }}
+            <label for="allergiesrec" class="form-label">Allergies</label>
+            <select name="allergiesrec[]" id="allergiesrec" class="form-control" multiple>
+                {% for allergen in allergens %}
+                    <option value="{{ allergen }}" {% if form.allergiesrec.data and allergen in form.allergiesrec.data %}selected{% endif %}>
+                        {{ allergen }}
+                    </option>
+                {% endfor %}
+            </select>
+            <small class="form-text text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple options.</small>
         </div>
+
     
-        <!-- Origin -->
+        <!-- Origin Dropdown -->
         <div class="mb-3">
-            {{ form.origin.label(class="form-label") }}
-            {{ form.origin(class="form-control") }}
+            <label for="origin" class="form-label">Origin</label>
+            <select name="origin" id="origin" class="form-control">
+                <option value="">Select an Origin</option>
+                {% for origin in origins %}
+                    <option value="{{ origin }}" {% if form.origin.data == origin %}selected{% endif %}>
+                        {{ origin }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
         <!-- Ingredients Section -->

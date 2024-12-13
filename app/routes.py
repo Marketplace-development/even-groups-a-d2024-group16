@@ -192,6 +192,7 @@ def list_recipes():
     return render_template('listing.html', recipes=recipes)
 
 
+
 @main.route('/add_recipe', methods=['GET', 'POST'])
 def add_recipe():
     if 'email' not in session or session.get('role') != 'chef':
@@ -200,8 +201,10 @@ def add_recipe():
 
     form = RecipeForm()
 
-    # Haal allergenen op uit de database of een statische lijst
+    # Gebruik directe import van allergenen, origins en categorieën
     allergens = get_allergens()
+    categories = get_categories()
+    origins = get_origins()
 
     if form.validate_on_submit():
         try:
@@ -276,9 +279,12 @@ def add_recipe():
     return render_template(
         'add_recipe.html',
         form=form,
-        ingredienten=ingredienten,
-        allergens=allergens  # Geef allergenen door aan de template
+        ingredienten=ingredienten,  # Gebruik rechtstreeks de dictionary uit ingredients.py
+        allergens=allergens,
+        categories=categories,
+        origins=origins
     )
+
 
 
 @main.route('/my_recipes')

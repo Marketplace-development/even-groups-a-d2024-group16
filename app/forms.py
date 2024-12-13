@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField
+from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField, SelectMultipleField
 from wtforms import StringField, TextAreaField, RadioField, SubmitField, IntegerField, DateField, FloatField, IntegerField, FileField
 from wtforms.validators import DataRequired, Email, Length, Optional, NumberRange
 from flask_wtf.file import FileAllowed, FileRequired
@@ -33,8 +33,11 @@ class RecipeForm(FlaskForm):
     description = TextAreaField('Description', validators=[DataRequired()])
     duration = IntegerField('Duration (in minutes)', validators=[DataRequired()])
     price = StringField('Price (in €)', validators=[DataRequired()])
-    allergiesrec = StringField('Allergies Information', validators=[DataRequired()])
-
+    allergiesrec = SelectMultipleField(
+        'Allergies',
+        choices=[],  # Wordt later in de route ingesteld
+        coerce=str
+    )
     # Nieuwe velden voor origin, category en preparation
     origin = StringField('Origin', validators=[Optional()])  # Optioneel
     category = StringField('Category', validators=[Optional()])  # Optioneel
