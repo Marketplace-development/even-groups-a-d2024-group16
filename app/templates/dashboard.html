@@ -173,22 +173,29 @@
                                 <p class="text-success fw-bold">€{{ data.recipe.price }}</p>
                 
                                 <!-- Rating -->
-                                <div>
-                                    {% for star in range(1, 6) %}
-                                        {% if star <= data.avg_rating %}
-                                            <!-- Volle ster -->
-                                            <i class="fas fa-star text-warning"></i>
-                                        {% elif star - 0.5 <= data.avg_rating %}
-                                            <!-- Halve ster -->
-                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    {% set avg_rating = data.avg_rating if data.avg_rating is not none else 0 %}
+                                    <div class="me-2">
+                                        {% for star in range(1, 6) %}
+                                            {% if star <= avg_rating %}
+                                                <!-- Volle ster -->
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% elif star - 0.5 <= avg_rating %}
+                                                <!-- Halve ster -->
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            {% else %}
+                                                <!-- Lege ster -->
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <small class="text-muted">
+                                        {% if avg_rating > 0 %}
+                                            ({{ avg_rating }})
                                         {% else %}
-                                            <!-- Lege ster -->
-                                            <i class="far fa-star text-warning"></i>
+                                            (No rating)
                                         {% endif %}
-                                    {% endfor %}
-                                    {% if not data.avg_rating %}
-                                        <span class="text-muted">(No rating)</span>
-                                    {% endif %}
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -233,6 +240,16 @@
     .text-decoration-none:hover {
         color: inherit;
     }
+    .fas.fa-star, .fas.fa-star-half-alt, .far.fa-star {
+        margin-left: 2px; /* Voeg wat ruimte toe tussen sterren */
+    }
+    
+    .d-flex.align-items-center {
+        text-align: center; /* Centreert inhoud visueel */
+        justify-content: flex-start; /* Helpt met een lichte uitlijning */
+        padding-left: 10px; /* Verschuif de sterren iets naar rechts */
+    }
+    
 </style>
 {% endblock %}
 
