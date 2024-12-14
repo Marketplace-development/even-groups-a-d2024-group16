@@ -12,11 +12,12 @@ class User(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=True)
     street = db.Column(db.String, nullable=True)
     housenr = db.Column(db.Integer, nullable=True)
-    postalcode = db.Column(db.Integer, nullable=True)
+    postalcode = db.Column(db.String, nullable=True)  # Veranderd naar String voor compatibiliteit met internationale postcodes
     city = db.Column(db.String, nullable=True)
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
-    is_chef = db.Column(db.Boolean, default=False, nullable=True)  # Update consistent met database
+    is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Nodig om te onderscheiden tussen chefs en klanten
+    preferences = db.Column(db.JSON, nullable=True, default={})  # Sla voorkeuren op als JSON met standaardwaarde {}
 
     # Relaties
     recipes = db.relationship('Recipe', backref='chef', lazy=True)
@@ -33,8 +34,24 @@ class User(db.Model):
         primaryjoin="User.email == Transaction.chef_email"
     )
 
+    def set_preferences(self, favorite_ingredients=None, favorite_origins=None, allergies=None):
+        """
+        Update user preferences.
+        """
+        self.preferences = {
+            "favorite_ingredients": favorite_ingredients or [],
+            "favorite_origins": favorite_origins or [],
+            "allergies": allergies or [],
+        }
+
+    def get_preferences(self):
+        """
+        Retrieve user preferences.
+        """
+        return self.preferences or {}
+
     def __repr__(self):
-        return f"<User(email={self.email}, name={self.name})>"
+        return f"<User(email={self.email}, name={self.name}, is_chef={self.is_chef})>"
 
 
 class Recipe(db.Model):
@@ -52,6 +69,7 @@ class Recipe(db.Model):
     origin = db.Column(db.String, nullable=True)  # Toegevoegd voor herkomst
     category = db.Column(db.String, nullable=True)  # Toegevoegd voor categorie
     preparation = db.Column(db.Text, nullable=True)  # Toegevoegd voor bereidingswijze
+    favorites = db.Column(JSONB, nullable=True)  
 
     __table_args__ = (
         PrimaryKeyConstraint('recipename', 'chef_email'),
@@ -110,3 +128,4 @@ class Review(db.Model):
 
     def __repr__(self):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
+

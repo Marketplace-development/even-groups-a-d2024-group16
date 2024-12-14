@@ -8,21 +8,33 @@ from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
 from app.forms import RecipeForm, ReviewForm, EditProfileForm
 from app.ingredients import ingredienten
 from app.dropdowns import get_allergens, get_categories, get_origins
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
 main = Blueprint('main', __name__)
 
+
 @main.route('/')
 def index():
     return render_template('index.html')
 
+from app.ingredients import ingredienten  # Zorg ervoor dat dit bovenaan je bestand staat
+
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     form = UserForm()
-
+    
+    # Gebruik ingredienten direct vanuit ingredients.py
+    form.allergies.choices = [(allergy, allergy) for allergy in get_allergens()]
+    form.favorite_ingredients.choices = [
+        (ingredient, ingredient) 
+        for category in ingredienten.values() 
+        for ingredient in category.keys()
+    ]
+    form.favorite_origins.choices = [(origin, origin) for origin in get_origins()]
+    
     if form.validate_on_submit():
         print("Form is submitted")
         print(f"E-mail: {form.email.data}")
@@ -39,6 +51,11 @@ def register():
             return redirect(url_for('main.register'))
 
         # Maak nieuwe gebruiker aan
+        preferences = {
+            'allergies': form.allergies.data or [],
+            'favorite_ingredients': form.favorite_ingredients.data or [],
+            'favorite_origins': form.favorite_origins.data or [],
+        }
         new_user = User(
             email=form.email.data,
             name=form.name.data,
@@ -49,7 +66,8 @@ def register():
             city=form.city.data,
             country=form.country.data,
             telephonenr=form.telephonenr.data,
-            is_chef=is_chef  # Gebruik de juiste waarde van is_chef
+            is_chef=is_chef,
+            preferences=preferences
         )
 
         # Voeg nieuwe gebruiker toe aan de database
@@ -64,11 +82,6 @@ def register():
         print("Redirecting to the login page...")
         return redirect(url_for('main.login'))
 
-    print("Form not submitted successfully")
-    return render_template('register.html', form=form)
-
-
-    # If the form isn't submitted or is not valid, show the registration form
     print("Form not submitted successfully")
     return render_template('register.html', form=form)
 
@@ -91,6 +104,7 @@ def login():
 
     
 from app.sort import apply_sorting
+from app.ingredients import ingredienten
 
 @main.route('/dashboard')
 def dashboard():
@@ -98,6 +112,7 @@ def dashboard():
         flash('You need to log in first.', 'danger')
         return redirect(url_for('main.login'))
 
+    # Huidige gebruiker ophalen
     user = User.query.filter_by(email=session['email']).first()
     if not user:
         flash('User not found.', 'danger')
@@ -108,7 +123,7 @@ def dashboard():
     origins = get_origins()
     allergens = get_allergens()
 
-    # Haal filters op
+    # Initialiseer filters
     filters = {
         'ingredients': request.args.getlist('ingredients'),
         'allergies': request.args.getlist('allergies'),
@@ -119,7 +134,8 @@ def dashboard():
         'origin': request.args.get('origin'),
     }
 
-    sort_by = request.args.get('sort_by', 'price_quality_ratio')  # Default sorteeroptie
+    # Gebruik standaard sortering "recommended" voor klanten en "price_quality" voor chefs
+    sort_by = request.args.get('sort_by', 'recommended' if not user.is_chef else 'price_quality')
 
     # Query starten
     query = Recipe.query
@@ -127,8 +143,9 @@ def dashboard():
     # Filters toepassen
     query = apply_filters(query, filters)
 
-    # Sorteerfunctie toepassen
-    query = apply_sorting(query, sort_by)
+    # Sorteerfunctie toepassen met voorkeuren
+    preferences = user.preferences or {'favorite_ingredients': [], 'favorite_origins': []}
+    query = apply_sorting(query, sort_by, preferences=preferences)
 
     # Gefilterde recepten ophalen
     recipes = query.all()
@@ -136,8 +153,9 @@ def dashboard():
     # Verwerk recepten en voeg extra gegevens toe
     recipe_data = []
     for recipe in recipes:
+        # Gemiddelde beoordeling berekenen
         avg_rating = (
-            db.session.query(db.func.avg(Review.rating))
+            db.session.query(func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
             .scalar()
         )
@@ -148,22 +166,24 @@ def dashboard():
         if recipe.ingredients:
             for ingredient, details in recipe.ingredients.items():
                 ingredients_list.append({
-                    'quantity': details['quantity'],
+                    'quantity': details.get('quantity', ''),
                     'unit': details.get('unit', ''),
                     'ingredient': ingredient
                 })
 
+        # Voeg alle verwerkte gegevens toe aan de lijst
         recipe_data.append({
             'recipe': recipe,
             'avg_rating': avg_rating,
             'ingredients_list': ingredients_list
         })
 
-    # Min-rating filteren
+    # Filteren op minimale beoordeling
     if filters.get('min_rating'):
         min_rating = float(filters['min_rating'])
         recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
 
+    # Render de template met de nodige gegevens
     return render_template(
         'dashboard.html',
         user=user,
@@ -649,7 +669,6 @@ def edit_recipe(recipename):
     )
 
 
-
 @main.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
     # Haal de gebruiker op uit de database op basis van het e-mailadres uit de sessie
@@ -657,35 +676,63 @@ def edit_profile():
 
     # Controleer of de gebruiker ingelogd is en bestaat
     if not user:
-        return redirect(url_for('main.login'))  # Redirect als de gebruiker niet gevonden is of niet ingelogd is
+        flash('Please log in to access your profile.', 'danger')
+        return redirect(url_for('main.login'))
 
     # Maak het formulier, vul het in met de huidige gebruikersdata
     form = EditProfileForm(obj=user)
 
-    # Als het formulier wordt ingediend en geldig is, werk dan de gebruikersinformatie bij
+    # Dynamische keuzes instellen voor SelectMultipleField
+    form.allergies.choices = [(allergy, allergy) for allergy in get_allergens()]
+    ingredient_choices = [(ingredient, ingredient) for category in ingredienten.values() for ingredient in category.keys()]
+    form.favorite_ingredients.choices = ingredient_choices
+    form.favorite_origins.choices = [(origin, origin) for origin in get_origins()]
+
+    # Haal bestaande voorkeuren op en vul deze in het formulier
+    if not user.preferences:
+        user.preferences = {
+            'allergies': [],
+            'favorite_ingredients': [],
+            'favorite_origins': []
+        }
+
+    # Vul standaardwaarden in het formulier
+    form.allergies.data = user.preferences.get('allergies', [])
+    form.favorite_ingredients.data = user.preferences.get('favorite_ingredients', [])
+    form.favorite_origins.data = user.preferences.get('favorite_origins', [])
+
+    # Verwerk formulierindiening
     if form.validate_on_submit():
-        user.name = form.name.data
-        user.date_of_birth = form.date_of_birth.data
-        user.street = form.street.data
-        user.housenr = form.housenr.data
-        user.postalcode = form.postalcode.data
-        user.city = form.city.data
-        user.country = form.country.data
-        user.telephonenr = form.telephonenr.data
-        
-        # Bewaar de waarde van is_chef ongewijzigd (zorg ervoor dat het niet wordt overschreven)
-        # Alleen als de gebruiker een chef is, behouden we de waarde van is_chef
-        if user.is_chef:  # Alleen als de gebruiker een chef is
-            user.is_chef = user.is_chef
+        try:
+            # Update persoonlijke gegevens
+            user.name = form.name.data or user.name
+            user.date_of_birth = form.date_of_birth.data or user.date_of_birth
+            user.street = form.street.data or user.street
+            user.housenr = form.housenr.data or user.housenr
+            user.postalcode = form.postalcode.data or user.postalcode
+            user.city = form.city.data or user.city
+            user.country = form.country.data or user.country
+            user.telephonenr = form.telephonenr.data or user.telephonenr
 
-        # Commit de wijzigingen naar de database
-        db.session.commit()
+            # Update voorkeuren
+            if not user.is_chef:
+                user.preferences = {
+                    'allergies': form.allergies.data,
+                    'favorite_ingredients': form.favorite_ingredients.data,
+                    'favorite_origins': form.favorite_origins.data
+                }
 
-        # Redirect naar het dashboard nadat de wijzigingen zijn opgeslagen
-        return redirect(url_for('main.dashboard'))  # Redirect naar het dashboard na het opslaan van wijzigingen
+            # Commit naar database
+            db.session.commit()
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('main.dashboard'))
 
-    # Geef de gebruikersgegevens door naar de template
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating profile: {e}", 'danger')
+
     return render_template('edit_profile.html', form=form, user=user)
+
 
 
 @main.route('/recipe_reviews/<recipename>')

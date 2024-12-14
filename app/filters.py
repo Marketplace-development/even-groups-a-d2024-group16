@@ -1,36 +1,43 @@
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql import text, cast
 from app.models import Recipe
-from sqlalchemy import and_, not_, or_
-import json
 
 def apply_filters(query, filters):
-    """Apply filters to the query."""
-    # Ingrediëntenfilter
-    if 'ingredients' in filters and filters['ingredients']:
+    """Past filters toe op ingrediënten en allergieën."""
+    
+    # Filter op ingrediënten (recept moet ALLE ingrediënten bevatten)
+    if filters.get('ingredients'):
         ingredients = filters['ingredients']
         query = query.filter(
-            or_(*[Recipe.ingredients.contains({ingredient: {}}) for ingredient in ingredients])
+            Recipe.ingredients.op('@>')(cast(ingredients, JSONB))
         )
 
-    # Allergieënfilter
-    if 'allergies' in filters and filters['allergies']:
+    # Filter op allergieën (recept mag GEEN van de allergieën bevatten)
+    if filters.get('allergies'):
         allergies = filters['allergies']
-        for allergy in allergies:
-            query = query.filter(~Recipe.allergiesrec.ilike(f"%{allergy}%"))
+        query = query.filter(
+            ~Recipe.allergiesrec.op('?|')(cast(allergies, JSONB))
+        )
 
-    # Duurfilter
-    if 'duration' in filters and filters['duration']:
-        query = query.filter(Recipe.duration <= int(filters['duration']))
+    # Andere filters blijven hetzelfde
+    if filters.get('origin'):
+        query = query.filter(Recipe.origin == filters['origin'])
 
-    # Prijsfilter
-    if 'price' in filters and filters['price']:
-        query = query.filter(Recipe.price <= float(filters['price']))
-
-    # Categoriefilter
-    if 'category' in filters and filters['category']:
+    if filters.get('category'):
         query = query.filter(Recipe.category == filters['category'])
 
-    # Herkomstfilter
-    if 'origin' in filters and filters['origin']:
-        query = query.filter(Recipe.origin == filters['origin'])
+    if filters.get('min_rating'):
+        min_rating = float(filters['min_rating'])
+        query = query.filter(
+            func.coalesce(func.avg(Review.rating), 0) >= min_rating
+        )
+
+    if filters.get('price'):
+        max_price = float(filters['price'])
+        query = query.filter(Recipe.price <= max_price)
+
+    if filters.get('duration'):
+        max_duration = int(filters['duration'])
+        query = query.filter(Recipe.duration <= max_duration)
 
     return query

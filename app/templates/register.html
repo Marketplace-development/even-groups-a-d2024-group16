@@ -158,74 +158,28 @@
         <div>
             <label for="street">Street</label>
             {{ form.street(class="form-control") }}
-            {% if form.street.errors %}
-                <ul class="errors">
-                    {% for error in form.street.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-
         <div>
             <label for="housenr">House number</label>
             {{ form.housenr(class="form-control") }}
-            {% if form.housenr.errors %}
-                <ul class="errors">
-                    {% for error in form.housenr.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-
         <div>
             <label for="postalcode">Postalcode</label>
             {{ form.postalcode(class="form-control") }}
-            {% if form.postalcode.errors %}
-                <ul class="errors">
-                    {% for error in form.postalcode.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-
         <div>
             <label for="city">City</label>
             {{ form.city(class="form-control") }}
-            {% if form.city.errors %}
-                <ul class="errors">
-                    {% for error in form.city.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-
         <div>
             <label for="country">Country</label>
             {{ form.country(class="form-control") }}
-            {% if form.country.errors %}
-                <ul class="errors">
-                    {% for error in form.country.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
 
         <!-- Telephone -->
         <div>
             <label for="telephonenr">Telephone</label>
             {{ form.telephonenr(class="form-control") }}
-            {% if form.telephonenr.errors %}
-                <ul class="errors">
-                    {% for error in form.telephonenr.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
 
         <!-- Chef Radio Buttons -->
@@ -233,15 +187,55 @@
             <label>Are you a chef?</label>
             <div class="chef-radios">
                 <div class="radio-container">
-                    <input type="radio" id="yes" name="is_chef" value="true" 
-                           {% if request.form.get('is_chef') == 'true' %} checked {% endif %}>
+                    <input type="radio" id="yes" name="is_chef" value="true" onchange="togglePreferences()">
                     <label for="yes">Yes</label>
                 </div>
                 <div class="radio-container">
-                    <input type="radio" id="no" name="is_chef" value="false" 
-                           {% if request.form.get('is_chef') == 'false' %} checked {% endif %}>
+                    <input type="radio" id="no" name="is_chef" value="false" onchange="togglePreferences()">
                     <label for="no">No</label>
                 </div>
+            </div>
+        </div>
+
+        <!-- Preferences Section -->
+        <div id="preferences-section" style="display: none;">
+            <!-- Allergies -->
+            <div>
+                <label for="allergies">Allergies</label>
+                {{ form.allergies(class="form-control", multiple="multiple") }}
+                {% if form.allergies.errors %}
+                    <ul class="errors">
+                        {% for error in form.allergies.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Favourite Ingredients -->
+            <div>
+                <label for="favorite_ingredients">Favourite Ingredients</label>
+                {{ form.favorite_ingredients(class="form-control", multiple="multiple") }}
+                {% if form.favorite_ingredients.errors %}
+                    <ul class="errors">
+                        {% for error in form.favorite_ingredients.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Favourite Origins -->
+            <div>
+                <label for="favorite_origins">Favourite Origins</label>
+                {{ form.favorite_origins(class="form-control", multiple="multiple") }}
+                {% if form.favorite_origins.errors %}
+                    <ul class="errors">
+                        {% for error in form.favorite_origins.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
         </div>
 
@@ -251,4 +245,16 @@
         </div>
     </form>
 </div>
+
+<!-- JavaScript -->
+<script>
+    function togglePreferences() {
+        const chefYes = document.getElementById('yes').checked;
+        const preferencesSection = document.getElementById('preferences-section');
+
+        // Toon de voorkeuren alleen als "No" is geselecteerd
+        preferencesSection.style.display = chefYes ? 'none' : 'block';
+    }
+</script>
+
 {% endblock %}

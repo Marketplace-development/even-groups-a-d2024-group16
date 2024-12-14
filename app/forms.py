@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField, SelectMultipleField
+from wtforms import StringField, DateField, IntegerField, BooleanField, SubmitField, SelectMultipleField, widgets
 from wtforms import StringField, TextAreaField, RadioField, SubmitField, IntegerField, DateField, FloatField, IntegerField, FileField
 from wtforms.validators import DataRequired, Email, Length, Optional, NumberRange
 from flask_wtf.file import FileAllowed, FileRequired
@@ -16,10 +16,38 @@ class UserForm(FlaskForm):
     country = StringField('Country', validators=[DataRequired()])
     telephonenr = StringField('Telephone', validators=[DataRequired(), Length(max=15)])
     
-    # Verander BooleanField naar RadioField voor radioknoppen "Yes" en "No"
-    is_chef = RadioField('Are you a chef?', choices=[('true', 'Yes'), ('false', 'No')], validators=[DataRequired()])
+    # Radioknoppen om aan te geven of de gebruiker een chef is
+    is_chef = RadioField(
+        'Are you a chef?', 
+        choices=[('true', 'Yes'), ('false', 'No')], 
+        validators=[DataRequired()]
+    )
+    
+    # Dynamische keuzes voor voorkeuren
+    allergies = SelectMultipleField(
+        'Allergies',
+        choices=[],  # Wordt dynamisch ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+    favorite_ingredients = SelectMultipleField(
+        'Favorite Ingredients',
+        choices=[],  # Wordt dynamisch ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+    favorite_origins = SelectMultipleField(
+        'Favorite Origins',
+        choices=[],  # Wordt dynamisch ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+    
+    submit = SubmitField('Register')
 
-    submit = SubmitField('Save')
 
 
 
@@ -69,5 +97,32 @@ class EditProfileForm(FlaskForm):
     city = StringField('City', validators=[Optional(), Length(max=50)])
     country = StringField('Country', validators=[Optional(), Length(max=50)])
     telephonenr = StringField('Telephone', validators=[Optional(), Length(max=15)])
+    
+    # Dynamische voorkeuren
+    allergies = SelectMultipleField(
+        'Allergies',
+        choices=[],  # Wordt ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+    favorite_ingredients = SelectMultipleField(
+        'Favorite Ingredients',
+        choices=[],  # Wordt ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+    favorite_origins = SelectMultipleField(
+        'Favorite Origins',
+        choices=[],  # Wordt ingesteld in de route
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+        coerce=str
+    )
+
+    # Alleen zichtbaar voor admins of specifieke rollen
     is_chef = BooleanField('Are you a chef?')
     submit = SubmitField('Save Changes')
+
+
