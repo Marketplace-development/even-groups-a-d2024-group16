@@ -17,23 +17,17 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-
-                <!-- Menu knop met drie witte strepen en "MENU" tekst -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <!-- Drie witte strepen voor het menu-icoon -->
                         <div style="display: flex; align-items: center;">
                             <div style="line-height: 1;">
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
                                 <div style="width: 25px; height: 3px; background-color: white;"></div>
                             </div>
-                            <!-- Tekst "MENU" naast de strepen -->
                             <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
                         </div>
                     </a>
-                    
-                    <!-- Dropdown menu met 'kotjes' -->
                     <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
                             <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
@@ -46,7 +40,6 @@
                         <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
                     </ul>
                 </li>
-
             </ul>
         </div>
     </div>
@@ -62,11 +55,9 @@
             <div class="col-md-3">
                 <label for="sort_by" class="form-label">Sort by</label>
                 <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
-                    {% if session.get('role') == 'customer' %}
-                        <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
-                            Recommended (default)
-                        </option>
-                    {% endif %}
+                    <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
+                        Recommended (default)
+                    </option>
                     <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>
                         Price-Quality Ratio
                     </option>
@@ -95,20 +86,18 @@
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
             <h5 class="mb-3">Filters</h5>
             <form method="GET" action="{{ url_for('main.dashboard') }}">
-                <div class="mb-3">
-                    <label for="ingredients" class="form-label">Ingredients</label>
-                    <select name="ingredients[]" id="ingredients" class="form-control" multiple>
-                        {% for category, items in ingredienten.items() %}
-                            <optgroup label="{{ category }}">
-                                {% for ingredient in items %}
-                                    <option value="{{ ingredient }}" {% if ingredient in request.args.getlist('ingredients') %}selected{% endif %}>
-                                        {{ ingredient }}
-                                    </option>
-                                {% endfor %}
-                            </optgroup>
-                        {% endfor %}
-                    </select>
+                <div class="mb-3" id="ingredients-filters">
+                    <h6>Ingredient Filters</h6>
+                    <!-- Dynamisch toegevoegde filterregels worden hier ingevoegd -->
+                    <div class="filter-row">
+                        <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
+                        <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
+                        <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
+                    </div>
                 </div>
+                <button type="button" class="btn btn-secondary" onclick="addFilterRow()">Add Filter</button>
+                
+                <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>
                     <select name="min_rating" id="min_rating" class="form-control">
@@ -217,48 +206,19 @@
     </div>
 </div>
 
+<script>
+    function addFilterRow() {
+        let newFilterRow = document.createElement('div');
+        newFilterRow.classList.add('filter-row');
+        newFilterRow.innerHTML = `
+            <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
+            <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
+            <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
+        `;
+        document.getElementById('ingredients-filters').appendChild(newFilterRow);
+    }
+</script>
 
-
-<style>
-    .card {
-        border-radius: 15px;
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .card img {
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .bg-light {
-        background-color: #f8f9fa !important;
-        border-radius: 15px;
-    }
-
-    .text-decoration-none {
-        color: inherit;
-    }
-
-    .text-decoration-none:hover {
-        color: inherit;
-    }
-    .fas.fa-star, .fas.fa-star-half-alt, .far.fa-star {
-        margin-left: 2px; /* Voeg wat ruimte toe tussen sterren */
-    }
-    
-    .d-flex.align-items-center {
-        text-align: center; /* Centreert inhoud visueel */
-        justify-content: flex-start; /* Helpt met een lichte uitlijning */
-        padding-left: 10px; /* Verschuif de sterren iets naar rechts */
-    }
-    
-</style>
 {% endblock %}
 
 <!-- DIT IS DE CODE MET ALLE GEGEVENS, GEBRUIK DIT ALS JE FILTERS WILT TESTEN

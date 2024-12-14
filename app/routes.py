@@ -125,7 +125,9 @@ def dashboard():
 
     # Initialiseer filters
     filters = {
-        'ingredients': request.args.getlist('ingredients'),
+        'ingredient': request.args.getlist('ingredient[]'),
+        'quantity': request.args.getlist('quantity[]'),
+        'unit': request.args.getlist('unit[]'),
         'allergies': request.args.getlist('allergies'),
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
@@ -177,6 +179,26 @@ def dashboard():
             'avg_rating': avg_rating,
             'ingredients_list': ingredients_list
         })
+
+    # Verwerk ingrediëntenfilters
+    ingredient_filters = filters['ingredient']
+    quantity_filters = filters['quantity']
+    unit_filters = filters['unit']
+
+    if ingredient_filters or quantity_filters or unit_filters:
+        recipe_data = [
+            r for r in recipe_data
+            if all(
+                # Controleer of de ingrediëntenlijst van het recept de opgegeven combinatie bevat
+                any(
+                    ingredient['ingredient'].lower() == ingredient_filter.strip().lower() and
+                    ingredient['quantity'] == quantity_filter.strip() and
+                    ingredient['unit'].lower() == unit_filter.strip().lower()
+                    for ingredient in r['ingredients_list']
+                )
+                for ingredient_filter, quantity_filter, unit_filter
+                in zip(ingredient_filters, quantity_filters, unit_filters)
+            )]
 
     # Filteren op minimale beoordeling
     if filters.get('min_rating'):
