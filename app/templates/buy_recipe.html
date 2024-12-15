@@ -2,19 +2,15 @@
 
 {% block content %}
 
-<!-- Navigatiebalk -->
-<!-- Navigatiebalk -->
+<!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo" style="height: 40px;">
         </a>
-        
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
@@ -48,18 +44,18 @@
     </div>
 </nav>
 
-
-<!-- Pagina-inhoud -->
-<div class="container mt-5">
+<!-- Page Content -->
+<div class="container mt-5 pt-5">
     <h1 class="text-center">Purchase {{ recipe.recipename }}</h1>
-    <div class="recipe-detail">
+    <div class="recipe-detail text-center my-4">
         <!-- Display Recipe Image -->
-        {% if recipe.image %}
-            <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid">
-        {% else %}
-            <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid">
-        {% endif %}
-        
+        <div class="image-container mb-4">
+            {% if recipe.image %}
+                <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
+            {% endif %}
+        </div>
         <h2>Details</h2>
         <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
         <p><strong>Category:</strong> {{ recipe.category }}</p>
@@ -89,7 +85,7 @@
         <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
     </div>
 
-    <form method="POST">
+    <form method="POST" class="text-center my-4">
         <button type="submit" class="btn btn-success">Confirm Purchase</button>
         <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
     </form>
@@ -111,14 +107,15 @@
             <p>No reviews available for this recipe yet.</p>
         {% endif %}
     </div>
-    <!-- Meer zoals dit -->
+
+    <!-- More Like This Section -->
     <div class="mt-5">
         <h3 class="text-success">More Like This</h3>
         <div class="row">
             {% for related in related_recipes %}
             <div class="col-md-3">
                 <div class="card shadow-sm">
-                    <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}">
+                    <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}" style="height: 200px; object-fit: cover;">
                     <div class="card-body text-center">
                         <h5 class="card-title">{{ related.recipename }}</h5>
                         <p class="text-muted">€{{ related.price }}</p>
@@ -131,4 +128,7 @@
     </div>
 </div>
 {% endblock %}
+
+
+
 
