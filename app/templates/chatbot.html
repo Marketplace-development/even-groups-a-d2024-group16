@@ -53,24 +53,41 @@
             <!-- Berichten verschijnen hier -->
         </div>
         <div class="input-group">
-            <input type="text" id="user-input" class="form-control" placeholder="Type your message here...">
+            <input type="text" id="user-input" class="form-control" placeholder="Type your message here..." aria-label="Type your message">
             <button id="send-btn" class="btn btn-primary">Send</button>
         </div>
+        <small id="typing-indicator" class="text-muted d-none">Chatbot is typing...</small>
     </div>
 </div>
+
 
 <script>
     const chatMessages = document.getElementById("chat-messages");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
-
-    sendBtn.addEventListener("click", () => {
+    const typingIndicator = document.getElementById("typing-indicator");
+    
+    function toggleTypingIndicator(show) {
+        typingIndicator.classList.toggle("d-none", !show);
+    }
+    
+    function addMessage(sender, message) {
+        const messageElement = document.createElement("div");
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll naar het laatste bericht
+    }
+    
+    function sendMessage() {
         const message = userInput.value.trim();
         if (!message) return;
     
         // Voeg de gebruikersinvoer toe aan de chat
         addMessage("You", message);
         userInput.value = "";
+    
+        // Toon "typing..."-indicator
+        toggleTypingIndicator(true);
     
         // Verstuur het bericht naar de server
         fetch("/chatbot/chat", {
@@ -81,21 +98,35 @@
             body: JSON.stringify({ message }),
         })
         .then((response) => {
-            console.log("Raw response:", response);  // Debug: Toon de ruwe response
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
             return response.json();
         })
         .then((data) => {
-            console.log("Chatbot response:", data);  // Debug: Toon de JSON-response
+            // Voeg de chatbot-respons toe aan de chat
             addMessage("Chatbot", data.response);
         })
         .catch((error) => {
-            console.error("Error:", error);  // Debug: Toon fouten in de console
+            console.error("Error:", error);
             addMessage("Chatbot", "Sorry, there was an error. Please try again.");
+        })
+        .finally(() => {
+            // Verberg "typing..."-indicator
+            toggleTypingIndicator(false);
         });
+    }
+    
+    // Event: Klik op de knop
+    sendBtn.addEventListener("click", sendMessage);
+    
+    // Event: Druk op Enter
+    userInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
     });
+    
     
 
     function addMessage(sender, message) {

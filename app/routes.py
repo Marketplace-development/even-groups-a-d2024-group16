@@ -856,30 +856,22 @@ def recipe_reviews(recipename):
     )
 
 from flask import Blueprint, render_template, request, jsonify
-
+from .responses import get_response  # Importeer de get_response functie
 
 @chatbot.route('/chat', methods=['GET', 'POST'])
 def chat():
     if request.method == 'POST':
         try:
             # Haal het gebruikersbericht op
-            user_message = request.json.get('message', '').lower()
-            
-            # Simpele logica voor reacties
-            if 'hello' in user_message:
-                response = "Hi there! How can I help you?"
-            elif 'find recipes' in user_message:
-                response = "You can use the search bar to find recipes by name, ingredient, or category."
-            elif 'add recipe' in user_message:
-                response = "As a chef, you can add new recipes by clicking on 'Add Recipe' in the menu."
-            else:
-                response = "I'm sorry, I didn't understand that. Could you try asking differently?"
-            
-            # Stuur een geldige JSON-response terug
-            return jsonify({"response": response}), 200
+            user_message = request.json.get('message', '').strip()
+            print(f"User message: {user_message}")  # Debugging log
 
+            # Haal een reactie op uit responses.py
+            response = get_response(user_message)
+            print(f"Chatbot response: {response}")  # Debugging log
+
+            return jsonify({"response": response}), 200
         except Exception as e:
-            # Log eventuele fouten en stuur een generieke foutmelding terug
             print(f"Error in chatbot: {e}")
             return jsonify({"response": "There was an error processing your request. Please try again later."}), 500
 
