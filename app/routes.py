@@ -10,6 +10,8 @@ from app.ingredients import ingredienten
 from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
+from app.sort import apply_sorting
+
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
@@ -103,9 +105,6 @@ def login():
     return render_template('login.html', form=form)
 
     
-from app.sort import apply_sorting
-from app.ingredients import ingredienten
-
 @main.route('/dashboard')
 def dashboard():
     if 'email' not in session:
@@ -136,7 +135,7 @@ def dashboard():
         'origin': request.args.get('origin'),
     }
 
-    # Gebruik standaard sortering "recommended" voor klanten en "price_quality" voor chefs
+    # Gebruik standaard sortering
     sort_by = request.args.get('sort_by', 'recommended' if not user.is_chef else 'price_quality')
 
     # Query starten
@@ -185,25 +184,55 @@ def dashboard():
     quantity_filters = filters['quantity']
     unit_filters = filters['unit']
 
-    if ingredient_filters or quantity_filters or unit_filters:
+    if ingredient_filters:
         recipe_data = [
             r for r in recipe_data
-            if all(
-                # Controleer of de ingrediëntenlijst van het recept de opgegeven combinatie bevat
-                any(
-                    ingredient['ingredient'].lower() == ingredient_filter.strip().lower() and
-                    ingredient['quantity'] == quantity_filter.strip() and
-                    ingredient['unit'].lower() == unit_filter.strip().lower()
-                    for ingredient in r['ingredients_list']
-                )
-                for ingredient_filter, quantity_filter, unit_filter
-                in zip(ingredient_filters, quantity_filters, unit_filters)
-            )]
+            if any(
+                ingredient_filter.lower() in ingredient['ingredient'].lower()
+                for ingredient_filter in ingredient_filters
+                for ingredient in r['ingredients_list']
+            )
+        ]
 
     # Filteren op minimale beoordeling
     if filters.get('min_rating'):
-        min_rating = float(filters['min_rating'])
-        recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
+        try:
+            min_rating = float(filters['min_rating'])
+            recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
+        except ValueError:
+            flash("Invalid minimum rating value.", "danger")
+
+    # Filteren op duur
+    if filters.get('duration'):
+        try:
+            max_duration = int(filters['duration'])
+            recipe_data = [r for r in recipe_data if r['recipe'].duration and r['recipe'].duration <= max_duration]
+        except ValueError:
+            flash("Invalid duration value.", "danger")
+
+    # Filteren op prijs
+    if filters.get('price'):
+        try:
+            max_price = float(filters['price'])
+            recipe_data = [r for r in recipe_data if r['recipe'].price and r['recipe'].price <= max_price]
+        except ValueError:
+            flash("Invalid price value.", "danger")
+
+    # Filteren op categorie
+    if filters.get('category'):
+        recipe_data = [r for r in recipe_data if r['recipe'].category == filters['category']]
+
+    # Filteren op herkomst
+    if filters.get('origin'):
+        recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
+
+    # Filteren op allergenen
+    if filters.get('allergies'):
+        allergy_filters = set(filters['allergies'])
+        recipe_data = [
+            r for r in recipe_data
+            if not allergy_filters.intersection(set(r['recipe'].allergiesrec.split(", ")))
+        ]
 
     # Render de template met de nodige gegevens
     return render_template(
@@ -216,7 +245,6 @@ def dashboard():
         ingredienten=ingredienten,
         sort_by=sort_by
     )
-
 
 
 @main.route('/logout', methods=['GET'])
