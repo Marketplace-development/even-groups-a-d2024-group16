@@ -80,7 +80,15 @@
             </div>
         </div>
     </form>
-
+    <div class="mb-3">
+        <form method="GET" action="{{ url_for('main.dashboard') }}">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search by name, ingredient, etc." 
+                       value="{{ request.args.get('search', '') }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
     <div class="row">
         <!-- Filters Sidebar -->
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">

@@ -11,6 +11,7 @@ from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
 from app.sort import apply_sorting
+from app.zoekbalk import apply_search
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -122,6 +123,8 @@ def dashboard():
     origins = get_origins()
     allergens = get_allergens()
 
+    search_query = request.args.get('search', '')
+
     # Initialiseer filters
     allergies_input = request.args.get('allergies', "")
     allergies_list = [a.lower().strip() for a in allergies_input.split(",") if a]
@@ -145,6 +148,9 @@ def dashboard():
 
     # Filters toepassen
     query = apply_filters(query, filters)
+
+    query = apply_search(query, search_query)
+
 
     # Sorteerfunctie toepassen met voorkeuren
     preferences = user.preferences or {'favorite_ingredients': [], 'favorite_origins': []}
