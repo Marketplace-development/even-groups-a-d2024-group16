@@ -1,4 +1,4 @@
-from sqlalchemy import func, case, cast, Text, Float
+from sqlalchemy import func, case, Float, Text, cast
 from app.models import Recipe, Review
 
 def apply_sorting(query, sort_by, preferences=None):
@@ -7,9 +7,9 @@ def apply_sorting(query, sort_by, preferences=None):
         preferences = {}
 
     # Haal voorkeuren en allergieën op uit de opgeslagen JSON
-    allergies = preferences.get('allergies', [])
     favorite_origins = preferences.get('favorite_origins', [])
     favorite_ingredients = preferences.get('favorite_ingredients', [])
+    allergies = preferences.get('allergies', [])
 
     if sort_by == 'price_low_to_high':
         query = query.order_by(Recipe.price.asc())
@@ -26,22 +26,11 @@ def apply_sorting(query, sort_by, preferences=None):
         query = query.order_by(Recipe.duration.asc())
     elif sort_by == "prep_time_desc":
         query = query.order_by(Recipe.duration.desc())
-    elif sort_by == 'price_quality':
-        avg_rating = func.avg(Review.rating)
-        price_quality_ratio = case(
-            (avg_rating > 0, Recipe.price / avg_rating),
-            else_=float('inf')  # Recepten zonder beoordeling krijgen een hoge waarde
-        )
-        query = (
-            query.outerjoin(Review)
-            .group_by(Recipe.recipename, Recipe.chef_email)
-            .order_by(price_quality_ratio.asc())
-        )
     elif sort_by == 'recommended':
         # Bereken prioriteit voor favoriete herkomsten
         origin_match = func.sum(
             case(
-                (Recipe.origin.in_(favorite_origins), 1),
+                (Recipe.origin.in_(favorite_origins), 1) if favorite_origins else (1 == 0, 0),
                 else_=0
             )
         )
@@ -52,7 +41,7 @@ def apply_sorting(query, sort_by, preferences=None):
                 *[
                     (func.lower(cast(Recipe.ingredients, Text)).like(f"%{ingredient.lower()}%"), 1)
                     for ingredient in favorite_ingredients
-                ],
+                ] if favorite_ingredients else [(1 == 0, 0)],
                 else_=0
             )
         )
@@ -72,7 +61,7 @@ def apply_sorting(query, sort_by, preferences=None):
             query.outerjoin(Review)
             .group_by(Recipe.recipename, Recipe.chef_email)
             .order_by(
-                origin_match.desc(),  # Prioriteer recepten met overeenkomende herkomsten
+                origin_match.desc(),  # Prioriteer recepten met overeenkomende herkomst
                 ingredient_match.desc(),  # Prioriteer recepten met overeenkomende ingrediënten
                 avg_rating.desc()  # Fallback naar beoordelingen
             )
