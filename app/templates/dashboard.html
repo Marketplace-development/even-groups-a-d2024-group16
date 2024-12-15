@@ -55,31 +55,49 @@
             <div class="col-md-3">
                 <label for="sort_by" class="form-label">Sort by</label>
                 <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
-                    <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
-                        Recommended (default)
-                    </option>
-                    <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>
-                        Price-Quality Ratio
-                    </option>
-                    <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
-                        Price (Low to High)
-                    </option>
-                    <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
-                        Price (High to Low)
-                    </option>
-                    <option value="rating_high_to_low" {% if request.args.get('sort_by') == 'rating_high_to_low' %}selected{% endif %}>
-                        Rating (High to Low)
-                    </option>
-                    <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
-                        Preparation Time (Low to High)
-                    </option>
-                    <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>
-                        Preparation Time (High to Low)
-                    </option>
+                    {% if session.get('role') == 'chef' %}
+                        <!-- Sorteeropties voor Chefs -->
+                        <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>
+                            Price-Quality Ratio
+                        </option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
+                            Price (Low to High)
+                        </option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
+                            Price (High to Low)
+                        </option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
+                            Preparation Time (Low to High)
+                        </option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>
+                            Preparation Time (High to Low)
+                        </option>
+                    {% else %}
+                        <!-- Sorteeropties voor Gebruikers -->
+                        <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
+                            Recommended
+                        </option>
+                        <option value="price_quality" {% if request.args.get('sort_by') == 'price_quality' %}selected{% endif %}>
+                            Price-Quality Ratio
+                        </option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
+                            Price (Low to High)
+                        </option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
+                            Price (High to Low)
+                        </option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
+                            Preparation Time (Low to High)
+                        </option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>
+                            Preparation Time (High to Low)
+                        </option>
+                    {% endif %}
                 </select>
             </div>
         </div>
     </form>
+    
     <div class="mb-3">
         <form method="GET" action="{{ url_for('main.dashboard') }}">
             <div class="input-group">
