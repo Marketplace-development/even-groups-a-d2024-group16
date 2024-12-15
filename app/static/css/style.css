@@ -1,6 +1,17 @@
+/*Welcome content*/
+.welcome-content h1 {
+    font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
+    color: #ff4500; /* Red color */
+    font-size: 3rem; /* Increase font size for emphasis */
+}
+
+.welcome-content p {
+    color: black; /* Ensure the text is readable on the white background */
+}
+
 /* Algemene instellingen */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Roboto, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f0f8ff;
@@ -8,7 +19,6 @@ body {
 }
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     text-align: center;
@@ -87,7 +97,7 @@ h1 {
 }
 
 .recipe-card {
-    background: #fff;
+    background: #fafafa;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -121,6 +131,39 @@ h1 {
 .recipe-card .recipe-details strong {
     color: #003366;
 }
+
+
+
+/*zoekbalk en searchknop aansluiten en afgeronde hoeken */
+.input-group .form-control {
+    width: 70%;
+    border-radius: 25px 0 0 25px; /* Linker afgeronde hoeken */
+    border: 2px solid #000; /* Voeg een rand toe zoals de knop */
+    margin: 0; /* Voorkom ruimte */
+    height: 48px;
+    border-radius: 25px;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    line-height: 1;
+}
+
+.input-group .btn {
+    width: 30%;
+    height: 100%; /* Gelijke hoogte met de input */
+    border-radius: 0 25px 25px 0; /* Rechter afgeronde hoeken */
+    border: 2px solid #000; /* Zorg dat de randen consistent zijn */
+    border-left: none; /* Vermijd dubbele rand tussen input en knop */ 
+    vertical-align: middle;
+    margin: 0; /* Voorkom ruimte */
+    height: 48px;
+    border-radius: 25px;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    line-height: 1;
+    
+}
+
+
 /* Zorg ervoor dat de header vast blijft staan */
 nav.navbar {
     position: fixed;
@@ -128,6 +171,7 @@ nav.navbar {
     width: 100%;
     z-index: 1030; /* Zorgt ervoor dat de header altijd boven andere elementen blijft */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optionele schaduw voor visuele scheiding */
+
 }
 
 /* Voeg extra ruimte toe aan de inhoud, zodat het niet onder de header wordt verborgen */

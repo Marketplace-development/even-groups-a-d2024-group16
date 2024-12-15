@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <!-- Vervang Dishcovery tekst door een afbeelding -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
-            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-wit.png') }}" alt="Dishcovery Logo" height="50" width="140">
         </a>
         
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,14 +30,14 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
                         {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
-                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_uploads') }}" style="border-radius: 5px;">My Uploads</a></li>
-                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.add_recipe') }}" style="border-radius: 5px;">Add Recipe</a></li>
-                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
-                        <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -45,7 +45,8 @@
     </div>
 </nav>
 
-<div class="container mt-5 pt-4">
+        
+<div class="container mt-5 pt-4 welcome-content">
     <h1 class="text-center">Welcome to Dishcovery!</h1>
     <p class="text-center">Explore recipes from amazing chefs and discover new flavours today.</p>
 
@@ -56,42 +57,18 @@
                 <label for="sort_by" class="form-label">Sort by</label>
                 <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
                     {% if session.get('role') == 'chef' %}
-                        <!-- Sorteeropties voor Chefs -->
-                        <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>
-                            Price-Quality Ratio
-                        </option>
-                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
-                            Price (Low to High)
-                        </option>
-                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
-                            Price (High to Low)
-                        </option>
-                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
-                            Preparation Time (Low to High)
-                        </option>
-                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>
-                            Preparation Time (High to Low)
-                        </option>
+                        <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>Price-Quality Ratio</option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>Price (Low to High)</option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>Price (High to Low)</option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>Preparation Time (Low to High)</option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>Preparation Time (High to Low)</option>
                     {% else %}
-                        <!-- Sorteeropties voor Gebruikers -->
-                        <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
-                            Recommended
-                        </option>
-                        <option value="price_quality" {% if request.args.get('sort_by') == 'price_quality' %}selected{% endif %}>
-                            Price-Quality Ratio
-                        </option>
-                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
-                            Price (Low to High)
-                        </option>
-                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
-                            Price (High to Low)
-                        </option>
-                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
-                            Preparation Time (Low to High)
-                        </option>
-                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>
-                            Preparation Time (High to Low)
-                        </option>
+                        <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>Recommended</option>
+                        <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>Price-Quality Ratio</option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>Price (Low to High)</option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>Price (High to Low)</option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>Preparation Time (Low to High)</option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by') == 'prep_time_desc' %}selected{% endif %}>Preparation Time (High to Low)</option>
                     {% endif %}
                 </select>
             </div>
@@ -101,12 +78,12 @@
     <div class="mb-3">
         <form method="GET" action="{{ url_for('main.dashboard') }}">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search by name, ingredient, etc." 
-                       value="{{ request.args.get('search', '') }}">
-                <button type="submit" class="btn btn-primary">Search</button>
+                <input type="text" class="form-control" placeholder="Search by name, ingredient, etc." aria-label= "Search input" name="search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-secondary" type="submit">Search</button>
             </div>
         </form>
     </div>
+
     <div class="row">
         <!-- Filters Sidebar -->
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
@@ -221,7 +198,7 @@
                         allergiesHidden.value = allergies.join(",");
                     }
                 </script>                       
-                <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                <button type="submit" class="btn btn-secondary">Apply Filters</button>
             </form>
         </div>
 
