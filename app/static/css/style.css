@@ -9,6 +9,13 @@
     color: black; /* Ensure the text is readable on the white background */
 }
 
+/*Logo*/ 
+.navbar-logo {
+    max-height: 55px; /* Beperk de maximale hoogte */
+    width: auto; /* Breedte past zich aan om de verhouding te behouden */
+    object-fit: contain; /* Zorgt ervoor dat het logo niet uitrekt */
+}
+
 /* Algemene instellingen */
 body {
     font-family: Roboto, sans-serif;
