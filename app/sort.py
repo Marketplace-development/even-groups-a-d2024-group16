@@ -1,11 +1,16 @@
-from sqlalchemy import func, case, cast, Float
+from sqlalchemy import func, case, cast, Text, Float
 from app.models import Recipe, Review
-from sqlalchemy import func, case, cast, Float
-from sqlalchemy import func, case, cast, Float
-from sqlalchemy import func, case, Float
 
 def apply_sorting(query, sort_by, preferences=None):
-    """Pas de sorteervolgorde toe."""
+    """Pas de sorteervolgorde toe, inclusief gebruikersvoorkeuren en allergieën."""
+    if not preferences:
+        preferences = {}
+
+    # Haal voorkeuren en allergieën op uit de opgeslagen JSON
+    allergies = preferences.get('allergies', [])
+    favorite_origins = preferences.get('favorite_origins', [])
+    favorite_ingredients = preferences.get('favorite_ingredients', [])
+
     if sort_by == 'price_low_to_high':
         query = query.order_by(Recipe.price.asc())
     elif sort_by == 'price_high_to_low':
@@ -24,7 +29,7 @@ def apply_sorting(query, sort_by, preferences=None):
     elif sort_by == 'price_quality':
         avg_rating = func.avg(Review.rating)
         price_quality_ratio = case(
-            (avg_rating > 0, Recipe.price / avg_rating),  # Bereken prijs-kwaliteitverhouding
+            (avg_rating > 0, Recipe.price / avg_rating),
             else_=float('inf')  # Recepten zonder beoordeling krijgen een hoge waarde
         )
         query = (
@@ -32,32 +37,48 @@ def apply_sorting(query, sort_by, preferences=None):
             .group_by(Recipe.recipename, Recipe.chef_email)
             .order_by(price_quality_ratio.asc())
         )
-    elif sort_by == 'recommended' and preferences:
-        # Sorteren op basis van favorite_origins
-        favorite_origins = preferences.get('favorite_origins', [])
-        
-        if favorite_origins:  # Alleen sorteren als er voorkeuren zijn
-            origin_match = func.sum(
-                case(
-                    (Recipe.origin.in_(favorite_origins), 1),
-                    else_=0
+    elif sort_by == 'recommended':
+        # Bereken prioriteit voor favoriete herkomsten
+        origin_match = func.sum(
+            case(
+                (Recipe.origin.in_(favorite_origins), 1),
+                else_=0
+            )
+        )
+
+        # Bereken prioriteit voor favoriete ingrediënten
+        ingredient_match = func.sum(
+            case(
+                *[
+                    (func.lower(cast(Recipe.ingredients, Text)).like(f"%{ingredient.lower()}%"), 1)
+                    for ingredient in favorite_ingredients
+                ],
+                else_=0
+            )
+        )
+
+        # Filter recepten met allergieën
+        if allergies:
+            for allergy in allergies:
+                query = query.filter(
+                    ~func.lower(cast(Recipe.allergiesrec, Text)).like(f"%{allergy.lower()}%")
                 )
+
+        # Voeg fallback voor beoordelingen toe
+        avg_rating = func.avg(Review.rating)
+
+        # Combineer alle factoren voor sortering
+        query = (
+            query.outerjoin(Review)
+            .group_by(Recipe.recipename, Recipe.chef_email)
+            .order_by(
+                origin_match.desc(),  # Prioriteer recepten met overeenkomende herkomsten
+                ingredient_match.desc(),  # Prioriteer recepten met overeenkomende ingrediënten
+                avg_rating.desc()  # Fallback naar beoordelingen
             )
-            query = (
-                query.outerjoin(Review)
-                .group_by(Recipe.recipename, Recipe.chef_email)
-                .order_by(origin_match.desc())  # Prioriteer recepten die overeenkomen met favorite_origins
-            )
-        else:
-            # Als er geen voorkeuren zijn, sorteer op gemiddelde beoordeling
-            avg_rating = func.avg(Review.rating)
-            query = (
-                query.outerjoin(Review)
-                .group_by(Recipe.recipename, Recipe.chef_email)
-                .order_by(avg_rating.desc())
-            )
+        )
     else:
-        # Standaard sortering (bijvoorbeeld prijs-kwaliteitverhouding)
+        # Standaard sortering: prijs-kwaliteitverhouding
         avg_rating = func.avg(Review.rating)
         price_quality_ratio = case(
             (avg_rating > 0, Recipe.price / avg_rating),
