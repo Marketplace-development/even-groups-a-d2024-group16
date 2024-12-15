@@ -1,10 +1,8 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}My Purchased Recipes{% endblock %}
+{% block title %}Chatbot{% endblock %}
 
 {% block content %}
-<!-- Navigatiebalk -->
-<!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
         <!-- Vervang Dishcovery tekst door een afbeelding -->
@@ -48,50 +46,63 @@
         </div>
     </div>
 </nav>
-
-
-<!-- Pagina inhoud -->
 <div class="container mt-5">
-    <h1 class="text-center">My Purchased Recipes</h1>
-
-    {% if recipes %}
-        <div class="recipes-container row mt-4">
-            {% for recipe in recipes %}
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100 d-flex flex-column">
-                        {% if recipe.image %}
-                            <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
-                        {% endif %}
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-center">{{ recipe.recipename }}</h5>
-                            <p class="card-text text-muted text-center">by {{ recipe.chef_name }}</p>
-                            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                            <p><strong>Ingredients:</strong></p>
-                            <ul>
-                                {% for ingredient in recipe.ingredients_list %}
-                                    <li>{{ ingredient }}</li>
-                                {% endfor %}
-                            </ul>                                
-                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-                            
-                            <!-- Knoppen met witruimte tussen de knoppen en Review knop bovenaan -->
-                            <div class="mt-auto d-flex flex-column align-items-center">
-                                <!-- Review knop bovenaan met een grotere marge naar beneden -->
-                                <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-warning mb-3">Review</a>
-                                <!-- View Recipe knop met witruimte tussen de knoppen -->
-                                <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success mt-3">View Recipe</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+    <h1 class="text-center">Dishcovery Chatbot</h1>
+    <div class="chatbox mt-4">
+        <div id="chat-messages" class="chat-messages border rounded p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+            <!-- Berichten verschijnen hier -->
         </div>
-    {% else %}
-        <p class="text-center">You haven't purchased any recipes yet.</p>
-    {% endif %}
+        <div class="input-group">
+            <input type="text" id="user-input" class="form-control" placeholder="Type your message here...">
+            <button id="send-btn" class="btn btn-primary">Send</button>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
+<script>
+    const chatMessages = document.getElementById("chat-messages");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    sendBtn.addEventListener("click", () => {
+        const message = userInput.value.trim();
+        if (!message) return;
+    
+        // Voeg de gebruikersinvoer toe aan de chat
+        addMessage("You", message);
+        userInput.value = "";
+    
+        // Verstuur het bericht naar de server
+        fetch("/chatbot/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message }),
+        })
+        .then((response) => {
+            console.log("Raw response:", response);  // Debug: Toon de ruwe response
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log("Chatbot response:", data);  // Debug: Toon de JSON-response
+            addMessage("Chatbot", data.response);
+        })
+        .catch((error) => {
+            console.error("Error:", error);  // Debug: Toon fouten in de console
+            addMessage("Chatbot", "Sorry, there was an error. Please try again.");
+        });
+    });
+    
+
+    function addMessage(sender, message) {
+        const messageElement = document.createElement("div");
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll naar het laatste bericht
+    }
+</script>
+{% endblock %}

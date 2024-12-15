@@ -231,3 +231,26 @@ h3.text-success {
 .card-body {
     padding: 10px;
 }
+
+.chatbox {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.chat-messages {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}

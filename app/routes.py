@@ -17,6 +17,7 @@ from app.zoekbalk import apply_search
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
 main = Blueprint('main', __name__)
+chatbot = Blueprint('chatbot', __name__)
 
 
 @main.route('/')
@@ -853,3 +854,34 @@ def recipe_reviews(recipename):
         avg_rating=avg_rating,
         ingredients_list=ingredients_list
     )
+
+from flask import Blueprint, render_template, request, jsonify
+
+
+@chatbot.route('/chat', methods=['GET', 'POST'])
+def chat():
+    if request.method == 'POST':
+        try:
+            # Haal het gebruikersbericht op
+            user_message = request.json.get('message', '').lower()
+            
+            # Simpele logica voor reacties
+            if 'hello' in user_message:
+                response = "Hi there! How can I help you?"
+            elif 'find recipes' in user_message:
+                response = "You can use the search bar to find recipes by name, ingredient, or category."
+            elif 'add recipe' in user_message:
+                response = "As a chef, you can add new recipes by clicking on 'Add Recipe' in the menu."
+            else:
+                response = "I'm sorry, I didn't understand that. Could you try asking differently?"
+            
+            # Stuur een geldige JSON-response terug
+            return jsonify({"response": response}), 200
+
+        except Exception as e:
+            # Log eventuele fouten en stuur een generieke foutmelding terug
+            print(f"Error in chatbot: {e}")
+            return jsonify({"response": "There was an error processing your request. Please try again later."}), 500
+
+    # Render de chatbot-template bij een GET-verzoek
+    return render_template('chatbot.html')

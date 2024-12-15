@@ -1,26 +1,25 @@
 # app/__init__.py
 
-from flask import Flask #import the Flask class
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from .config import Config #import Config class with information on login to Supabase
+from .config import Config
 from .models import db
 
 migrate = Migrate()
 
 def create_app():
-    app = Flask(__name__) #create an instance of the class
-    app.config.from_object(Config) #updates the values fot the object Config
+    app = Flask(__name__)  # Maak een nieuwe Flask-applicatie
+    app.config.from_object(Config)  # Configureer de app met de waarden uit Config
 
-    db.init_app(app) #initialize the instance db with the Specific Flask instance "app"
-    migrate.init_app(app,db)
+    db.init_app(app)  # Initialiseer SQLAlchemy
+    migrate.init_app(app, db)  # Initialiseer Flask-Migrate
 
     with app.app_context():
-        from .routes import main
-        app.register_blueprint(main)
-    
+        from .routes import main, chatbot  # Importeer beide Blueprints vanuit routes.py
+
+        # Registreer Blueprints
+        app.register_blueprint(main)  # Hoofd-Blueprint
+        app.register_blueprint(chatbot, url_prefix="/chatbot")  # Chatbot Blueprint
+
     return app
-
-
-
-    
