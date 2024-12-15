@@ -543,6 +543,16 @@ def buy_recipe(recipename):
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
+    # Ingrediënten als JSON voorbereiden
+    ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
+
+    # Gerelateerde recepten ophalen
+    related_recipes = Recipe.query.filter(
+        #(Recipe.category == recipe.category) | 
+        (Recipe.origin == recipe.origin) | 
+        (Recipe.ingredients.contains(ingredients_to_match))
+    ).filter(Recipe.recipename != recipename).limit(4).all()
+
     # Check if user is logged in
     if 'email' not in session:
         flash('You need to be logged in to buy a recipe.', 'danger')
@@ -595,7 +605,8 @@ def buy_recipe(recipename):
         'buy_recipe.html',
         recipe=recipe,
         ingredients_list=ingredients_list,
-        reviews=reviews
+        reviews=reviews,
+        related_recipes=related_recipes
     )
 
 
