@@ -69,7 +69,6 @@ class Recipe(db.Model):
     origin = db.Column(db.String, nullable=True)  # Toegevoegd voor herkomst
     category = db.Column(db.String, nullable=True)  # Toegevoegd voor categorie
     preparation = db.Column(db.Text, nullable=True)  # Toegevoegd voor bereidingswijze
-    favorites = db.Column(JSONB, nullable=True)  
 
     __table_args__ = (
         PrimaryKeyConstraint('recipename', 'chef_email'),
