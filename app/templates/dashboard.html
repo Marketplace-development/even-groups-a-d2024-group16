@@ -140,15 +140,61 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="allergies" class="form-label">Allergies</label>
-                    <select name="allergies[]" id="allergies" class="form-control" multiple>
-                        {% for allergen in allergens %}
-                            <option value="{{ allergen }}" {% if allergen in request.args.getlist('allergies') %}selected{% endif %}>
-                                {{ allergen }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <label for="allergies" class="form-label">Exclude Allergens</label>
+                    <div id="allergy-input-container">
+                        <input type="text" id="allergy-input" class="form-control mb-2" placeholder="Type an allergen and press Enter">
+                    </div>
+                    <small class="form-text text-muted">
+                        Press Enter after typing each allergen.
+                    </small>
+                    <ul id="allergy-list" class="list-group mt-2">
+                        <!-- Dynamisch toegevoegde allergieën worden hier weergegeven -->
+                    </ul>
+                    <input type="hidden" name="allergies" id="allergies-hidden">
                 </div>
+                
+                <script>
+                    const allergyInput = document.getElementById("allergy-input");
+                    const allergyList = document.getElementById("allergy-list");
+                    const allergiesHidden = document.getElementById("allergies-hidden");
+                
+                    // Dynamisch allergieën toevoegen
+                    allergyInput.addEventListener("keypress", function (e) {
+                        if (e.key === "Enter" && allergyInput.value.trim() !== "") {
+                            e.preventDefault();
+                            const allergy = allergyInput.value.trim();
+                
+                            // Maak een nieuwe lijstitem
+                            const listItem = document.createElement("li");
+                            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                            listItem.textContent = allergy;
+                
+                            // Verwijderknop toevoegen
+                            const removeButton = document.createElement("button");
+                            removeButton.className = "btn btn-sm btn-danger";
+                            removeButton.textContent = "Remove";
+                            removeButton.addEventListener("click", function () {
+                                listItem.remove();
+                                updateHiddenInput();
+                            });
+                
+                            listItem.appendChild(removeButton);
+                            allergyList.appendChild(listItem);
+                
+                            // Inputveld leegmaken
+                            allergyInput.value = "";
+                
+                            // Update verborgen input
+                            updateHiddenInput();
+                        }
+                    });
+                
+                    // Verborgen input bijwerken
+                    function updateHiddenInput() {
+                        const allergies = Array.from(allergyList.children).map(li => li.textContent.replace("Remove", "").trim());
+                        allergiesHidden.value = allergies.join(",");
+                    }
+                </script>                       
                 <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
             </form>
         </div>

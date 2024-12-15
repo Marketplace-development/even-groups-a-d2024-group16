@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import text, cast
+from sqlalchemy import func
 from app.models import Recipe
 
 def apply_filters(query, filters):
@@ -12,12 +13,15 @@ def apply_filters(query, filters):
             Recipe.ingredients.op('@>')(cast(ingredients, JSONB))
         )
 
-    # Allergieënfilter (reeds correct)
+    
+    # Allergieënfilter (recepten zonder de opgegeven allergieën)
     if filters.get('allergies'):
-        allergies = filters['allergies']
-        query = query.filter(
-            ~Recipe.allergiesrec.op('?|')(cast(allergies, JSONB))
-        )
+        allergy_filters = filters['allergies']
+        for allergy in allergy_filters:
+            query = query.filter(
+                ~func.lower(Recipe.allergiesrec).like(f"%{allergy.lower()}%")
+            )
+
 
     # Herkomstfilter
     if filters.get('origin'):

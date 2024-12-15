@@ -123,11 +123,13 @@ def dashboard():
     allergens = get_allergens()
 
     # Initialiseer filters
+    allergies_input = request.args.get('allergies', "")
+    allergies_list = [a.lower().strip() for a in allergies_input.split(",") if a]
     filters = {
         'ingredient': request.args.getlist('ingredient[]'),
         'quantity': request.args.getlist('quantity[]'),
         'unit': request.args.getlist('unit[]'),
-        'allergies': request.args.getlist('allergies'),
+        'allergies': allergies_list,  # Zorg voor een genormaliseerde lijst
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
         'price': request.args.get('price'),
@@ -172,18 +174,19 @@ def dashboard():
                     'ingredient': ingredient
                 })
 
+        # Allergieën verwerken
+        allergies = recipe.allergiesrec.split(", ") if recipe.allergiesrec else []
+
         # Voeg alle verwerkte gegevens toe aan de lijst
         recipe_data.append({
             'recipe': recipe,
             'avg_rating': avg_rating,
-            'ingredients_list': ingredients_list
+            'ingredients_list': ingredients_list,
+            'allergies': allergies  # Voeg 'allergies' expliciet toe
         })
 
     # Verwerk ingrediëntenfilters
     ingredient_filters = filters['ingredient']
-    quantity_filters = filters['quantity']
-    unit_filters = filters['unit']
-
     if ingredient_filters:
         recipe_data = [
             r for r in recipe_data
@@ -191,6 +194,17 @@ def dashboard():
                 ingredient_filter.lower() in ingredient['ingredient'].lower()
                 for ingredient_filter in ingredient_filters
                 for ingredient in r['ingredients_list']
+            )
+        ]
+
+    # Filteren op allergieën
+    if filters['allergies']:
+        allergy_filters = filters['allergies']
+        recipe_data = [
+            r for r in recipe_data
+            if not any(
+                allergy in [a.lower() for a in r['allergies']]  # Controleer overlap
+                for allergy in allergy_filters
             )
         ]
 
@@ -226,14 +240,6 @@ def dashboard():
     if filters.get('origin'):
         recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
 
-    # Filteren op allergenen
-    if filters.get('allergies'):
-        allergy_filters = set(filters['allergies'])
-        recipe_data = [
-            r for r in recipe_data
-            if not allergy_filters.intersection(set(r['recipe'].allergiesrec.split(", ")))
-        ]
-
     # Render de template met de nodige gegevens
     return render_template(
         'dashboard.html',
@@ -245,6 +251,9 @@ def dashboard():
         ingredienten=ingredienten,
         sort_by=sort_by
     )
+
+
+    
 
 
 @main.route('/logout', methods=['GET'])
