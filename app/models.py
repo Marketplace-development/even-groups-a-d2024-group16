@@ -56,18 +56,22 @@ class User(db.Model):
         return f"<User(email={self.email}, name={self.name}, is_chef={self.is_chef})>"
     
     def add_to_favorites(self, recipename, chef_email):
-        # Check if the recipe is already in favorites
+        if not self.favorites:
+            self.favorites = []
         favorite_entry = {"recipename": recipename, "chef_email": chef_email}
         if favorite_entry not in self.favorites:
             self.favorites.append(favorite_entry)
 
     def remove_from_favorites(self, recipename, chef_email):
-        # Remove the recipe if it exists in favorites
+        if not self.favorites:
+            self.favorites = []
         favorite_entry = {"recipename": recipename, "chef_email": chef_email}
         self.favorites = [fav for fav in self.favorites if fav != favorite_entry]
 
     def is_favorite(self, recipename, chef_email):
-        # Check if a recipe is in favorites
+        # Ensure favorites is initialized as an empty list if None
+        if not self.favorites:
+            self.favorites = []
         favorite_entry = {"recipename": recipename, "chef_email": chef_email}
         return favorite_entry in self.favorites
 
