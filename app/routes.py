@@ -166,7 +166,6 @@ def dashboard():
 
     for recipe in recipes:
 
-        is_liked = {"recipename": recipe.recipename, "chef_email": recipe.chef_email} in user_favorites
 
         # Gemiddelde beoordeling berekenen
         avg_rating = (
@@ -188,6 +187,7 @@ def dashboard():
 
         # Allergieën verwerken
         allergies = recipe.allergiesrec.split(", ") if recipe.allergiesrec else []
+        is_liked = user.is_favorite(recipe.recipename, recipe.chef_email)
 
         # Voeg alle verwerkte gegevens toe aan de lijst
         recipe_data.append({
@@ -943,12 +943,8 @@ def toggle_favorite():
     if not recipename or not chef_email:
         return jsonify({"error": "Invalid recipe data"}), 400
 
-    if not user.favorites:
-        user.favorites = []
-
-    favorite_entry = {"recipename": recipename, "chef_email": chef_email}
-
-    if favorite_entry in user.favorites:
+    # Toggle favorite
+    if user.is_favorite(recipename, chef_email):
         user.remove_from_favorites(recipename, chef_email)
         action = "removed"
     else:
@@ -962,7 +958,6 @@ def toggle_favorite():
         db.session.rollback()
         return jsonify({"error": "Failed to update favorites", "details": str(e)}), 500
 
-
 @main.route('/wishlist')
 def wishlist():
     if 'email' not in session or session.get('role') != 'customer':
@@ -971,10 +966,8 @@ def wishlist():
 
     user = User.query.filter_by(email=session['email']).first()
    
-    if not user or not user.favorites:
-        favorite_recipes = []
-    else:
-        favorite_recipes = []
+    favorite_recipes = []
+    if user and user.favorites:
         for fav in user.favorites:
             recipe = Recipe.query.filter_by(recipename=fav['recipename'], chef_email=fav['chef_email']).first()
             if recipe:
