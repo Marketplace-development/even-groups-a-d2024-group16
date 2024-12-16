@@ -18,7 +18,11 @@ class User(db.Model):
     country = db.Column(db.String, nullable=True)
     telephonenr = db.Column(db.String, nullable=True)
     is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Nodig om te onderscheiden tussen chefs en klanten
-    preferences = db.Column(db.JSON, nullable=True, default={})  # Sla voorkeuren op als JSON met standaardwaarde {}
+    preferences = db.Column(db.JSON, nullable=False, default=lambda: {
+        "allergies": [],
+        "favorite_origins": [],
+        "favorite_ingredients": []
+    })
     favorites = db.Column(MutableList.as_mutable(JSONB), default=[])
 
     # Relaties

@@ -215,15 +215,20 @@
             <!-- Favourite Ingredients -->
             <div>
                 <label for="favorite_ingredients">Favourite Ingredients</label>
-                {{ form.favorite_ingredients(class="form-control", multiple="multiple") }}
-                {% if form.favorite_ingredients.errors %}
-                    <ul class="errors">
-                        {% for error in form.favorite_ingredients.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+                <div id="ingredients-container" class="form-control p-2" style="min-height: 40px; display: flex; flex-wrap: wrap;">
+                    <!-- Dynamisch toegevoegde tags komen hier -->
+                </div>
+                <input type="text" id="ingredient-input" class="form-control mt-2" placeholder="Type an ingredient and press Enter" style="display: none;">
+                <small class="text-muted">Press Enter to add an ingredient.</small>
+                <ul class="errors">
+                    {% for error in form.favorite_ingredients.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
             </div>
+            
+            <input type="hidden" id="favorite_ingredients" name="favorite_ingredients" value="{{ ','.join(form.favorite_ingredients.data) if form.favorite_ingredients.data else '' }}">
+            
 
             <!-- Favourite Origins -->
             <div>
@@ -247,6 +252,58 @@
 </div>
 
 <!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('ingredients-container');
+        const input = document.getElementById('ingredient-input');
+        const hiddenInput = document.getElementById('favorite_ingredients');
+
+        // Maak de input zichtbaar als er wordt geklikt
+        container.addEventListener('click', function () {
+            input.style.display = 'block';
+            input.focus();
+        });
+
+        input.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter' && input.value.trim() !== '') {
+                event.preventDefault();
+
+                const ingredient = input.value.trim();
+                addTag(ingredient);
+
+                input.value = '';
+                input.style.display = 'none';
+                updateHiddenInput();
+            }
+        });
+
+        function addTag(ingredient) {
+            const tag = document.createElement('span');
+            tag.className = 'badge bg-primary text-white me-2 mb-2';
+            tag.textContent = ingredient;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn-close ms-2';
+            removeBtn.style.fontSize = '0.75rem';
+            removeBtn.setAttribute('aria-label', 'Remove');
+            removeBtn.addEventListener('click', function () {
+                tag.remove();
+                updateHiddenInput();
+            });
+
+            tag.appendChild(removeBtn);
+            container.appendChild(tag);
+        }
+
+        function updateHiddenInput() {
+            const tags = Array.from(container.children)
+                .filter(el => el.tagName === 'SPAN')
+                .map(el => el.firstChild.textContent.trim());
+            hiddenInput.value = tags.join(',');
+        }
+    });
+</script>
+
 <script>
     function togglePreferences() {
         const chefYes = document.getElementById('yes').checked;

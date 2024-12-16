@@ -31,13 +31,7 @@ class UserForm(FlaskForm):
         option_widget=widgets.CheckboxInput(),
         coerce=str
     )
-    favorite_ingredients = SelectMultipleField(
-        'Favorite Ingredients',
-        choices=[],  # Wordt dynamisch ingesteld in de route
-        widget=widgets.ListWidget(prefix_label=False),
-        option_widget=widgets.CheckboxInput(),
-        coerce=str
-    )
+    favorite_ingredients = StringField('Favorite Ingredients')  # Dit wordt nu een enkel invoerveld
     favorite_origins = SelectMultipleField(
         'Favorite Origins',
         choices=[],  # Wordt dynamisch ingesteld in de route

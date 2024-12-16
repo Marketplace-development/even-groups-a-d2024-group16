@@ -56,12 +56,14 @@ def register():
             print(f"The email {form.email.data} is already in use.")
             flash('This email is already in use, pick another one or login', 'danger')
             return redirect(url_for('main.register'))
+        
+        favorite_ingredients = form.favorite_ingredients.data.split(',') if form.favorite_ingredients.data else []
 
         # Maak nieuwe gebruiker aan
         preferences = {
-            'allergies': form.allergies.data or [],
-            'favorite_ingredients': form.favorite_ingredients.data or [],
-            'favorite_origins': form.favorite_origins.data or [],
+            "allergies": form.allergies.data or [],
+            "favorite_origins": form.favorite_origins.data or [],
+            "favorite_ingredients": favorite_ingredients,
         }
         new_user = User(
             email=form.email.data,
