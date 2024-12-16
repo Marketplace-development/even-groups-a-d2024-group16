@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Wishlist{% endblock %}
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Replace Dishcovery text with an image -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Chatbot Link with Icon -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
+                        <i class="fas fa-robot me-2"></i>Chatbot
+                    </a>
+                </li>
+                {% if session.get('role') == 'customer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.wishlist') }}">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
+
+                <!-- Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <!-- Contact Link -->
+                        <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">My Wishlist</h1>
+    
+    <div class="row g-4">
+        {% for favorite in favorite_recipes %}
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <a href="{{ url_for('main.buy_recipe', recipename=favorite['recipe'].recipename) }}" class="text-decoration-none">
+                    {% if favorite['recipe'].image %}
+                        <img src="{{ url_for('static', filename=favorite['recipe'].image) }}" class="card-img-top" alt="{{ favorite['recipe'].recipename }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                    {% endif %}
+                </a>
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ favorite['recipe'].recipename }}</h5>
+                    <p class="text-muted">by {{ favorite['recipe'].chef_name }}</p>
+    
+                    <button 
+                        class="btn favorite-btn"
+                        data-recipename="{{ favorite['recipe'].recipename }}"
+                        data-chef-email="{{ favorite['recipe'].chef_email }}">
+                        <i class="fa-heart {% if favorite['is_liked'] %}fas{% else %}far{% endif %}"></i>
+                    </button>
+    
+                    <div class="d-flex justify-content-center align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        <span>{{ favorite['recipe'].duration }} min</span>
+                    </div>
+                    <p class="text-success fw-bold">€{{ favorite['recipe'].price }}</p>
+                    <div class="d-flex align-items-center justify-content-center">
+                        {% set avg_rating = favorite['avg_rating'] if favorite['avg_rating'] is not none else 0 %}
+                        <div class="me-2">
+                            {% for star in range(1, 6) %}
+                                {% if star <= avg_rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% elif star - 0.5 <= avg_rating %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">
+                            {% if avg_rating > 0 %}
+                                ({{ avg_rating }})
+                            {% else %}
+                                (No rating)
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <p class="text-center">You haven't added any recipes to your wishlist yet.</p>
+        {% endfor %}
+    </div>    
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Event listener for all favorite buttons
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const recipename = this.getAttribute('data-recipename');
+                const chefEmail = this.getAttribute('data-chef-email');
+
+                fetch("{{ url_for('main.toggle_favorite') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ recipename, chef_email: chefEmail }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.action === "added") {
+                        this.querySelector('i').classList.remove('far');
+                        this.querySelector('i').classList.add('fas');
+                    } else if (data.action === "removed") {
+                        this.querySelector('i').classList.remove('fas');
+                        this.querySelector('i').classList.add('far');
+                    }
+                    // Refresh the page to reflect changes
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -162,7 +162,12 @@ def dashboard():
 
     # Verwerk recepten en voeg extra gegevens toe
     recipe_data = []
+    user_favorites = user.favorites or []
+
     for recipe in recipes:
+
+        is_liked = {"recipename": recipe.recipename, "chef_email": recipe.chef_email} in user_favorites
+
         # Gemiddelde beoordeling berekenen
         avg_rating = (
             db.session.query(func.avg(Review.rating))
@@ -189,7 +194,8 @@ def dashboard():
             'recipe': recipe,
             'avg_rating': avg_rating,
             'ingredients_list': ingredients_list,
-            'allergies': allergies  # Voeg 'allergies' expliciet toe
+            'allergies': allergies,  # Voeg 'allergies' expliciet toe
+            'is_liked': is_liked  # Include the accurate liked state
         })
 
     # Verwerk ingrediëntenfilters
@@ -256,7 +262,8 @@ def dashboard():
         origins=origins,
         allergens=allergens,
         ingredienten=ingredienten,
-        sort_by=sort_by
+        sort_by=sort_by,
+        user_favorites=user_favorites
     )
 
 
@@ -918,3 +925,68 @@ def contact():
     public_comments = Feedback.query.filter_by(is_public=True).order_by(Feedback.created_at.desc()).all()
 
     return render_template('contact.html', form=form, public_comments=public_comments)
+
+
+@main.route('/toggle_favorite', methods=['POST'])
+def toggle_favorite():
+    if 'email' not in session:
+        return jsonify({"error": "User not logged in"}), 403
+
+    user = User.query.filter_by(email=session['email']).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.json
+    recipename = data.get('recipename')
+    chef_email = data.get('chef_email')
+
+    if not recipename or not chef_email:
+        return jsonify({"error": "Invalid recipe data"}), 400
+
+    if not user.favorites:
+        user.favorites = []
+
+    favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+
+    if favorite_entry in user.favorites:
+        user.remove_from_favorites(recipename, chef_email)
+        action = "removed"
+    else:
+        user.add_to_favorites(recipename, chef_email)
+        action = "added"
+
+    try:
+        db.session.commit()
+        return jsonify({"message": f"Recipe {action} in favorites", "action": action}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to update favorites", "details": str(e)}), 500
+
+
+@main.route('/wishlist')
+def wishlist():
+    if 'email' not in session or session.get('role') != 'customer':
+        flash('You need to log in as a customer to view your wishlist.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    user = User.query.filter_by(email=session['email']).first()
+   
+    if not user or not user.favorites:
+        favorite_recipes = []
+    else:
+        favorite_recipes = []
+        for fav in user.favorites:
+            recipe = Recipe.query.filter_by(recipename=fav['recipename'], chef_email=fav['chef_email']).first()
+            if recipe:
+                avg_rating = (
+                    db.session.query(func.avg(Review.rating))
+                    .filter(Review.recipename == recipe.recipename)
+                    .scalar()
+                )
+                favorite_recipes.append({
+                    "recipe": recipe,
+                    "avg_rating": round(avg_rating, 1) if avg_rating else None,
+                    "is_liked": True
+                })
+
+    return render_template('wishlist.html', favorite_recipes=favorite_recipes)

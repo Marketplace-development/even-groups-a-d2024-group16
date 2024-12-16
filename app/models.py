@@ -18,6 +18,7 @@ class User(db.Model):
     telephonenr = db.Column(db.String, nullable=True)
     is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Nodig om te onderscheiden tussen chefs en klanten
     preferences = db.Column(db.JSON, nullable=True, default={})  # Sla voorkeuren op als JSON met standaardwaarde {}
+    favorites = db.Column(JSONB, default=[])  # Ensure favorites defaults to an empty array
 
     # Relaties
     recipes = db.relationship('Recipe', backref='chef', lazy=True)
@@ -52,6 +53,21 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User(email={self.email}, name={self.name}, is_chef={self.is_chef})>"
+
+
+    def add_to_favorites(self, recipename, chef_email):
+        if not self.favorites:
+            self.favorites = []
+        favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+        if favorite_entry not in self.favorites:
+            self.favorites.append(favorite_entry)
+
+    def remove_from_favorites(self, recipename, chef_email):
+        if not self.favorites:
+            return
+        favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+        self.favorites = [fav for fav in self.favorites if fav != favorite_entry]
+   
 
 
 class Recipe(db.Model):

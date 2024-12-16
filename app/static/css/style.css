@@ -254,3 +254,16 @@ h3.text-success {
     display: flex;
     align-items: center;
 }
+
+<style>
+    .favorite-btn {
+        background: none;
+        border: none;
+        color: red;
+        font-size: 1.5rem;
+    }
+
+    .favorite-btn:hover {
+        color: darkred;
+    }
+</style>

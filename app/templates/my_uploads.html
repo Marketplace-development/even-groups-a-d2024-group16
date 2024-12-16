@@ -24,6 +24,13 @@
                         <i class="fas fa-robot me-2"></i>Chatbot
                     </a>
                 </li>
+                {% if session.get('role') == 'customer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.wishlist') }}">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
 
                 <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
@@ -55,7 +62,6 @@
         </div>
     </div>
 </nav>
-
     
 <!-- Content -->
 <div class="container mt-5">
