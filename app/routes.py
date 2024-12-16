@@ -152,7 +152,6 @@ def dashboard():
 
     query = apply_search(query, search_query)
 
-
     # Sorteerfunctie toepassen met voorkeuren
     preferences = user.preferences or {'favorite_ingredients': [], 'favorite_origins': []}
     query = apply_sorting(query, sort_by, preferences=preferences)
@@ -165,8 +164,6 @@ def dashboard():
     user_favorites = user.favorites or []
 
     for recipe in recipes:
-
-
         # Gemiddelde beoordeling berekenen
         avg_rating = (
             db.session.query(func.avg(Review.rating))
@@ -198,19 +195,7 @@ def dashboard():
             'is_liked': is_liked  # Include the accurate liked state
         })
 
-    # Verwerk ingrediëntenfilters
-    ingredient_filters = filters['ingredient']
-    if ingredient_filters:
-        recipe_data = [
-            r for r in recipe_data
-            if any(
-                ingredient_filter.lower() in ingredient['ingredient'].lower()
-                for ingredient_filter in ingredient_filters
-                for ingredient in r['ingredients_list']
-            )
-        ]
-
-    # Filteren op allergieën
+    # Verwerk allergieënfilters
     if filters['allergies']:
         allergy_filters = filters['allergies']
         recipe_data = [
@@ -253,6 +238,7 @@ def dashboard():
     if filters.get('origin'):
         recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
 
+
     # Render de template met de nodige gegevens
     return render_template(
         'dashboard.html',
@@ -265,8 +251,6 @@ def dashboard():
         sort_by=sort_by,
         user_favorites=user_favorites
     )
-
-
     
 
 

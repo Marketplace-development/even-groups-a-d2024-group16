@@ -133,17 +133,6 @@
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
             <h5 class="mb-3">Filters</h5>
             <form method="GET" action="{{ url_for('main.dashboard') }}">
-                <div class="mb-3" id="ingredients-filters">
-                    <h6>Ingredient Filters</h6>
-                    <!-- Dynamisch toegevoegde filterregels worden hier ingevoegd -->
-                    <div class="filter-row">
-                        <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
-                        <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
-                        <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="addFilterRow()">Add Filter</button>
-                
                 <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>

@@ -6,14 +6,6 @@ from app.models import Recipe
 def apply_filters(query, filters):
     """Past filters toe op de receptenquery."""
 
-    # Ingrediëntenfilter (reeds correct)
-    if filters.get('ingredients'):
-        ingredients = filters['ingredients']
-        query = query.filter(
-            Recipe.ingredients.op('@>')(cast(ingredients, JSONB))
-        )
-
-    
     # Allergieënfilter (recepten zonder de opgegeven allergieën)
     if filters.get('allergies'):
         allergy_filters = filters['allergies']
@@ -21,7 +13,6 @@ def apply_filters(query, filters):
             query = query.filter(
                 ~func.lower(Recipe.allergiesrec).like(f"%{allergy.lower()}%")
             )
-
 
     # Herkomstfilter
     if filters.get('origin'):
