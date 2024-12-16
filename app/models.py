@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKeyConstraint, PrimaryKeyConstraint, CheckConstraint, Numeric
 from sqlalchemy.dialects.postgresql import JSONB, NUMERIC
+from sqlalchemy.ext.mutable import MutableList
 
 db = SQLAlchemy()
 
@@ -18,6 +19,7 @@ class User(db.Model):
     telephonenr = db.Column(db.String, nullable=True)
     is_chef = db.Column(db.Boolean, default=False, nullable=False)  # Nodig om te onderscheiden tussen chefs en klanten
     preferences = db.Column(db.JSON, nullable=True, default={})  # Sla voorkeuren op als JSON met standaardwaarde {}
+    favorites = db.Column(MutableList.as_mutable(JSONB), default=[])
 
     # Relaties
     recipes = db.relationship('Recipe', backref='chef', lazy=True)
@@ -52,7 +54,26 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User(email={self.email}, name={self.name}, is_chef={self.is_chef})>"
+    
+    def add_to_favorites(self, recipename, chef_email):
+        if not self.favorites:
+            self.favorites = []
+        favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+        if favorite_entry not in self.favorites:
+            self.favorites.append(favorite_entry)
 
+    def remove_from_favorites(self, recipename, chef_email):
+        if not self.favorites:
+            self.favorites = []
+        favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+        self.favorites = [fav for fav in self.favorites if fav != favorite_entry]
+
+    def is_favorite(self, recipename, chef_email):
+        # Ensure favorites is initialized as an empty list if None
+        if not self.favorites:
+            self.favorites = []
+        favorite_entry = {"recipename": recipename, "chef_email": chef_email}
+        return favorite_entry in self.favorites
 
 class Recipe(db.Model):
     __tablename__ = 'recipe'
@@ -128,3 +149,13 @@ class Review(db.Model):
     def __repr__(self):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
 
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_public = db.Column(db.Boolean, default=False)  # Whether the comment is public
+    created_at = db.Column(db.DateTime, default=db.func.now())

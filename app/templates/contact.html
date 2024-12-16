@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Replace Dishcovery text with an image -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Chatbot Link with Icon -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
+                        <i class="fas fa-robot me-2"></i>Chatbot
+                    </a>
+                </li>
+                {% if session.get('role') == 'customer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.wishlist') }}">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
+
+                <!-- Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <!-- Contact Link -->
+                        <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">About Us</h1>
+
+    <!-- About Us Section -->
+    <div class="row mb-5 align-items-center">
+        <!-- Image Section -->
+        <div class="col-md-7">
+            <img src="{{ url_for('static', filename='images/concept.jpg') }}" alt="Dishcovery Concept" class="img-fluid rounded shadow-lg">
+        </div>
+        
+        <!-- Text Section -->
+        <div class="col-md-5">
+            <p>
+                At <strong>Dishcovery</strong>, we bridge the gap between passionate chefs and food enthusiasts by 
+                revolutionizing the way you discover and enjoy recipes. Say goodbye to cluttered shelves filled with 
+                expensive cookbooks you only use once. With Dishcovery, you'll always have instant access to the exclusive 
+                recipes of your favorite top chefs, exactly when you need them.
+            </p>
+            <p>
+                Our platform empowers chefs to showcase their unique culinary creations, allowing them to share their 
+                expertise with a global audience. Meanwhile, food lovers can explore an ever-growing collection of dishes 
+                from around the world, tailored to their tastes and preferences. Whether you're in the mood for an 
+                intricate gourmet meal or a quick and efficient dish, Dishcovery has you covered.
+            </p>
+            <p>
+                Save money, reduce waste, and elevate your cooking efficiency by accessing professional-grade recipes 
+                directly at your fingertips. No more flipping through countless books or spending a fortune on unused 
+                collections—Dishcovery ensures you have everything you need to create culinary magic, all in one place. 
+                Whether you're here to explore new flavors or share your own creations, Dishcovery is your trusted partner 
+                in culinary inspiration.
+            </p>
+        </div>
+    </div>
+
+    <!-- Contact Details -->
+    <div class="row mb-5">
+        <h2 class="text-center mb-4">Onze Contactgegevens</h2>
+        <p class="text-center">
+            Heb je vragen of opmerkingen? Neem gerust contact met ons op!
+            <br>
+            <strong>Email:</strong> <a href="mailto:info@dishcovery.com">info@dishcovery.com</a>
+        </p>
+    </div>
+
+    <!-- Contact Form Section -->
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="text-center mb-4">Neem Contact Op</h2>
+            <form method="POST" action="{{ url_for('main.contact') }}">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", placeholder="Your Name") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", placeholder="Your Email") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.subject.label(class="form-label") }}
+                    {{ form.subject(class="form-control", placeholder="Subject") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.message.label(class="form-label") }}
+                    {{ form.message(class="form-control", rows=5, placeholder="Your Message") }}
+                </div>
+                <div class="form-check mb-3">
+                    {{ form.is_public(class="form-check-input") }}
+                    {{ form.is_public.label(class="form-check-label") }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row mb-5">
+        <h2 class="text-center mb-4">Veelgestelde Vragen</h2>
+        <div class="col-md-8 offset-md-2">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>Hoe kan ik een recept toevoegen?</strong>
+                    <p>Log in als chef en klik op "Add Recipe" in het menu.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>Hoe kan ik mijn profiel wijzigen?</strong>
+                    <p>Ga naar "Edit Profile" in het menu om je persoonlijke gegevens aan te passen.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>Hoe kan ik een recept kopen?</strong>
+                    <p>Log in als klant, zoek een recept en klik op "Buy Now" om het te kopen.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>Hoe kan ik contact opnemen met de support?</strong>
+                    <p>Stuur ons een email via <a href="mailto:info@dishcovery.com">info@dishcovery.com</a>.</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Public Comments Section -->
+<div class="row mb-5">
+    <h2 class="text-center mb-4">Public Comments</h2>
+    <div class="col-md-8 offset-md-2">
+        {% if public_comments %}
+            <ul class="list-group">
+                {% for comment in public_comments %}
+                    <li class="list-group-item">
+                        <strong>{{ comment.name }}</strong> - <small>{{ comment.created_at.strftime('%d %B %Y, %H:%M') }}</small>
+                        <p>{{ comment.message }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center">No public comments available yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

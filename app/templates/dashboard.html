@@ -7,7 +7,7 @@
 <!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <!-- Replace Dishcovery text with an image -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
         </a>
@@ -18,9 +18,21 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                <!-- Chatbot Link with Icon -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('chatbot.chat') }}">Chatbot</a>
+                    <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
+                        <i class="fas fa-robot me-2"></i>Chatbot
+                    </a>
                 </li>
+                {% if session.get('role') == 'customer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.wishlist') }}">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
+
+                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div style="display: flex; align-items: center;">
@@ -41,6 +53,8 @@
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
+                        <!-- Contact Link -->
+                        <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
                         <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
                     </ul>
                 </li>
@@ -48,6 +62,7 @@
         </div>
     </div>
 </nav>
+
 
 
         
@@ -118,17 +133,6 @@
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
             <h5 class="mb-3">Filters</h5>
             <form method="GET" action="{{ url_for('main.dashboard') }}">
-                <div class="mb-3" id="ingredients-filters">
-                    <h6>Ingredient Filters</h6>
-                    <!-- Dynamisch toegevoegde filterregels worden hier ingevoegd -->
-                    <div class="filter-row">
-                        <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
-                        <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
-                        <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="addFilterRow()">Add Filter</button>
-                
                 <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>
@@ -246,6 +250,16 @@
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ data.recipe.recipename }}</h5>
                                 <p class="text-muted">by {{ data.recipe.chef_name }}</p>
+                                {% if session.get('role') == 'customer' %}
+                                <button 
+                                    class="btn favorite-btn"
+                                    data-recipename="{{ data.recipe.recipename }}"
+                                    data-chef-email="{{ data.recipe.chef_email }}">
+                                    <i class="fa-heart {% if data.is_liked %}fas{% else %}far{% endif %}"></i>
+                                </button>
+                                {% endif %}
+        
+                            
                                 <div class="d-flex justify-content-center align-items-center">
                                     <i class="fas fa-clock me-2"></i>
                                     <span>{{ data.recipe.duration }} min</span>
@@ -295,6 +309,38 @@
         `;
         document.getElementById('ingredients-filters').appendChild(newFilterRow);
     }
+    document.addEventListener('DOMContentLoaded', function () {
+        // Event listener for all favorite buttons
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const recipename = this.getAttribute('data-recipename');
+                const chefEmail = this.getAttribute('data-chef-email');
+
+                fetch("{{ url_for('main.toggle_favorite') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ recipename, chef_email: chefEmail }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.action === "added") {
+                        this.querySelector('i').classList.remove('far');
+                        this.querySelector('i').classList.add('fas');
+                    } else if (data.action === "removed") {
+                        this.querySelector('i').classList.remove('fas');
+                        this.querySelector('i').classList.add('far');
+                    }
+                    // Refresh the page to reflect changes
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            });
+        });
+    });
 </script>
 
 {% endblock %}
