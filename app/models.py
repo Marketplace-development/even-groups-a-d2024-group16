@@ -128,3 +128,13 @@ class Review(db.Model):
     def __repr__(self):
         return f"<Review(reviewid={self.reviewid}, rating={self.rating})>"
 
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    subject = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_public = db.Column(db.Boolean, default=False)  # Whether the comment is public
+    created_at = db.Column(db.DateTime, default=db.func.now())

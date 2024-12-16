@@ -4,8 +4,8 @@ from datetime import datetime  # Voor datum- en tijdstempels
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
-from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
-from app.forms import RecipeForm, ReviewForm, EditProfileForm
+from app.models import User, Recipe, Review, Transaction, Feedback  # Je databasemodellen
+from app.forms import RecipeForm, ReviewForm, EditProfileForm, ContactForm
 from app.ingredients import ingredienten
 from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
@@ -881,3 +881,40 @@ def chat():
 
     # Render de chatbot-template bij een GET-verzoek
     return render_template('chatbot.html')
+
+@main.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        try:
+            # Collect form data
+            name = form.name.data
+            email = form.email.data
+            subject = form.subject.data
+            message = form.message.data
+            is_public = form.is_public.data  # Retrieve the checkbox value
+
+            # Save feedback to the database
+            new_feedback = Feedback(
+                name=name,
+                email=email,
+                subject=subject,
+                message=message,
+                is_public=is_public
+            )
+            db.session.add(new_feedback)
+            db.session.commit()
+
+            # Success message
+            flash("Thank you for contacting us! We'll get back to you shortly.", "success")
+            return redirect(url_for('main.contact'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while submitting your message. Please try again.", "danger")
+            print(f"Error: {e}")
+
+    # Fetch public comments to display
+    public_comments = Feedback.query.filter_by(is_public=True).order_by(Feedback.created_at.desc()).all()
+
+    return render_template('contact.html', form=form, public_comments=public_comments)

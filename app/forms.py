@@ -126,3 +126,10 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField('Save Changes')
 
 
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    subject = StringField('Subject', validators=[DataRequired(), Length(max=100)])
+    message = TextAreaField('Message', validators=[DataRequired(), Length(max=1000)])
+    is_public = BooleanField('Make this comment public')  # Checkbox for public visibility
+    submit = SubmitField('Send Message')
