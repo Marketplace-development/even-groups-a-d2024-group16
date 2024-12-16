@@ -10,50 +10,43 @@
         </span>
     </div>
 </nav>
+
 <!-- Include Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
 <style>
     html, body {
-        margin: 0; /* Remove default margins */
-        padding: 0; /* Remove default padding */
-        height: 100%; /* Ensure the elements span the full viewport height */
+        margin: 0;
+        padding: 0;
+        height: 100%;
     }
 
     body {
-        /* Set the background image */
         background-image: url('{{ url_for('static', filename='images/Index_background.jpeg') }}');
-        background-size: cover; /* Cover the entire viewport */
-        background-position: center; /* Center the image */
-        background-repeat: no-repeat; /* Prevent tiling */
-        overflow-x: hidden; /* Prevent horizontal scrolling */
-        font-family: 'Roboto', sans-serif; /* Use a clean font */
-        color: white; /* Set default text color */
-        scroll-behavior: smooth; /* Enable smooth scrolling */
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        overflow-x: hidden;
+        font-family: 'Roboto', sans-serif;
+        color: white;
+        scroll-behavior: smooth;
     }
 
-    /* Ensure all container elements fit inside the viewport */
     .welcome-content {
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.8); /* Slightly increase opacity for better readability */
+        background-color: rgba(255, 255, 255, 0.8);
         padding: 2rem;
-        border-radius: 12px; /* Rounded corners */
+        border-radius: 12px;
         max-width: 600px;
-        margin: 20vh auto; /* Center the content both vertically and horizontally */
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
-        color: black; /* Black text for contrast */
-    }
-
-    /* Fix white bar issue on smaller screens */
-    html {
-        box-sizing: border-box; /* Include padding and border in element dimensions */
-        overflow-y: auto; /* Enable vertical scrolling without white bars */
+        margin: 20vh auto;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        color: black;
     }
 
     .welcome-content h1 {
-        font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
-        color: #ff4500; /* Red color */
-        font-size: 3rem; /* Increase font size for emphasis */
+        font-family: 'Dancing Script', cursive;
+        color: #ff4500;
+        font-size: 3rem;
         margin-bottom: 1rem;
     }
 
@@ -70,17 +63,16 @@
         margin: 0.5rem;
         padding: 0.75rem 1.5rem;
         font-size: 1.25rem;
-        border: 2px solid black; /* Black border for contrast */
-        background-color: transparent; /* Transparent background */
-        color: black; /* Black text color */
-        border-radius: 25px; /* Rounded buttons */
-        transition: all 0.3s ease; /* Smooth hover effect */
+        border: 2px solid black;
+        background-color: transparent;
+        color: black;
+        border-radius: 25px;
+        transition: all 0.3s ease;
     }
 
-    /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: black; /* Black background on hover */
-        color: white; /* White text on hover */
+        background-color: black;
+        color: white;
     }
 
     .chef-container {
@@ -89,13 +81,13 @@
     }
 
     .chef-radios {
-        display: flex; /* Align radio buttons horizontally */
+        display: flex;
         justify-content: center;
-        gap: 20px; /* Add spacing between buttons */
+        gap: 20px;
     }
 
     .radio-container input {
-        margin-right: 10px; /* Space between the radio button and label */
+        margin-right: 10px;
     }
 
     ul.errors {
@@ -108,10 +100,8 @@
 </style>
 
 <div class="welcome-content">
-    <!-- Register Heading -->
     <h1>Register</h1>
 
-    <!-- Registration Form -->
     <form method="POST">
         {{ form.hidden_tag() }}
 
@@ -197,7 +187,16 @@
             </div>
         </div>
 
-        <!-- Preferences Section -->
+        <!-- Ingredients (Dynamisch veld) -->
+        <div id="ingredients-section" style="display: none;">
+            <label for="favorite_ingredients">Favourite Ingredients</label>
+            <div id="ingredients-container">
+                <input type="text" name="favorite_ingredients" class="form-control ingredient-input" placeholder="Enter ingredient">
+            </div>
+            <button type="button" class="btn btn-custom" onclick="addIngredientField()">Add Ingredient</button>
+        </div>
+
+        <!-- Preferences Section (Hiding when chef is selected) -->
         <div id="preferences-section" style="display: none;">
             <!-- Allergies -->
             <div>
@@ -206,19 +205,6 @@
                 {% if form.allergies.errors %}
                     <ul class="errors">
                         {% for error in form.allergies.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
-
-            <!-- Favourite Ingredients -->
-            <div>
-                <label for="favorite_ingredients">Favourite Ingredients</label>
-                {{ form.favorite_ingredients(class="form-control", multiple="multiple") }}
-                {% if form.favorite_ingredients.errors %}
-                    <ul class="errors">
-                        {% for error in form.favorite_ingredients.errors %}
                             <li>{{ error }}</li>
                         {% endfor %}
                     </ul>
@@ -248,11 +234,27 @@
 
 <!-- JavaScript -->
 <script>
+    function addIngredientField() {
+        const container = document.getElementById('ingredients-container');
+        
+        // Maak een nieuw invoerveld aan
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'favorite_ingredients'; // Zorg ervoor dat de naam hetzelfde blijft
+        input.className = 'form-control ingredient-input';
+        input.placeholder = 'Enter ingredient';
+        
+        // Voeg het nieuwe invoerveld toe aan de container
+        container.appendChild(input);
+    }
+
     function togglePreferences() {
         const chefYes = document.getElementById('yes').checked;
+        const ingredientsSection = document.getElementById('ingredients-section');
         const preferencesSection = document.getElementById('preferences-section');
 
-        // Toon de voorkeuren alleen als "No" is geselecteerd
+        // Toont de ingredients sectie enkel als de gebruiker "No" kiest
+        ingredientsSection.style.display = chefYes ? 'none' : 'block';
         preferencesSection.style.display = chefYes ? 'none' : 'block';
     }
 </script>
