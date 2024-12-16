@@ -3,70 +3,409 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <!-- Navigatiebalk -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <!-- Dishcovery knop -->
-            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">Dishcovery</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <!-- Voor Customers -->
-                    {% if session.get('role') == 'customer' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.my_recipes') }}">My Recipes</a>
-                        </li>
-                    {% endif %}
+<!-- Navigatiebalk -->
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                    <!-- Voor Chefs -->
-                    {% if session.get('role') == 'chef' %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.my_uploads') }}">My Uploads</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.add_recipe') }}">Add Recipe</a>
-                        </li>
-                    {% endif %}
-
-                    <!-- Logout -->
-                    {% if session.get('email') %}
-                        <li class="nav-item">
-                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{{ url_for('main.login') }}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{{ url_for('main.register') }}">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <!-- Dashboard Content -->
-    <div class="container mt-5">
-        <h1 class="text-center">Welcome to your Dashboard!</h1>
-        <p class="text-center">Here you can view all available recipes.</p>
-
-        <!-- Receptenlijst -->
-        <div class="recipes-container">
-            {% for recipe in recipes %}
-                <div class="recipe-card">
-                    <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="recipe-image">
-                    <div class="recipe-details">
-                        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                        <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
-                        <p><strong>Price:</strong> €{{ recipe.price }}</p>
-                        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-                    </div>
-                </div>
-            {% else %}
-                <p class="text-center">No recipes available at the moment.</p>
-            {% endfor %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chatbot.chat') }}">Chatbot</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
+</nav>
+
+
+        
+<div class="container mt-5 pt-4 welcome-content">
+    <h1 class="text-center">Welcome to Dishcovery!</h1>
+    <p class="text-center">Explore recipes from amazing chefs and discover new flavours today.</p>
+
+    <!-- Sort Options -->
+    <form method="GET" action="{{ url_for('main.dashboard') }}" class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="sort_by" class="form-label">Sort by</label>
+                <select name="sort_by" id="sort_by" class="form-control" onchange="this.form.submit()">
+                    {% if session.get('role') == 'chef' %}
+                        <!-- Sorteeropties voor Chefs -->
+                        <option value="price_quality" {% if request.args.get('sort_by', 'price_quality') == 'price_quality' %}selected{% endif %}>
+                            Price-Quality Ratio
+                        </option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
+                            Price (Low to High)
+                        </option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
+                            Price (High to Low)
+                        </option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
+                            Preparation Time (Low to High)
+                        </option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by', 'price_quality') == 'prep_time_desc' %}selected{% endif %}>
+                            Preparation Time (High to Low)
+                        </option>
+                    {% else %}
+                        <!-- Sorteeropties voor Customers -->
+                        <option value="recommended" {% if request.args.get('sort_by', 'recommended') == 'recommended' %}selected{% endif %}>
+                            Recommended
+                        </option>
+                        <option value="price_quality" {% if request.args.get('sort_by') == 'price_quality' %}selected{% endif %}>
+                            Price-Quality Ratio
+                        </option>
+                        <option value="price_low_to_high" {% if request.args.get('sort_by') == 'price_low_to_high' %}selected{% endif %}>
+                            Price (Low to High)
+                        </option>
+                        <option value="price_high_to_low" {% if request.args.get('sort_by') == 'price_high_to_low' %}selected{% endif %}>
+                            Price (High to Low)
+                        </option>
+                        <option value="prep_time_asc" {% if request.args.get('sort_by') == 'prep_time_asc' %}selected{% endif %}>
+                            Preparation Time (Low to High)
+                        </option>
+                        <option value="prep_time_desc" {% if request.args.get('sort_by', 'recommended') == 'prep_time_desc' %}selected{% endif %}>
+                            Preparation Time (High to Low)
+                        </option>
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+    </form>
+    
+    <div class="mb-3">
+        <form method="GET" action="{{ url_for('main.dashboard') }}">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search by name, ingredient, etc." aria-label= "Search input" name="search" value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-secondary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3 bg-light p-4 shadow-sm rounded">
+            <h5 class="mb-3">Filters</h5>
+            <form method="GET" action="{{ url_for('main.dashboard') }}">
+                <div class="mb-3" id="ingredients-filters">
+                    <h6>Ingredient Filters</h6>
+                    <!-- Dynamisch toegevoegde filterregels worden hier ingevoegd -->
+                    <div class="filter-row">
+                        <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
+                        <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
+                        <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addFilterRow()">Add Filter</button>
+                
+                <!-- Other Filters -->
+                <div class="mb-3">
+                    <label for="min_rating" class="form-label">Min. Rating</label>
+                    <select name="min_rating" id="min_rating" class="form-control">
+                        <option value="">Any</option>
+                        {% for i in range(1, 6) %}
+                            <option value="{{ i }}" {% if request.args.get('min_rating') == i|string %}selected{% endif %}>
+                                {{ i }}+
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="duration" class="form-label">Max. Duration (min)</label>
+                    <input type="number" name="duration" id="duration" class="form-control" placeholder="e.g., 30" value="{{ request.args.get('duration') }}">
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Max. Price (€)</label>
+                    <input type="number" step="0.01" name="price" id="price" class="form-control" placeholder="e.g., 20.00" value="{{ request.args.get('price') }}">
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select name="category" id="category" class="form-control">
+                        <option value="">Any</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="origin" class="form-label">Origin</label>
+                    <select name="origin" id="origin" class="form-control">
+                        <option value="">Any</option>
+                        {% for origin in origins %}
+                            <option value="{{ origin }}" {% if request.args.get('origin') == origin %}selected{% endif %}>
+                                {{ origin }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Exclude Allergens</label>
+                    <div id="allergy-input-container">
+                        <input type="text" id="allergy-input" class="form-control mb-2" placeholder="Type an allergen and press Enter">
+                    </div>
+                    <small class="form-text text-muted">
+                        Press Enter after typing each allergen.
+                    </small>
+                    <ul id="allergy-list" class="list-group mt-2">
+                        <!-- Dynamisch toegevoegde allergieën worden hier weergegeven -->
+                    </ul>
+                    <input type="hidden" name="allergies" id="allergies-hidden">
+                </div>
+                
+                <script>
+                    const allergyInput = document.getElementById("allergy-input");
+                    const allergyList = document.getElementById("allergy-list");
+                    const allergiesHidden = document.getElementById("allergies-hidden");
+                
+                    // Dynamisch allergieën toevoegen
+                    allergyInput.addEventListener("keypress", function (e) {
+                        if (e.key === "Enter" && allergyInput.value.trim() !== "") {
+                            e.preventDefault();
+                            const allergy = allergyInput.value.trim();
+                
+                            // Maak een nieuwe lijstitem
+                            const listItem = document.createElement("li");
+                            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                            listItem.textContent = allergy;
+                
+                            // Verwijderknop toevoegen
+                            const removeButton = document.createElement("button");
+                            removeButton.className = "btn btn-sm btn-danger";
+                            removeButton.textContent = "Remove";
+                            removeButton.addEventListener("click", function () {
+                                listItem.remove();
+                                updateHiddenInput();
+                            });
+                
+                            listItem.appendChild(removeButton);
+                            allergyList.appendChild(listItem);
+                
+                            // Inputveld leegmaken
+                            allergyInput.value = "";
+                
+                            // Update verborgen input
+                            updateHiddenInput();
+                        }
+                    });
+                
+                    // Verborgen input bijwerken
+                    function updateHiddenInput() {
+                        const allergies = Array.from(allergyList.children).map(li => li.textContent.replace("Remove", "").trim());
+                        allergiesHidden.value = allergies.join(",");
+                    }
+                </script>                       
+                <button type="submit" class="btn btn-secondary">Apply Filters</button>
+            </form>
+        </div>
+
+        <!-- Recipes Section -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                {% for data in recipe_data %}
+                <div class="col-md-6">
+                    <a href="{% if session.get('role') == 'customer' %}{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}{% elif session.get('role') == 'chef' %}{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}{% endif %}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100">
+                            {% if data.recipe.image %}
+                                <img src="{{ url_for('static', filename=data.recipe.image) }}" class="card-img-top" alt="{{ data.recipe.recipename }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ data.recipe.recipename }}</h5>
+                                <p class="text-muted">by {{ data.recipe.chef_name }}</p>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <span>{{ data.recipe.duration }} min</span>
+                                </div>
+                                <p class="text-success fw-bold">€{{ data.recipe.price }}</p>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    {% set avg_rating = data.avg_rating if data.avg_rating is not none else 0 %}
+                                    <div class="me-2">
+                                        {% for star in range(1, 6) %}
+                                            {% if star <= avg_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% elif star - 0.5 <= avg_rating %}
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <small class="text-muted">
+                                        {% if avg_rating > 0 %}
+                                            ({{ avg_rating }})
+                                        {% else %}
+                                            (No rating)
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% else %}
+                    <p class="text-center">No recipes available at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addFilterRow() {
+        let newFilterRow = document.createElement('div');
+        newFilterRow.classList.add('filter-row');
+        newFilterRow.innerHTML = `
+            <input type="text" name="ingredient[]" class="form-control mb-2" placeholder="Ingredient">
+            <input type="text" name="quantity[]" class="form-control mb-2" placeholder="Quantity">
+            <input type="text" name="unit[]" class="form-control mb-2" placeholder="Unit">
+        `;
+        document.getElementById('ingredients-filters').appendChild(newFilterRow);
+    }
+</script>
+
 {% endblock %}
+
+<!-- DIT IS DE CODE MET ALLE GEGEVENS, GEBRUIK DIT ALS JE FILTERS WILT TESTEN
+Navigatiebalk 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" height="50" width="140"> <!-- Breedte verhoogd en hoogte iets aangepast -->
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+
+                <!-- Menu knop met drie witte strepen en "MENU" tekst -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- Drie witte strepen voor het menu-icoon -->
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <!-- Tekst "MENU" naast de strepen -->
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    
+                    <!-- Dropdown menu met 'kotjes' -->
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_recipes') }}" style="border-radius: 5px;">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.my_uploads') }}" style="border-radius: 5px;">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.add_recipe') }}" style="border-radius: 5px;">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-outline-secondary mb-2 p-2 text-center" href="{{ url_for('main.edit_profile') }}" style="border-radius: 5px;">Edit Profile</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item p-2 text-center" href="{{ url_for('main.logout') }}" style="color: red; border-radius: 5px;">Logout</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Dashboard Content -->
+<div class="container mt-5">
+    <h1 class="text-center">Welcome to your Dashboard!</h1>
+    <p class="text-center">Here you can view all available recipes and their reviews.</p>
+
+    <!-- Recipe List -->
+    <div class="recipes-container">
+        {% for data in recipe_data %}
+            <div class="recipe-card">
+                <!-- Display Recipe Image -->
+                {% if data.recipe.image %}
+                    <img src="{{ url_for('static', filename=data.recipe.image) }}" alt="{{ data.recipe.recipename }}" class="recipe-image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="recipe-image">
+                {% endif %}
+
+                <div class="recipe-details">
+                    <h3>{{ data.recipe.recipename }}</h3>
+                    <p class="text-muted">by {{ data.recipe.chef_email }}</p> <!-- Show Chef's Email -->
+
+                    <p><strong>Cooking Time:</strong> {{ data.recipe.duration }} minutes</p>
+                    <!-- Ingrediënten -->
+                    <p><strong>Ingredients:</strong></p>
+                    <ul>
+                        {% for ingredient in data.ingredients_list %}
+                            <li>{{ ingredient.quantity }} {{ ingredient.unit }} of {{ ingredient.ingredient }}</li>
+                        {% endfor %}
+                    </ul>             
+                    <p><strong>Price:</strong> €{{ data.recipe.price }}</p>
+                    <p><strong>Allergies:</strong> {{ data.recipe.allergiesrec }}</p>
+
+                    <!-- Average Rating -->
+                    <p><strong>Average Rating:</strong>
+                        {% if data.avg_rating %}
+                            {{ data.avg_rating }}/5
+                        {% else %}
+                            No ratings yet.
+                        {% endif %}
+                    </p>
+
+                    <!-- View Reviews Button -->
+                    <a href="{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}" class="btn btn-warning mb-2">View Reviews</a>
+
+                    <!-- Alleen de "Buy Now"-knop voor klanten -->
+                    {% if session.get('role') == 'customer' %}
+                        <a href="{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}" class="btn btn-success mt-2">Buy Now</a>
+                    {% elif session.get('role') == 'chef' and data.recipe.chef_email == session.get('email') %}
+                        <!-- Alleen de "Edit Recipe"-knop tonen voor de chef die het recept heeft geüpload -->
+                        <a href="{{ url_for('main.edit_recipe', recipename=data.recipe.recipename) }}" class="btn btn-primary mt-2">Edit Recipe</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center">No recipes available at the moment.</p>
+        {% endfor %}
+    </div>
+    
+</div>
+-->
+

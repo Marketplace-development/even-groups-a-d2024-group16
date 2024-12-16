@@ -1,21 +1,97 @@
 {% extends 'base.html' %}
 
-{% block title %}My Recipes{% endblock %}
+{% block title %}My Purchased Recipes{% endblock %}
 
 {% block content %}
+<!-- Navigatiebalk -->
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chatbot.chat') }}">Chatbot</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Pagina inhoud -->
 <div class="container mt-5">
-    <h1>My Recipes</h1>
+    <h1 class="text-center">My Purchased Recipes</h1>
+
     {% if recipes %}
-        <div class="recipes-container">
+        <div class="recipes-container row mt-4">
             {% for recipe in recipes %}
-                <div class="recipe-card">
-                    <h2>{{ recipe.recipename }}</h2>
-                    <p><strong>Description:</strong> {{ recipe.description }}</p>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100 d-flex flex-column">
+                        {% if recipe.image %}
+                            <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-center">{{ recipe.recipename }}</h5>
+                            <p class="card-text text-muted text-center">by {{ recipe.chef_name }}</p>
+                            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                            <p><strong>Ingredients:</strong></p>
+                            <ul>
+                                {% for ingredient in recipe.ingredients_list %}
+                                    <li>{{ ingredient }}</li>
+                                {% endfor %}
+                            </ul>                                
+                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+                            
+                            <!-- Knoppen met witruimte tussen de knoppen en Review knop bovenaan -->
+                            <div class="mt-auto d-flex flex-column align-items-center">
+                                <!-- Review knop bovenaan met een grotere marge naar beneden -->
+                                <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-review">Review</a>
+                                <!-- View Recipe knop met witruimte tussen de knoppen -->
+                                <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success mt-3">View Recipe</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No recipes available at the moment.</p>
+        <p class="text-center">You haven't purchased any recipes yet.</p>
     {% endif %}
 </div>
 {% endblock %}
+

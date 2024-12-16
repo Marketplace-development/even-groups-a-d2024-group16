@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <!-- Vervang Dishcovery tekst door een afbeelding -->
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('chatbot.chat') }}">Chatbot</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    
+    
+<h1>Edit Profile</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <!-- E-mail (readonly) -->
+    <div>
+        <label for="email">E-mail (cannot be changed)</label>
+        {{ form.email(class="form-control", value=user.email, readonly=True) }}
+    </div>
+
+    <!-- Name -->
+    <div>
+        <label for="name">Full Name</label>
+        {{ form.name(class="form-control", value=user.name) }}
+        {% if form.name.errors %}
+            <ul class="errors">
+                {% for error in form.name.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <!-- Date of Birth -->
+    <div>
+        <label for="date_of_birth">Date of Birth</label>
+        {{ form.date_of_birth(class="form-control", value=user.date_of_birth) }}
+        {% if form.date_of_birth.errors %}
+            <ul class="errors">
+                {% for error in form.date_of_birth.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <!-- Address Fields -->
+    <div>
+        <label for="street">Street</label>
+        {{ form.street(class="form-control", value=user.street) }}
+        {% if form.street.errors %}
+            <ul class="errors">
+                {% for error in form.street.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="housenr">House Number</label>
+        {{ form.housenr(class="form-control", value=user.housenr) }}
+        {% if form.housenr.errors %}
+            <ul class="errors">
+                {% for error in form.housenr.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="postalcode">Postal Code</label>
+        {{ form.postalcode(class="form-control", value=user.postalcode) }}
+        {% if form.postalcode.errors %}
+            <ul class="errors">
+                {% for error in form.postalcode.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="city">City</label>
+        {{ form.city(class="form-control", value=user.city) }}
+        {% if form.city.errors %}
+            <ul class="errors">
+                {% for error in form.city.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="country">Country</label>
+        {{ form.country(class="form-control", value=user.country) }}
+        {% if form.country.errors %}
+            <ul class="errors">
+                {% for error in form.country.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <!-- Telephone -->
+    <div>
+        <label for="telephonenr">Telephone</label>
+        {{ form.telephonenr(class="form-control", value=user.telephonenr) }}
+        {% if form.telephonenr.errors %}
+            <ul class="errors">
+                {% for error in form.telephonenr.errors %}
+                    <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <!-- Allergies -->
+    {% if not user.is_chef %}
+        <div>
+            <label for="allergies">Allergies</label>
+            {{ form.allergies(class="form-control", multiple="multiple") }}
+            {% if form.allergies.errors %}
+                <ul class="errors">
+                    {% for error in form.allergies.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Favourite Ingredients -->
+        <div>
+            <label for="favorite_ingredients">Favourite Ingredients</label>
+            {{ form.favorite_ingredients(class="form-control", multiple="multiple") }}
+            {% if form.favorite_ingredients.errors %}
+                <ul class="errors">
+                    {% for error in form.favorite_ingredients.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Favourite Origins -->
+        <div>
+            <label for="favorite_origins">Favourite Origins</label>
+            {{ form.favorite_origins(class="form-control", multiple="multiple") }}
+            {% if form.favorite_origins.errors %}
+                <ul class="errors">
+                    {% for error in form.favorite_origins.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Submit Button -->
+    <div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
+
+
+    <style>
+        form {
+            max-width: 600px;
+            margin: auto;
+            margin-top: 30px;
+        }
+        .errors {
+            list-style: none;
+            padding: 0;
+        }
+        .errors li {
+            font-size: 0.9em;
+        }
+    </style>
+{% endblock %}
+

@@ -1,6 +1,24 @@
+/*Welcome content*/
+.welcome-content h1 {
+    font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
+    color: #ff4500; /* Red color */
+    font-size: 3rem; /* Increase font size for emphasis */
+}
+
+.welcome-content p {
+    color: black; /* Ensure the text is readable on the white background */
+}
+
+/*Logo*/ 
+.navbar-logo {
+    max-height: 55px; /* Beperk de maximale hoogte */
+    width: auto; /* Breedte past zich aan om de verhouding te behouden */
+    object-fit: contain; /* Zorgt ervoor dat het logo niet uitrekt */
+}
+
 /* Algemene instellingen */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Roboto, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f0f8ff;
@@ -8,7 +26,6 @@ body {
 }
 
 .container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     text-align: center;
@@ -87,7 +104,7 @@ h1 {
 }
 
 .recipe-card {
-    background: #fff;
+    background: #fafafa;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -120,4 +137,120 @@ h1 {
 
 .recipe-card .recipe-details strong {
     color: #003366;
+}
+
+
+
+/*zoekbalk en searchknop aansluiten en afgeronde hoeken */
+.input-group .form-control {
+    width: 70%;
+    border-radius: 25px 0 0 25px; /* Linker afgeronde hoeken */
+    border: 2px solid #000; /* Voeg een rand toe zoals de knop */
+    margin: 0; /* Voorkom ruimte */
+    height: 48px;
+    border-radius: 25px;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    line-height: 1;
+}
+
+.input-group .btn {
+    width: 30%;
+    height: 100%; /* Gelijke hoogte met de input */
+    border-radius: 0 25px 25px 0; /* Rechter afgeronde hoeken */
+    border: 2px solid #000; /* Zorg dat de randen consistent zijn */
+    border-left: none; /* Vermijd dubbele rand tussen input en knop */ 
+    vertical-align: middle;
+    margin: 0; /* Voorkom ruimte */
+    height: 48px;
+    border-radius: 25px;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    line-height: 1;
+    
+}
+
+
+/* Zorg ervoor dat de header vast blijft staan */
+nav.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030; /* Zorgt ervoor dat de header altijd boven andere elementen blijft */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optionele schaduw voor visuele scheiding */
+
+}
+
+/* Voeg extra ruimte toe aan de inhoud, zodat het niet onder de header wordt verborgen */
+body {
+    padding-top: 70px; /* Pas dit aan op basis van de hoogte van je header */
+}
+.flash-messages {
+    position: relative;
+    z-index: 1050;
+    margin-top: 60px; /* Adjust based on navbar height */
+    width: 100%;
+}
+.flash-messages .alert {
+    margin: 10px auto;
+    max-width: 600px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+@font-face {
+    font-family: 'Congenial';
+    src: url('{{ url_for('static', filename='fonts/fonnts.com-Congenial_Medium.otf') }}') format('opentype');
+    font-weight: 700; /* Indien nodig */
+    font-style: normal; /* Indien nodig */
+}
+
+/* Meer zoals dit sectie */
+h3.text-success {
+    margin-top: 40px;
+    font-weight: bold;
+}
+
+.card {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+    object-fit: cover;
+    height: 150px;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.card-body {
+    padding: 10px;
+}
+
+.chatbox {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.chat-messages {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
 }
