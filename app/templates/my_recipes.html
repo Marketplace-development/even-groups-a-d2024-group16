@@ -80,7 +80,7 @@
                             <!-- Knoppen met witruimte tussen de knoppen en Review knop bovenaan -->
                             <div class="mt-auto d-flex flex-column align-items-center">
                                 <!-- Review knop bovenaan met een grotere marge naar beneden -->
-                                <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-warning mb-3">Review</a>
+                                <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-review">Review</a>
                                 <!-- View Recipe knop met witruimte tussen de knoppen -->
                                 <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success mt-3">View Recipe</a>
                             </div>
