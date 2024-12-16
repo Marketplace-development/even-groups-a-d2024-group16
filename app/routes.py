@@ -14,7 +14,7 @@ from app.sort import apply_sorting
 from app.zoekbalk import apply_search
 from flask_mail import Mail, Message
 from app.check_and_notify_chef import check_and_notify_chef
-from app import Mail
+from app import mail
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -880,6 +880,8 @@ def chat():
     # Render de chatbot-template bij een GET-verzoek
     return render_template('chatbot.html')
 
+from flask_mail import Message
+
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
@@ -903,6 +905,14 @@ def contact():
             db.session.add(new_feedback)
             db.session.commit()
 
+            # Send email
+            msg = Message(
+                subject=f"New Message from {name}: {subject}",
+                recipients=["dishcovery101@gmail.com"],  # Replace with your email
+                body=f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            )
+            mail.send(msg)
+
             # Success message
             flash("Thank you for contacting us! We'll get back to you shortly.", "success")
             return redirect(url_for('main.contact'))
@@ -916,6 +926,7 @@ def contact():
     public_comments = Feedback.query.filter_by(is_public=True).order_by(Feedback.created_at.desc()).all()
 
     return render_template('contact.html', form=form, public_comments=public_comments)
+
 
 
 @main.route('/toggle_favorite', methods=['POST'])
