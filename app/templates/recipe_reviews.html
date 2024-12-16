@@ -50,47 +50,50 @@
 
 
 <!-- Recipe Details Section -->
-<div class="container mt-5">
+<div class="container mt-5 pt-5">
     <h1 class="text-center">{{ recipe.recipename }}</h1>
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <!-- Recipe Image -->
+    <div class="recipe-detail text-center my-4">
+        <!-- Display Recipe Image -->
+        <div class="image-container mb-4">
             {% if recipe.image %}
-                <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+                <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
             {% else %}
-                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
             {% endif %}
         </div>
-        <div class="col-md-6">
-            <h5><strong>Chef:</strong> {{ recipe.chef_email }}</h5>
-            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-            
-            <p><strong>Ingredients:</strong></p>
-            <ul style="list-style-position: inside;">
-                {% if ingredients_list %}
-                    {% for ingredient in ingredients_list %}
-                        <li>{{ ingredient.quantity }} {{ ingredient.unit }}{% if ingredient.unit %} of{% endif %} {{ ingredient.ingredient }}</li>
-                    {% endfor %}
-                {% else %}
-                    <li>No ingredients provided</li>
-                {% endif %}
-            </ul>
 
-            <p><strong>Price:</strong> €{{ recipe.price }}</p>
-            <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-            <p><strong>Average Rating:</strong> 
-                {% if avg_rating %}
-                    {{ avg_rating }}/5
-                {% else %}
-                    No ratings yet.
-                {% endif %}
-            </p>
+        <h5><strong>Details:</strong></h5>
+        <p><strong>Chef:</strong> {{ recipe.chef_email }}</p>
+        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
 
-            <!-- Buy Now Button -->
-            {% if session.get('role') == 'customer' %}
-                <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="btn btn-success mt-3">Buy Now</a>
+        <!-- Ingredients Table -->
+        <h5><strong>Ingredients:</strong></h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity & Unit</th>
+                </tr>
+            </thead>
+            <tbody id="ingredientsTableBody">
+                {% for ingredient in ingredients_list %}
+                    <tr>
+                        <td>{{ ingredient.ingredient }}</td>
+                        <td>{{ ingredient.quantity }} {{ ingredient.unit }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p><strong>Price:</strong> €{{ recipe.price }}</p>
+        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+        <p><strong>Average Rating:</strong> 
+            {% if avg_rating %}
+                {{ avg_rating }}/5
+            {% else %}
+                No ratings yet.
             {% endif %}
-        </div>
+        </p>
     </div>
 </div>
 
@@ -117,3 +120,6 @@
     <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
 </div>
 {% endblock %}
+
+
+

@@ -1,7 +1,7 @@
 import os  # Voor bestandspaden en mapbeheer
 import json
 from datetime import datetime  # Voor datum- en tijdstempels
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app, jsonify
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction  # Je databasemodellen
@@ -12,6 +12,9 @@ from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
 from app.sort import apply_sorting
 from app.zoekbalk import apply_search
+from flask_mail import Mail, Message
+from app.check_and_notify_chef import check_and_notify_chef
+from app import Mail
 
 # Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
@@ -549,7 +552,6 @@ def buy_recipe(recipename):
 
     # Gerelateerde recepten ophalen
     related_recipes = Recipe.query.filter(
-        #(Recipe.category == recipe.category) | 
         (Recipe.origin == recipe.origin) | 
         (Recipe.ingredients.contains(ingredients_to_match))
     ).filter(Recipe.recipename != recipename).limit(4).all()
@@ -589,6 +591,7 @@ def buy_recipe(recipename):
             flash('You have already purchased this recipe.', 'warning')
             return redirect(url_for('main.dashboard'))
 
+        # Create the transaction
         transaction = Transaction(
             transactiondate=datetime.now(),
             price=recipe.price,
@@ -598,6 +601,9 @@ def buy_recipe(recipename):
         )
         db.session.add(transaction)
         db.session.commit()
+
+        # Check if chef should be notified
+        check_and_notify_chef(chef_email, recipename)
 
         flash('Recipe purchased successfully!', 'success')
         return redirect(url_for('main.my_recipes'))
@@ -609,6 +615,7 @@ def buy_recipe(recipename):
         reviews=reviews,
         related_recipes=related_recipes
     )
+
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
@@ -881,3 +888,13 @@ def chat():
 
     # Render de chatbot-template bij een GET-verzoek
     return render_template('chatbot.html')
+
+
+
+
+
+
+
+
+
+
