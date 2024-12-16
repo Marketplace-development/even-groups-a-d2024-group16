@@ -748,40 +748,43 @@ def edit_recipe(recipename):
 
 @main.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
-    # Haal de gebruiker op uit de database op basis van het e-mailadres uit de sessie
+    # Haal de gebruiker op basis van sessie-email
     user = User.query.filter_by(email=session.get('email')).first()
 
-    # Controleer of de gebruiker ingelogd is en bestaat
+    # Controleer of de gebruiker is ingelogd
     if not user:
         flash('Please log in to access your profile.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Maak het formulier, vul het in met de huidige gebruikersdata
+    # Maak het formulier en vul het met huidige gebruikersdata
     form = EditProfileForm(obj=user)
 
-    # Dynamische keuzes instellen voor SelectMultipleField
-    form.allergies.choices = [(allergy, allergy) for allergy in get_allergens()]
-    ingredient_choices = [(ingredient, ingredient) for category in ingredienten.values() for ingredient in category.keys()]
-    form.favorite_ingredients.choices = ingredient_choices
-    form.favorite_origins.choices = [(origin, origin) for origin in get_origins()]
+    # Dynamische keuzes instellen
+    form.allergies.choices = [(a, a) for a in get_allergens()]
+    form.favorite_ingredients.choices = [
+        (ingredient, f"{ingredient}")
+        for category, items in ingredienten.items()
+        for ingredient in items.keys()
+    ]
+    form.favorite_origins.choices = [(o, o) for o in get_origins()]
 
-    # Haal bestaande voorkeuren op en vul deze in het formulier
-    if not user.preferences:
-        user.preferences = {
-            'allergies': [],
-            'favorite_ingredients': [],
-            'favorite_origins': []
-        }
+    # Voorkeuren ophalen uit de database
+    preferences = user.preferences or {
+        'allergies': [],
+        'favorite_ingredients': [],
+        'favorite_origins': []
+    }
 
-    # Vul standaardwaarden in het formulier
-    form.allergies.data = user.preferences.get('allergies', [])
-    form.favorite_ingredients.data = user.preferences.get('favorite_ingredients', [])
-    form.favorite_origins.data = user.preferences.get('favorite_origins', [])
+    # Vul het formulier met bestaande gegevens
+    if request.method == 'GET':
+        form.allergies.data = preferences.get('allergies', [])
+        form.favorite_ingredients.data = preferences.get('favorite_ingredients', [])
+        form.favorite_origins.data = preferences.get('favorite_origins', [])
 
     # Verwerk formulierindiening
     if form.validate_on_submit():
         try:
-            # Update persoonlijke gegevens
+            # Persoonlijke gegevens bijwerken
             user.name = form.name.data or user.name
             user.date_of_birth = form.date_of_birth.data or user.date_of_birth
             user.street = form.street.data or user.street
@@ -791,15 +794,15 @@ def edit_profile():
             user.country = form.country.data or user.country
             user.telephonenr = form.telephonenr.data or user.telephonenr
 
-            # Update voorkeuren
-            if not user.is_chef:
-                user.preferences = {
-                    'allergies': form.allergies.data,
-                    'favorite_ingredients': form.favorite_ingredients.data,
-                    'favorite_origins': form.favorite_origins.data
-                }
+            # Voorkeuren bijwerken
+            updated_preferences = {
+                'allergies': form.allergies.data,
+                'favorite_ingredients': form.favorite_ingredients.data,
+                'favorite_origins': form.favorite_origins.data
+            }
+            user.preferences = updated_preferences
 
-            # Commit naar database
+            # Opslaan in de database
             db.session.commit()
             flash('Profile updated successfully!', 'success')
             return redirect(url_for('main.dashboard'))
@@ -809,6 +812,7 @@ def edit_profile():
             flash(f"Error updating profile: {e}", 'danger')
 
     return render_template('edit_profile.html', form=form, user=user)
+
 
 
 
