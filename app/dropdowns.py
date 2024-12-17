@@ -2,47 +2,47 @@ def get_allergens():
     """Retourneer een lijst met allergenen."""
     return [
         "Gluten",
-        "Pinda's",
-        "Noten",
-        "Ei",
-        "Melk",
-        "Vis",
-        "Schaaldieren",
-        "Weekdieren",
-        "Soja",
-        "Selderij",
-        "Mosterd",
-        "Sesamzaad",
-        "Sulfieten",
-        "Lupine"
+        "Peanuts",
+        "Tree nuts",
+        "Egg",
+        "Milk",
+        "Fish",
+        "Crustaceans",
+        "Mollusks",
+        "Soy",
+        "Celery",
+        "Mustard",
+        "Sesame",
+        "Sulfites",
+        "Lupin"
     ]
 
 def get_categories():
     """Retourneer een lijst met categorieën."""
     return [
-        "Voorgerecht",
-        "Hoofdgerecht",
+        "Appetizer",
+        "Main course",
         "Dessert",
         "Snack",
-        "Drank",
-        "Soep",
-        "Bijgerecht",
-        "Ontbijt"
+        "Drink",
+        "Soup",
+        "Side dish",
+        "Breakfast"
     ]
 
 def get_origins():
     """Retourneer een lijst met origines."""
     return [
-        "Belgisch",
-        "Italiaans",
-        "Frans",
-        "Chinees",
-        "Japans",
-        "Mexicaans",
-        "Indiaas",
-        "Amerikaans",
-        "Thais",
-        "Spaans",
-        "Turks",
-        "Grieks"
+        "Belgian",
+        "Italian",
+        "French",
+        "Chinese",
+        "Japanese",
+        "Mexican",
+        "Indian",
+        "American",
+        "Thai",
+        "Spanish",
+        "Turkish",
+        "Greek"
     ]

@@ -1,20 +1,19 @@
-import os  # Voor bestandspaden en mapbeheer
-import json
-from datetime import datetime  # Voor datum- en tijdstempels
+import os  # For file paths and directory management
+from datetime import datetime  # For date and time stamps
+
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app, jsonify
-from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
-from app import db  # SQLAlchemy-instantie
-from app.models import User, Recipe, Review, Transaction, Feedback  # Je databasemodellen
-from app.forms import RecipeForm, ReviewForm, EditProfileForm, ContactForm
+from werkzeug.utils import secure_filename  # For secure filenames when uploading
+from app import db, mail  # SQLAlchemy and mail instances
+from app.models import User, Recipe, Review, Transaction, Feedback  # Your database models
+from app.forms import UserForm, LoginForm, RecipeForm, ReviewForm, EditProfileForm, ContactForm
 from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
 from app.sort import apply_sorting
 from app.zoekbalk import apply_search
-from flask_mail import Mail, Message
+from flask_mail import Message
 from app.check_and_notify_chef import check_and_notify_chef
-from app import mail
-from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
+from .responses import get_response
 
 main = Blueprint('main', __name__)
 chatbot = Blueprint('chatbot', __name__)
@@ -29,28 +28,28 @@ def index():
 def register():
     form = UserForm()
     
-    # Gebruik ingredienten direct vanuit ingredients.py
+    # Use allergens directly from ingredients.py
     form.allergies.choices = [(allergy, allergy) for allergy in get_allergens()]
     form.favorite_origins.choices = [(origin, origin) for origin in get_origins()]
     
     if form.validate_on_submit():
         print("Form is submitted")
-        print(f"E-mail: {form.email.data}")
+        print(f"Email: {form.email.data}")
 
-        # Haal de waarde van is_chef direct op uit de POST-gegevens
+        # Retrieve the value of is_chef directly from the POST data
         is_chef_value = request.form.get('is_chef')
         print(f"Received is_chef value: {is_chef_value}")
-        is_chef = True if is_chef_value == 'true' else False  # Converteer correct naar boolean
+        is_chef = True if is_chef_value == 'true' else False
 
         # Check if the user already exists
         if User.query.filter_by(email=form.email.data).first():
             print(f"The email {form.email.data} is already in use.")
-            flash('This email is already in use, pick another one or login', 'danger')
+            flash('This email is already in use, choose another one or log in', 'danger')
             return redirect(url_for('main.register'))
         
         favorite_ingredients = form.favorite_ingredients.data.split(',') if form.favorite_ingredients.data else []
 
-        # Maak nieuwe gebruiker aan
+        # Create a new user
         preferences = {
             "allergies": form.allergies.data or [],
             "favorite_origins": form.favorite_origins.data or [],
@@ -70,15 +69,12 @@ def register():
             preferences=preferences
         )
 
-        # Voeg nieuwe gebruiker toe aan de database
+        # Add new user to the database
         print("User is being added to the database...")
         db.session.add(new_user)
         db.session.commit()
 
-        # Flash een succesbericht
         flash('You are registered successfully', 'success')
-
-        # Redirect naar de login pagina
         print("Redirecting to the login page...")
         return redirect(url_for('main.login'))
 
@@ -93,7 +89,6 @@ def login():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user:
-            # Sla e-mail en rol op in de session
             session['email'] = user.email
             session['role'] = 'chef' if user.is_chef else 'customer'
             flash(f'Logged in as {user.email}', 'success')
@@ -102,34 +97,31 @@ def login():
             flash('Invalid email. Please try again.', 'danger')
     return render_template('login.html', form=form)
 
-    
+
 @main.route('/dashboard')
 def dashboard():
     if 'email' not in session:
         flash('You need to log in first.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Huidige gebruiker ophalen
     user = User.query.filter_by(email=session['email']).first()
     if not user:
         flash('User not found.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Haal gegevens op voor dropdowns
     categories = get_categories()
     origins = get_origins()
     allergens = get_allergens()
 
     search_query = request.args.get('search', '')
 
-    # Initialiseer filters
     allergies_input = request.args.get('allergies', "")
     allergies_list = [a.lower().strip() for a in allergies_input.split(",") if a]
     filters = {
         'ingredient': request.args.getlist('ingredient[]'),
         'quantity': request.args.getlist('quantity[]'),
         'unit': request.args.getlist('unit[]'),
-        'allergies': allergies_list,  # Zorg voor een genormaliseerde lijst
+        'allergies': allergies_list,
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
         'price': request.args.get('price'),
@@ -137,30 +129,20 @@ def dashboard():
         'origin': request.args.get('origin'),
     }
 
-    # Gebruik standaard sortering
     sort_by = request.args.get('sort_by', 'recommended' if not user.is_chef else 'price_quality')
 
-    # Query starten
     query = Recipe.query
-
-    # Filters toepassen
     query = apply_filters(query, filters)
-
     query = apply_search(query, search_query)
-
-    # Sorteerfunctie toepassen met voorkeuren
     preferences = user.preferences or {'favorite_ingredients': [], 'favorite_origins': []}
     query = apply_sorting(query, sort_by, preferences=preferences)
 
-    # Gefilterde recepten ophalen
     recipes = query.all()
 
-    # Verwerk recepten en voeg extra gegevens toe
     recipe_data = []
     user_favorites = user.favorites or []
 
     for recipe in recipes:
-        # Gemiddelde beoordeling berekenen
         avg_rating = (
             db.session.query(func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
@@ -168,7 +150,6 @@ def dashboard():
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
-        # Ingrediëntenlijst verwerken
         ingredients_list = []
         if recipe.ingredients:
             for ingredient, details in recipe.ingredients.items():
@@ -178,31 +159,27 @@ def dashboard():
                     'ingredient': ingredient
                 })
 
-        # Allergieën verwerken
         allergies = recipe.allergiesrec.split(", ") if recipe.allergiesrec else []
         is_liked = user.is_favorite(recipe.recipename, recipe.chef_email)
 
-        # Voeg alle verwerkte gegevens toe aan de lijst
         recipe_data.append({
             'recipe': recipe,
             'avg_rating': avg_rating,
             'ingredients_list': ingredients_list,
-            'allergies': allergies,  # Voeg 'allergies' expliciet toe
-            'is_liked': is_liked  # Include the accurate liked state
+            'allergies': allergies,
+            'is_liked': is_liked
         })
 
-    # Verwerk allergieënfilters
     if filters['allergies']:
         allergy_filters = filters['allergies']
         recipe_data = [
             r for r in recipe_data
             if not any(
-                allergy in [a.lower() for a in r['allergies']]  # Controleer overlap
+                allergy in [a.lower() for a in r['allergies']]
                 for allergy in allergy_filters
             )
         ]
 
-    # Filteren op minimale beoordeling
     if filters.get('min_rating'):
         try:
             min_rating = float(filters['min_rating'])
@@ -210,7 +187,6 @@ def dashboard():
         except ValueError:
             flash("Invalid minimum rating value.", "danger")
 
-    # Filteren op duur
     if filters.get('duration'):
         try:
             max_duration = int(filters['duration'])
@@ -218,7 +194,6 @@ def dashboard():
         except ValueError:
             flash("Invalid duration value.", "danger")
 
-    # Filteren op prijs
     if filters.get('price'):
         try:
             max_price = float(filters['price'])
@@ -226,16 +201,12 @@ def dashboard():
         except ValueError:
             flash("Invalid price value.", "danger")
 
-    # Filteren op categorie
     if filters.get('category'):
         recipe_data = [r for r in recipe_data if r['recipe'].category == filters['category']]
 
-    # Filteren op herkomst
     if filters.get('origin'):
         recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
 
-
-    # Render de template met de nodige gegevens
     return render_template(
         'dashboard.html',
         user=user,
@@ -246,29 +217,22 @@ def dashboard():
         sort_by=sort_by,
         user_favorites=user_favorites
     )
-    
 
 
 @main.route('/logout', methods=['GET'])
 def logout():
-    print("Logout route is reached")  # Dit verschijnt in je terminal voor debugging
-    # Verwijder de email uit de sessie om de gebruiker uit te loggen
+    print("Logout route reached")
     if 'email' in session:
         session.pop('email', None)
         flash('You have been logged out successfully.', 'info')
         print("User session cleared, redirecting to index")
-
-    # Redirect naar de homepage of een andere pagina na uitloggen
     return redirect(url_for('main.index'))
+
 
 @main.route('/recipes', methods=['GET'])
 def list_recipes():
-    # Haal alle recepten op uit de database
     recipes = Recipe.query.all()
-    
-    # Render de template en geef de recepten mee
     return render_template('listing.html', recipes=recipes)
-
 
 
 @main.route('/add_recipe', methods=['GET', 'POST'])
@@ -279,18 +243,15 @@ def add_recipe():
 
     form = RecipeForm()
 
-    # Gebruik directe import van allergenen, origins en categorieën
     allergens = get_allergens()
     categories = get_categories()
     origins = get_origins()
 
     if form.validate_on_submit():
         try:
-            # Zorg ervoor dat de uploadmap bestaat
             upload_folder = os.path.join(current_app.root_path, 'static/images')
             os.makedirs(upload_folder, exist_ok=True)
 
-            # Verwerk de afbeelding
             image_file = form.image.data
             filename = secure_filename(image_file.filename) if image_file else None
             relative_path = None
@@ -299,61 +260,52 @@ def add_recipe():
                 image_file.save(file_path)
                 relative_path = f'images/{filename}'
 
-            # Haal ingrediënten, hoeveelheden en eenheden op uit het formulier
             ingredients = request.form.getlist('ingredients[]')
             quantities = request.form.getlist('quantities[]')
             units = request.form.getlist('units[]')
 
-            # Maak een dictionary voor de ingrediënten
             ingredient_dict = {}
             for ingredient, quantity, unit in zip(ingredients, quantities, units):
-                if ingredient and quantity and unit:  # Zorg dat alle velden zijn ingevuld
+                if ingredient and quantity and unit:
                     ingredient_dict[ingredient.strip()] = {
                         "quantity": quantity.strip(),
                         "unit": unit.strip()
                     }
 
-            # Haal geselecteerde allergenen op uit de dropdown
             selected_allergens = request.form.getlist('allergiesrec[]')
-            allergens_string = ', '.join(selected_allergens)  # Opslaan als een door komma's gescheiden string
+            allergens_string = ', '.join(selected_allergens)
 
-            # Haal bereidingsstappen op en combineer ze in één string, gescheiden door pipes
             preparation_steps = request.form.getlist('preparation_steps[]')
             preparation_instructions = '|'.join([step.strip() for step in preparation_steps if step.strip()])
 
-            # Haal de naam van de chef op
             chef = User.query.filter_by(email=session['email']).first()
             chef_name = chef.name if chef else None
 
-            # Maak een nieuw receptobject
             new_recipe = Recipe(
                 recipename=form.recipename.data,
                 chef_email=session['email'],
-                chef_name=chef_name,  # Naam van de chef automatisch ophalen
+                chef_name=chef_name,
                 description=form.description.data,
                 duration=form.duration.data,
                 price=form.price.data,
                 ingredients=ingredient_dict,
-                allergiesrec=allergens_string,  # Opslaan als string
+                allergiesrec=allergens_string,
                 image=relative_path,
-                origin=form.origin.data,  # Herkomstveld toevoegen
-                category=form.category.data,  # Categorieveld toevoegen
-                preparation=preparation_instructions  # Bereidingswijze als een lange string
+                origin=form.origin.data,
+                category=form.category.data,
+                preparation=preparation_instructions
             )
 
-            # Voeg toe aan de database en sla op
             db.session.add(new_recipe)
             db.session.commit()
             flash('Recipe added successfully!', 'success')
             return redirect(url_for('main.my_uploads'))
 
         except Exception as e:
-            # Rol de wijzigingen terug bij een fout
             db.session.rollback()
             flash(f"Error saving recipe: {e}", 'danger')
             print("Error:", str(e))
 
-    # Render de template en geef de allergenen, ingrediënten, en formulier door
     return render_template(
         'add_recipe.html',
         form=form,
@@ -363,33 +315,25 @@ def add_recipe():
     )
 
 
-
 @main.route('/my_recipes')
 def my_recipes():
     if 'email' not in session or session.get('role') != 'customer':
         flash('You need to log in as a customer to access this page.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Haal de huidige gebruiker op
     user_email = session['email']
-
-    # Haal de transacties op waar deze gebruiker de koper is (customer)
     transactions = Transaction.query.filter_by(consumer_email=user_email).all()
 
-    # Haal de recepten op die bij deze transacties horen, inclusief de chefnaam
     purchased_recipes = []
     for transaction in transactions:
         recipe = Recipe.query.filter_by(recipename=transaction.recipename, chef_email=transaction.chef_email).first()
         if recipe:
-            # Ingrediënten verwerken (uit de dictionary in plaats van JSON)
             ingredients_list = []
             if recipe.ingredients:
                 try:
-                    # Loop door de ingrediënten dictionary
                     for ingredient, details in recipe.ingredients.items():
-                        # Voeg de hoeveelheid, maateenheid en ingrediënt toe aan de lijst
                         quantity = details['quantity']
-                        unit = details.get('unit', '')  # Als er geen eenheid is, gebruik een lege string
+                        unit = details.get('unit', '')
                         ingredients_list.append(f"{quantity} {unit} of {ingredient}")
                 except KeyError:
                     ingredients_list = ["Invalid ingredient format"]
@@ -401,7 +345,7 @@ def my_recipes():
                 "description": recipe.description,
                 "duration": recipe.duration,
                 "price": recipe.price,
-                "ingredients_list": ingredients_list,  # Geprocessed ingredientenlijst
+                "ingredients_list": ingredients_list,
                 "allergiesrec": recipe.allergiesrec,
                 "image": recipe.image
             })
@@ -409,10 +353,8 @@ def my_recipes():
     return render_template('my_recipes.html', recipes=purchased_recipes)
 
 
-
 @main.route('/recipe/<recipename>', methods=['GET'])
 def recipe_detail(recipename):
-    # Haal het recept op uit de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
@@ -421,15 +363,12 @@ def recipe_detail(recipename):
     user_email = session.get('email')
     user_review = Review.query.filter_by(recipename=recipename, consumer_email=user_email).first()
 
-    # Ingrediënten verwerken uit dictionary voor detailweergave
     ingredients_list = []
     if recipe.ingredients:
         try:
-            # Loop door de ingrediënten dictionary
             for ingredient, details in recipe.ingredients.items():
-                # Haal de hoeveelheid, maateenheid en het ingrediënt op
                 quantity = details['quantity']
-                unit = details.get('unit', '')  # Als er geen eenheid is, gebruik een lege string
+                unit = details.get('unit', '')
                 ingredients_list.append({
                     'quantity': quantity,
                     'unit': unit,
@@ -442,10 +381,8 @@ def recipe_detail(recipename):
         'recipe_detail.html',
         recipe=recipe,
         user_review=user_review,
-        ingredients_list=ingredients_list  # De lijst van ingredienten als dictionaries
+        ingredients_list=ingredients_list
     )
-
-
 
 
 @main.route('/my_uploads')
@@ -457,12 +394,10 @@ def my_uploads():
     chef_email = session['email']
     uploads = Recipe.query.filter_by(chef_email=chef_email).all()
 
-    # Berekeningen
     uploads_data = []
     total_revenue = 0
     revenue_data = []
     for recipe in uploads:
-        # Parse ingrediënten
         ingredients_list = []
         if recipe.ingredients:
             try:
@@ -473,17 +408,15 @@ def my_uploads():
             except KeyError:
                 ingredients_list = ["Invalid ingredient format"]
 
-        # Bereken gemiddelde beoordeling
         avg_rating = (
-            db.session.query(db.func.avg(Review.rating))
+            db.session.query(func.avg(Review.rating))
             .filter(Review.recipename == recipe.recipename)
             .scalar()
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
 
-        # Bereken totale omzet per gerecht
         total_recipe_revenue = (
-            db.session.query(db.func.sum(Transaction.price))
+            db.session.query(func.sum(Transaction.price))
             .filter(Transaction.recipename == recipe.recipename, Transaction.chef_email == chef_email)
             .scalar()
         ) or 0
@@ -498,15 +431,13 @@ def my_uploads():
             'recipe': recipe,
             'ingredients_list': ingredients_list,
             'avg_rating': avg_rating,
-            'allergies': recipe.allergiesrec  # Voeg allergies toe
+            'allergies': recipe.allergiesrec
         })
 
-    # Sorteer de recepten op basis van omzet en haal de top 5 bestverkochte recepten
     revenue_data = sorted(revenue_data, key=lambda x: x['total_revenue'], reverse=True)[:5]
 
-    # Bereken overall average rating
     overall_avg_rating = (
-        db.session.query(db.func.avg(Review.rating))
+        db.session.query(func.avg(Review.rating))
         .filter(Review.chef_email == chef_email)
         .scalar()
     )
@@ -519,31 +450,25 @@ def my_uploads():
                            revenue_data=revenue_data)
 
 
-
 @main.route('/buy_recipe/<recipename>', methods=['GET', 'POST'])
 def buy_recipe(recipename):
-    # Fetch recipe from the database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
 
     if recipe is None:
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    # Ingrediënten als JSON voorbereiden
     ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
 
-    # Gerelateerde recepten ophalen
     related_recipes = Recipe.query.filter(
         (Recipe.origin == recipe.origin) | 
         (Recipe.ingredients.contains(ingredients_to_match))
     ).filter(Recipe.recipename != recipename).limit(4).all()
 
-    # Check if user is logged in
     if 'email' not in session:
         flash('You need to be logged in to buy a recipe.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Process ingredients
     ingredients_list = []
     if recipe.ingredients:
         try:
@@ -556,10 +481,8 @@ def buy_recipe(recipename):
         except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
-    # Fetch reviews for the recipe
     reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
 
-    # Handle POST request for purchase
     if request.method == 'POST':
         user_email = session['email']
         chef_email = recipe.chef_email
@@ -573,7 +496,6 @@ def buy_recipe(recipename):
             flash('You have already purchased this recipe.', 'warning')
             return redirect(url_for('main.dashboard'))
 
-        # Create the transaction
         transaction = Transaction(
             transactiondate=datetime.now(),
             price=recipe.price,
@@ -584,7 +506,6 @@ def buy_recipe(recipename):
         db.session.add(transaction)
         db.session.commit()
 
-        # Check if chef should be notified
         check_and_notify_chef(chef_email, recipename)
 
         flash('Recipe purchased successfully!', 'success')
@@ -599,21 +520,17 @@ def buy_recipe(recipename):
     )
 
 
-
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
 def add_review(recipename):
-    # Zorg dat de gebruiker is ingelogd
     if 'email' not in session:
         flash('You need to log in to add a review.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Haal het recept op
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.my_recipes'))
 
-    # Controleer of de transactie bestaat
     transaction = Transaction.query.filter_by(
         recipename=recipename,
         consumer_email=session['email']
@@ -623,27 +540,23 @@ def add_review(recipename):
         flash('No transaction found for this recipe.', 'danger')
         return redirect(url_for('main.my_recipes'))
 
-    # Haal de chef_email uit het recept
     chef_email = recipe.chef_email
 
     if request.method == 'POST':
-        # Haal gegevens uit het formulier
         rating = request.form.get('rating')
         comment = request.form.get('comment')
 
-        # Controleer of alle velden zijn ingevuld
         if not rating or not comment:
             flash('All fields are required.', 'danger')
             return redirect(url_for('main.add_review', recipename=recipename))
 
-        # Maak een nieuwe review aan
         try:
             new_review = Review(
                 comment=comment,
                 rating=int(rating),
                 consumer_email=session['email'],
                 recipename=recipename,
-                chef_email=chef_email,  # Voeg de chef_email toe
+                chef_email=chef_email,
                 transactionid=transaction.transactionid
             )
             db.session.add(new_review)
@@ -669,7 +582,6 @@ def edit_recipe(recipename):
     ingredients = recipe.ingredients if recipe.ingredients else {}
     form = RecipeForm(obj=recipe)
 
-    # Haal dropdownwaarden op
     categories = get_categories()
     origins = get_origins()
     allergens = get_allergens()
@@ -683,15 +595,12 @@ def edit_recipe(recipename):
             recipe.origin = form.origin.data
             recipe.category = form.category.data
 
-            # Update allergies
             selected_allergens = request.form.getlist('allergiesrec[]')
             recipe.allergiesrec = ', '.join(selected_allergens)
 
-            # Update preparation steps
             preparation_steps = request.form.getlist('preparation_steps[]')
             recipe.preparation = '|'.join([step.strip() for step in preparation_steps if step.strip()])
 
-            # Update ingredients
             ingredient_names = request.form.getlist('ingredients[]')
             ingredient_quantities = request.form.getlist('quantities[]')
             ingredient_units = request.form.getlist('units[]')
@@ -705,7 +614,6 @@ def edit_recipe(recipename):
                     }
             recipe.ingredients = updated_ingredients
 
-            # Update image
             if form.image.data:
                 upload_folder = os.path.join(current_app.root_path, 'static/images')
                 os.makedirs(upload_folder, exist_ok=True)
@@ -737,38 +645,30 @@ def edit_recipe(recipename):
 
 @main.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
-    # Haal de gebruiker op basis van sessie-email
     user = User.query.filter_by(email=session.get('email')).first()
 
-    # Controleer of de gebruiker is ingelogd
     if not user:
         flash('Please log in to access your profile.', 'danger')
         return redirect(url_for('main.login'))
 
-    # Maak het formulier en vul het met huidige gebruikersdata
     form = EditProfileForm(obj=user)
 
-    # Dynamische keuzes instellen
     form.allergies.choices = [(a, a) for a in get_allergens()]
     form.favorite_origins.choices = [(o, o) for o in get_origins()]
 
-    # Voorkeuren ophalen uit de database
     preferences = user.preferences or {
         'allergies': [],
         'favorite_ingredients': [],
         'favorite_origins': []
     }
 
-    # Vul het formulier met bestaande gegevens
     if request.method == 'GET':
         form.allergies.data = preferences.get('allergies', [])
-        form.favorite_ingredients.data = '\n'.join(preferences.get('favorite_ingredients', []))  # Opslaan als tekst
+        form.favorite_ingredients.data = '\n'.join(preferences.get('favorite_ingredients', []))
         form.favorite_origins.data = preferences.get('favorite_origins', [])
 
-    # Verwerk formulierindiening
     if form.validate_on_submit():
         try:
-            # Persoonlijke gegevens bijwerken
             user.name = form.name.data or user.name
             user.date_of_birth = form.date_of_birth.data or user.date_of_birth
             user.street = form.street.data or user.street
@@ -778,10 +678,8 @@ def edit_profile():
             user.country = form.country.data or user.country
             user.telephonenr = form.telephonenr.data or user.telephonenr
 
-            # Ingrediënten verwerken (gescheiden door nieuwe regels)
             new_ingredients = [ingredient.strip() for ingredient in form.favorite_ingredients.data.split('\n') if ingredient.strip()]
 
-            # Voorkeuren bijwerken
             updated_preferences = {
                 'allergies': form.allergies.data,
                 'favorite_ingredients': new_ingredients,
@@ -789,7 +687,6 @@ def edit_profile():
             }
             user.preferences = updated_preferences
 
-            # Opslaan in de database
             db.session.commit()
             flash('Profile updated successfully!', 'success')
             return redirect(url_for('main.dashboard'))
@@ -801,42 +698,34 @@ def edit_profile():
     return render_template('edit_profile.html', form=form, user=user)
 
 
-
 @main.route('/recipe_reviews/<recipename>')
 def recipe_reviews(recipename):
-    # Haal het recept op uit de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found.', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    # Haal de beoordelingen voor het recept op
     reviews = Review.query.filter_by(recipename=recipename).all()
 
-    # Bereken de gemiddelde rating
     avg_rating = (
-        db.session.query(db.func.avg(Review.rating))
+        db.session.query(func.avg(Review.rating))
         .filter(Review.recipename == recipename)
         .scalar()
     )
     avg_rating = round(avg_rating, 1) if avg_rating else None
 
-    # Verwerk de ingrediënten voor weergave (nu direct als dictionary)
     ingredients_list = []
     if recipe.ingredients:
         try:
-            # Loop door de ingrediënten dictionary (geen JSON decoding nodig)
             for ingredient, details in recipe.ingredients.items():
-                # Voeg de quantity, unit en ingredient toe aan de lijst
                 ingredients_list.append({
                     'quantity': details['quantity'],
-                    'unit': details.get('unit', ''),  # Voeg unit toe, als die bestaat
+                    'unit': details.get('unit', ''),
                     'ingredient': ingredient
                 })
         except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
-    # Render de recipe_reviews pagina
     return render_template(
         'recipe_reviews.html',
         recipe=recipe,
@@ -845,44 +734,34 @@ def recipe_reviews(recipename):
         ingredients_list=ingredients_list
     )
 
-from flask import Blueprint, render_template, request, jsonify
-from .responses import get_response  # Importeer de get_response functie
 
 @chatbot.route('/chat', methods=['GET', 'POST'])
 def chat():
     if request.method == 'POST':
         try:
-            # Haal het gebruikersbericht op
             user_message = request.json.get('message', '').strip()
-            print(f"User message: {user_message}")  # Debugging log
-
-            # Haal een reactie op uit responses.py
+            print(f"User message: {user_message}")
             response = get_response(user_message)
-            print(f"Chatbot response: {response}")  # Debugging log
-
+            print(f"Chatbot response: {response}")
             return jsonify({"response": response}), 200
         except Exception as e:
             print(f"Error in chatbot: {e}")
             return jsonify({"response": "There was an error processing your request. Please try again later."}), 500
 
-    # Render de chatbot-template bij een GET-verzoek
     return render_template('chatbot.html')
 
-from flask_mail import Message
 
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
         try:
-            # Collect form data
             name = form.name.data
             email = form.email.data
             subject = form.subject.data
             message = form.message.data
-            is_public = form.is_public.data  # Retrieve the checkbox value
+            is_public = form.is_public.data
 
-            # Save feedback to the database
             new_feedback = Feedback(
                 name=name,
                 email=email,
@@ -893,7 +772,6 @@ def contact():
             db.session.add(new_feedback)
             db.session.commit()
 
-            # Send email
             msg = Message(
                 subject=f"New Message from {name}: {subject}",
                 recipients=["dishcovery101@gmail.com"],  # Replace with your email
@@ -901,7 +779,6 @@ def contact():
             )
             mail.send(msg)
 
-            # Success message
             flash("Thank you for contacting us! We'll get back to you shortly.", "success")
             return redirect(url_for('main.contact'))
 
@@ -910,11 +787,9 @@ def contact():
             flash("An error occurred while submitting your message. Please try again.", "danger")
             print(f"Error: {e}")
 
-    # Fetch public comments to display
     public_comments = Feedback.query.filter_by(is_public=True).order_by(Feedback.created_at.desc()).all()
 
     return render_template('contact.html', form=form, public_comments=public_comments)
-
 
 
 @main.route('/toggle_favorite', methods=['POST'])
@@ -933,7 +808,6 @@ def toggle_favorite():
     if not recipename or not chef_email:
         return jsonify({"error": "Invalid recipe data"}), 400
 
-    # Toggle favorite
     if user.is_favorite(recipename, chef_email):
         user.remove_from_favorites(recipename, chef_email)
         action = "removed"
@@ -948,6 +822,7 @@ def toggle_favorite():
         db.session.rollback()
         return jsonify({"error": "Failed to update favorites", "details": str(e)}), 500
 
+
 @main.route('/wishlist')
 def wishlist():
     if 'email' not in session or session.get('role') != 'customer':
@@ -955,7 +830,7 @@ def wishlist():
         return redirect(url_for('main.dashboard'))
 
     user = User.query.filter_by(email=session['email']).first()
-   
+
     favorite_recipes = []
     if user and user.favorites:
         for fav in user.favorites:
@@ -973,14 +848,3 @@ def wishlist():
                 })
 
     return render_template('wishlist.html', favorite_recipes=favorite_recipes)
-
-
-
-
-
-
-
-
-
-
-

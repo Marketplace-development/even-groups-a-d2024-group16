@@ -9,7 +9,7 @@ class Config:
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
-    MAIL_USERNAME = 'dishcovery101@gmail.com'  # Vervang door je e-mailadres
+    MAIL_USERNAME = 'dishcovery101@gmail.com'  
     MAIL_PASSWORD = 'rydu ueej ftbr izpb'
     MAIL_DEFAULT_SENDER = 'dishcovery101@gmail.com'
 

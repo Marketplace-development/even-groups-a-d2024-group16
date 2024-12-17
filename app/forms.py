@@ -42,13 +42,9 @@ class UserForm(FlaskForm):
     
     submit = SubmitField('Register')
 
-
-
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Login')
-
 
 class RecipeForm(FlaskForm):
     recipename = StringField('Recipe Name', validators=[DataRequired()])
@@ -72,8 +68,6 @@ class RecipeForm(FlaskForm):
     ])
 
     submit = SubmitField('Save Changes')
-
-
 
 class ReviewForm(FlaskForm):
     comment = TextAreaField('Comment', validators=[DataRequired()])
@@ -115,7 +109,6 @@ class EditProfileForm(FlaskForm):
     # Alleen zichtbaar voor admins of specifieke rollen
     is_chef = BooleanField('Are you a chef?')
     submit = SubmitField('Save Changes')
-
 
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=50)])
