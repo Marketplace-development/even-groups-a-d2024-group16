@@ -25,9 +25,17 @@ def apply_filters(query, filters):
         query = query.filter(Recipe.category == category)
 
     # Prijsfilter
-    if filters.get('price'):
+    if filters.get('min_price'):
         try:
-            max_price = float(filters['price'])
+            min_price = float(filters['min_price'])
+            query = query.filter(Recipe.price >= min_price)
+        except ValueError:
+            pass  # Negeer ongeldige invoer
+
+    # Max Prijs filter
+    if filters.get('max_price'):
+        try:
+            max_price = float(filters['max_price'])
             query = query.filter(Recipe.price <= max_price)
         except ValueError:
             pass  # Negeer ongeldige invoer

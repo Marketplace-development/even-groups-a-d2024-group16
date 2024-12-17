@@ -121,6 +121,8 @@ def dashboard():
     allergens = get_allergens()
 
     search_query = request.args.get('search', '')
+    max_price_query = db.session.query(func.max(Recipe.price)).scalar()
+    max_price = max_price_query if max_price_query is not None else 100.0
 
     # Initialiseer filters
     allergies_input = request.args.get('allergies', "")
@@ -132,7 +134,7 @@ def dashboard():
         'allergies': allergies_list,  # Zorg voor een genormaliseerde lijst
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
-        'price': request.args.get('price'),
+        'price': request.args.get('price', max_price),  # Gebruik max_price als standaard
         'category': request.args.get('category'),
         'origin': request.args.get('origin'),
     }
@@ -234,6 +236,8 @@ def dashboard():
     if filters.get('origin'):
         recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
 
+    max_price_query = db.session.query(func.max(Recipe.price)).scalar()
+    max_price = max_price_query if max_price_query is not None else 100.0
 
     # Render de template met de nodige gegevens
     return render_template(
@@ -244,7 +248,8 @@ def dashboard():
         origins=origins,
         allergens=allergens,
         sort_by=sort_by,
-        user_favorites=user_favorites
+        user_favorites=user_favorites,
+        max_price=max_price  # Voeg maximale prijs toe
     )
     
 
