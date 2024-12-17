@@ -3,7 +3,6 @@
 <!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Replace Dishcovery text with an image -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
         </a>
@@ -14,7 +13,6 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Chatbot Link with Icon -->
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
                         <i class="fas fa-robot me-2"></i>Chatbot
@@ -27,8 +25,6 @@
                     </a>
                 </li>
                 {% endif %}
-
-                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div style="display: flex; align-items: center;">
@@ -49,7 +45,6 @@
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
-                        <!-- Contact Link -->
                         <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
                         <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
                     </ul>
@@ -58,8 +53,7 @@
         </div>
     </div>
 </nav>
-    
-    
+
 <h1>Edit Profile</h1>
 <form method="POST">
     {{ form.hidden_tag() }}
@@ -187,7 +181,17 @@
         <!-- Favourite Ingredients -->
         <div>
             <label for="favorite_ingredients">Favourite Ingredients</label>
-            {{ form.favorite_ingredients(class="form-control", multiple="multiple") }}
+            
+            <!-- Dynamisch lijst van favoriete ingrediënten -->
+            <div id="ingredients-list">
+                {% for ingredient in user.preferences.favorite_ingredients %}
+                    <input type="text" name="favorite_ingredients" class="form-control mb-2" value="{{ ingredient }}">
+                {% endfor %}
+            </div>
+
+            <!-- Knop om ingredienten toe te voegen -->
+            <button type="button" id="add-ingredient" class="btn btn-secondary mt-2">Add Ingredient</button>
+
             {% if form.favorite_ingredients.errors %}
                 <ul class="errors">
                     {% for error in form.favorite_ingredients.errors %}
@@ -217,20 +221,33 @@
     </div>
 </form>
 
+<script>
+    document.getElementById("add-ingredient").addEventListener("click", function() {
+        // Maak een nieuw tekstinvoerveld aan
+        var newInput = document.createElement("input");
+        newInput.type = "text";
+        newInput.name = "favorite_ingredients"; // Zorg ervoor dat alle velden dezelfde naam hebben
+        newInput.className = "form-control mb-2"; // Voeg een klasse toe voor opmaak
 
-    <style>
-        form {
-            max-width: 600px;
-            margin: auto;
-            margin-top: 30px;
-        }
-        .errors {
-            list-style: none;
-            padding: 0;
-        }
-        .errors li {
-            font-size: 0.9em;
-        }
-    </style>
+        // Voeg het nieuwe invoerveld toe aan de lijst
+        document.getElementById("ingredients-list").appendChild(newInput);
+    });
+</script>
+
+<style>
+    form {
+        max-width: 600px;
+        margin: auto;
+        margin-top: 30px;
+    }
+    .errors {
+        list-style: none;
+        padding: 0;
+    }
+    .errors li {
+        font-size: 0.9em;
+    }
+</style>
+
 {% endblock %}
 

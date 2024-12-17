@@ -794,10 +794,13 @@ def edit_profile():
             user.country = form.country.data or user.country
             user.telephonenr = form.telephonenr.data or user.telephonenr
 
+            # Verzamelen van de nieuwe lijst van favoriete ingrediënten
+            new_ingredients = request.form.getlist('favorite_ingredients')
+
             # Voorkeuren bijwerken
             updated_preferences = {
                 'allergies': form.allergies.data,
-                'favorite_ingredients': form.favorite_ingredients.data,
+                'favorite_ingredients': new_ingredients,
                 'favorite_origins': form.favorite_origins.data
             }
             user.preferences = updated_preferences
@@ -812,8 +815,6 @@ def edit_profile():
             flash(f"Error updating profile: {e}", 'danger')
 
     return render_template('edit_profile.html', form=form, user=user)
-
-
 
 
 @main.route('/recipe_reviews/<recipename>')
