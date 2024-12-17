@@ -116,10 +116,10 @@
                         <p><strong>Allergies:</strong> {{ upload.recipe.allergiesrec }}</p>
 
                         <!-- View Reviews-knop toevoegen -->
-                        <a href="{{ url_for('main.recipe_reviews', recipename=upload.recipe.recipename) }}" class="btn btn-warning mb-2">View Reviews</a>
+                        <a href="{{ url_for('main.recipe_reviews', recipename=upload.recipe.recipename) }}" class="btn btn-review">View Reviews</a>
                         
                         <!-- Bewerk-knop toevoegen -->
-                        <a href="{{ url_for('main.edit_recipe', recipename=upload.recipe.recipename) }}" class="btn btn-primary mt-2">Edit Recipe</a>
+                        <a href="{{ url_for('main.edit_recipe', recipename=upload.recipe.recipename) }}" class="btn btn-secondary mt-2">Edit Recipe</a>
                     </div>
                 </div>
             {% endfor %}
