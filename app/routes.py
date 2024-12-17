@@ -761,11 +761,6 @@ def edit_profile():
 
     # Dynamische keuzes instellen
     form.allergies.choices = [(a, a) for a in get_allergens()]
-    form.favorite_ingredients.choices = [
-        (ingredient, f"{ingredient}")
-        for category, items in ingredienten.items()
-        for ingredient in items.keys()
-    ]
     form.favorite_origins.choices = [(o, o) for o in get_origins()]
 
     # Voorkeuren ophalen uit de database
@@ -778,7 +773,7 @@ def edit_profile():
     # Vul het formulier met bestaande gegevens
     if request.method == 'GET':
         form.allergies.data = preferences.get('allergies', [])
-        form.favorite_ingredients.data = preferences.get('favorite_ingredients', [])
+        form.favorite_ingredients.data = '\n'.join(preferences.get('favorite_ingredients', []))  # Opslaan als tekst
         form.favorite_origins.data = preferences.get('favorite_origins', [])
 
     # Verwerk formulierindiening
@@ -794,8 +789,8 @@ def edit_profile():
             user.country = form.country.data or user.country
             user.telephonenr = form.telephonenr.data or user.telephonenr
 
-            # Verzamelen van de nieuwe lijst van favoriete ingrediënten
-            new_ingredients = request.form.getlist('favorite_ingredients')
+            # Ingrediënten verwerken (gescheiden door nieuwe regels)
+            new_ingredients = [ingredient.strip() for ingredient in form.favorite_ingredients.data.split('\n') if ingredient.strip()]
 
             # Voorkeuren bijwerken
             updated_preferences = {
@@ -815,6 +810,7 @@ def edit_profile():
             flash(f"Error updating profile: {e}", 'danger')
 
     return render_template('edit_profile.html', form=form, user=user)
+
 
 
 @main.route('/recipe_reviews/<recipename>')

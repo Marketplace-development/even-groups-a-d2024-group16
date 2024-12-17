@@ -100,13 +100,10 @@ class EditProfileForm(FlaskForm):
         option_widget=widgets.CheckboxInput(),
         coerce=str
     )
-    favorite_ingredients = SelectMultipleField(
+    favorite_ingredients = StringField(
         'Favorite Ingredients',
-        choices=[],  # Wordt ingesteld in de route
-        widget=widgets.ListWidget(prefix_label=False),
-        option_widget=widgets.CheckboxInput(),
-        coerce=str
-    )
+        default=''  # Zorgt ervoor dat het veld nooit None is
+)
     favorite_origins = SelectMultipleField(
         'Favorite Origins',
         choices=[],  # Wordt ingesteld in de route
