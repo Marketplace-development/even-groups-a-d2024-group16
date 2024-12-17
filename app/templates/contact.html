@@ -213,7 +213,7 @@
         {% if public_comments %}
             <ul class="comments-container">
                 {% for comment in public_comments %}
-                <div class="comment-bubble {% if loop.index % 2 == 0 %}bubble-right{% else %}bubble-left{% endif %}">
+                <div class="comment-bubble">
                     <div class="comment-header">
                         <strong>{{ comment.name }}</strong>
                         <small class="text-muted">{{ comment.created_at.strftime('%d %B %Y, %H:%M') }}</small>
