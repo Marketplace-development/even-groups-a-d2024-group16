@@ -6,7 +6,6 @@ from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij upl
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction, Feedback  # Je databasemodellen
 from app.forms import RecipeForm, ReviewForm, EditProfileForm, ContactForm
-from app.ingredients import ingredienten
 from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
@@ -15,8 +14,6 @@ from app.zoekbalk import apply_search
 from flask_mail import Mail, Message
 from app.check_and_notify_chef import check_and_notify_chef
 from app import mail
-
-# Formulieren
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 
 main = Blueprint('main', __name__)
@@ -27,7 +24,6 @@ chatbot = Blueprint('chatbot', __name__)
 def index():
     return render_template('index.html')
 
-from app.ingredients import ingredienten  # Zorg ervoor dat dit bovenaan je bestand staat
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
@@ -35,11 +31,6 @@ def register():
     
     # Gebruik ingredienten direct vanuit ingredients.py
     form.allergies.choices = [(allergy, allergy) for allergy in get_allergens()]
-    form.favorite_ingredients.choices = [
-        (ingredient, ingredient) 
-        for category in ingredienten.values() 
-        for ingredient in category.keys()
-    ]
     form.favorite_origins.choices = [(origin, origin) for origin in get_origins()]
     
     if form.validate_on_submit():
@@ -252,7 +243,6 @@ def dashboard():
         categories=categories,
         origins=origins,
         allergens=allergens,
-        ingredienten=ingredienten,
         sort_by=sort_by,
         user_favorites=user_favorites
     )
@@ -367,7 +357,6 @@ def add_recipe():
     return render_template(
         'add_recipe.html',
         form=form,
-        ingredienten=ingredienten,  # Gebruik rechtstreeks de dictionary uit ingredients.py
         allergens=allergens,
         categories=categories,
         origins=origins
