@@ -168,6 +168,15 @@ def dashboard():
             .scalar()
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
+        
+        # Filteren op minimale beoordeling
+        if filters.get('min_rating'):
+            try:
+                min_rating = float(filters['min_rating'])
+                if avg_rating is None or avg_rating < min_rating:
+                    continue  # Skip dit recept als het niet voldoet
+            except ValueError:
+                flash("Invalid minimum rating value.", "danger")
 
         # Ingrediëntenlijst verwerken
         ingredients_list = []
