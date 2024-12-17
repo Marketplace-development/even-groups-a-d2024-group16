@@ -150,9 +150,15 @@
                     <input type="number" name="duration" id="duration" class="form-control" placeholder="e.g., 30" value="{{ request.args.get('duration') }}">
                 </div>
                 <div class="mb-3">
-                    <label for="price" class="form-label">Max. Price (€)</label>
-                    <input type="number" step="0.01" name="price" id="price" class="form-control" placeholder="e.g., 20.00" value="{{ request.args.get('price') }}">
-                </div>
+                    <label for="price_slider" class="form-label">Price Range (€):</label>
+                    <div id="price_slider"></div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span id="min_price_label">€{{ request.args.get('min_price', 0) }}</span>
+                        <span id="max_price_label">€{{ request.args.get('max_price', max_price) }}</span>
+                    </div>
+                    <input type="hidden" name="min_price" id="min_price_input" value="{{ request.args.get('min_price', 0) }}">
+                    <input type="hidden" name="max_price" id="max_price_input" value="{{ request.args.get('max_price', max_price) }}">
+                </div>                                       
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select name="category" id="category" class="form-control">
@@ -231,7 +237,10 @@
                         allergiesHidden.value = allergies.join(",");
                     }
                 </script>                       
-                <button type="submit" class="btn btn-secondary">Apply Filters</button>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-secondary">Apply Filters</button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-danger">Remove All Filters</a>
+                </div>
             </form>
         </div>
 
@@ -342,6 +351,116 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const slider = document.getElementById('price_slider');
+        const minPriceInput = document.getElementById('min_price_input');
+        const maxPriceInput = document.getElementById('max_price_input');
+        const minPriceLabel = document.getElementById('min_price_label');
+        const maxPriceLabel = document.getElementById('max_price_label');
+        const maxPrice = parseFloat("{{ max_price }}");
+
+        // Create slider thumbs
+        const thumbMin = document.createElement('div');
+        const thumbMax = document.createElement('div');
+        const track = document.createElement('div');
+
+        thumbMin.classList.add('thumb');
+        thumbMax.classList.add('thumb');
+        track.classList.add('track');
+
+        slider.appendChild(track);
+        slider.appendChild(thumbMin);
+        slider.appendChild(thumbMax);
+
+        // Initial positions
+        const sliderWidth = slider.offsetWidth;
+        const minPosition = ((minPriceInput.value || 0) / maxPrice) * sliderWidth;
+        const maxPosition = ((maxPriceInput.value || maxPrice) / maxPrice) * sliderWidth;
+
+        thumbMin.style.left = `${minPosition}px`;
+        thumbMax.style.left = `${maxPosition}px`;
+        track.style.left = `${minPosition}px`;
+        track.style.width = `${maxPosition - minPosition}px`;
+
+        // Add drag logic
+        function dragThumb(event, thumb, isMin) {
+            event.preventDefault();
+            const startX = event.clientX;
+            const startLeft = parseFloat(thumb.style.left);
+
+            function onDrag(e) {
+                const deltaX = e.clientX - startX;
+                let newLeft = startLeft + deltaX;
+
+                // Constrain within bounds
+                newLeft = Math.max(0, newLeft);
+                newLeft = Math.min(sliderWidth, newLeft);
+
+                if (isMin) {
+                    newLeft = Math.min(newLeft, parseFloat(thumbMax.style.left) - 10);
+                } else {
+                    newLeft = Math.max(newLeft, parseFloat(thumbMin.style.left) + 10);
+                }
+
+                thumb.style.left = `${newLeft}px`;
+                const value = Math.round((newLeft / sliderWidth) * maxPrice);
+
+                if (isMin) {
+                    minPriceInput.value = value;
+                    minPriceLabel.textContent = `€${value}`;
+                    track.style.left = `${newLeft}px`;
+                    track.style.width = `${parseFloat(thumbMax.style.left) - newLeft}px`;
+                } else {
+                    maxPriceInput.value = value;
+                    maxPriceLabel.textContent = `€${value}`;
+                    track.style.width = `${newLeft - parseFloat(thumbMin.style.left)}px`;
+                }
+            }
+
+            function stopDrag() {
+                document.removeEventListener('mousemove', onDrag);
+                document.removeEventListener('mouseup', stopDrag);
+            }
+
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        thumbMin.addEventListener('mousedown', (e) => dragThumb(e, thumbMin, true));
+        thumbMax.addEventListener('mousedown', (e) => dragThumb(e, thumbMax, false));
+    });
+</script>
+<style>
+    #price_slider {
+        margin: 10px 0;
+        height: 6px;
+        background: #ddd;
+        position: relative;
+        border-radius: 5px;
+    }
+
+    #price_slider .thumb {
+        width: 20px;
+        height: 20px;
+        background: #007bff;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    #price_slider .track {
+        height: 100%;
+        background: #007bff;
+        position: absolute;
+        z-index: 1;
+        border-radius: 5px;
+    }
+</style>
+
 
 {% endblock %}
 
