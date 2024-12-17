@@ -70,15 +70,6 @@ h1 {
     background-color: #4682b4;
 }
 
-/* Extra stijl voor de knop "Geaccepteerde Klussen" */
-.btn-success {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
 
 /* Dashboard card-styling */
 .card {
@@ -276,5 +267,70 @@ h3.text-success {
 
 .favorite-btn:hover {
     color: darkred;
+}
+
+/*layout contactpagina*/
+.text-section-about-us {
+    background-color: rgba(255, 255, 255, 0.9); /* Licht transparante achtergrond */
+    border-radius: 8px; /* Ronde hoeken */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Zachte schaduw */
+    position: relative; /* Zorg ervoor dat de grootte dynamisch is */
+    height: 100%; /* Zelfde hoogte als de afbeelding */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centreert de tekst verticaal */
+}
+.comments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-bubble {
+    max-width: 70%;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f8f9fa; /* Lichtgrijs achtergrond */
+    position: relative;
+    word-wrap: break-word;
+}
+
+.comment-header {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.comment-header strong {
+    color: #333;
+}
+
+.comment-header small {
+    margin-left: 10px;
+    color: #777;
+}
+
+.comment-message p {
+    margin: 0;
+    color: #555;
+    font-size: 1rem;
+}
+
+.bubble-left {/* Bubbles afwisselend links en rechts */
+    align-self: flex-start;
+    background-color: #e9f5ff; /* Lichtblauw */
+    border-top-left-radius: 0;
+}
+
+.bubble-right {
+    align-self: flex-end;
+    background-color: #d4edda; /* Lichtgroen */
+    border-top-right-radius: 0;
+}
+
+.comment-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-in-out;
 }
 

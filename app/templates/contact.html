@@ -61,7 +61,7 @@
     </div>
 </nav>
 <div class="container mt-5">
-    <h1 class="text-center mb-4">About Us</h1>
+    <h1 class="page-title">About Us</h1>
 
     <!-- About Us Section -->
     <div class="row mb-5 align-items-center">
@@ -71,7 +71,7 @@
         </div>
         
         <!-- Text Section -->
-        <div class="col-md-5">
+        <div class="col-md-5 text-section-about-us p-4">
             <p>
                 At <strong>Dishcovery</strong>, we bridge the gap between passionate chefs and food enthusiasts by 
                 revolutionizing the way you discover and enjoy recipes. Say goodbye to cluttered shelves filled with 
@@ -96,44 +96,89 @@
 
     <!-- Contact Details -->
     <div class="row mb-5">
-        <h2 class="text-center mb-4">Onze Contactgegevens</h2>
+        <h2 class="text-center mb-4">Our contact details</h2>
         <p class="text-center">
-            Heb je vragen of opmerkingen? Neem gerust contact met ons op!
+            Do you have questions or comments? Please feel free to contact us!
             <br>
             <strong>Email:</strong> <a href="mailto:dishcovery101@gmail.com">dishcovery101@gmail.com</a>
         </p>
     </div>
 
     <!-- Contact Form Section -->
-    <div class="row mb-5">
-        <div class="col-md-8 offset-md-2">
-            <h2 class="text-center mb-4">Neem Contact Op</h2>
-            <form method="POST" action="{{ url_for('main.contact') }}">
-                {{ form.hidden_tag() }}
-                <div class="mb-3">
-                    {{ form.name.label(class="form-label") }}
-                    {{ form.name(class="form-control", placeholder="Your Name") }}
-                </div>
-                <div class="mb-3">
-                    {{ form.email.label(class="form-label") }}
-                    {{ form.email(class="form-control", placeholder="Your Email") }}
-                </div>
-                <div class="mb-3">
-                    {{ form.subject.label(class="form-label") }}
-                    {{ form.subject(class="form-control", placeholder="Subject") }}
-                </div>
-                <div class="mb-3">
-                    {{ form.message.label(class="form-label") }}
-                    {{ form.message(class="form-control", rows=5, placeholder="Your Message") }}
-                </div>
-                <div class="form-check mb-3">
-                    {{ form.is_public(class="form-check-input") }}
-                    {{ form.is_public.label(class="form-check-label") }}
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Send Message</button>
-            </form>
-        </div>
+    <style>
+        html, body {
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+        }
+    
+        html {
+            box-sizing: border-box; 
+            overflow-y: auto; 
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .contact-container {
+            background-color: rgba(255, 255, 255, 0.8); 
+            padding: 2rem; 
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+            max-width: 800px; 
+            margin: 5vh auto; 
+            color: black; 
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+    <div class="contact-container">
+        <h2 class="text-center mb-4">Contact us</h2>
+        <form method="POST" action="{{ url_for('main.contact') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Name -->
+            <div>
+                <label for="name">Your Name</label>
+                {{ form.name(class="form-control", placeholder="Enter your name") }}
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email">Your Email</label>
+                {{ form.email(class="form-control", placeholder="Enter your email") }}
+            </div>
+
+            <!-- Subject -->
+            <div>
+                <label for="subject">Subject</label>
+                {{ form.subject(class="form-control", placeholder="Enter the subject") }}
+            </div>
+
+            <!-- Message -->
+            <div>
+                <label for="message">Your Message</label>
+                {{ form.message(class="form-control", rows=5, placeholder="Type your message here") }}
+            </div>
+
+            <!-- Checkbox -->
+            <div class="form-check mb-3">
+                {{ form.is_public(class="form-check-input") }}
+                {{ form.is_public.label(class="form-check-label") }}
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" class="btn btn-secondary">Send Message</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- FAQ Section -->
 <div class="row mb-5">
@@ -166,12 +211,17 @@
     <h2 class="text-center mb-4">Public Comments</h2>
     <div class="col-md-8 offset-md-2">
         {% if public_comments %}
-            <ul class="list-group">
+            <ul class="comments-container">
                 {% for comment in public_comments %}
-                    <li class="list-group-item">
-                        <strong>{{ comment.name }}</strong> - <small>{{ comment.created_at.strftime('%d %B %Y, %H:%M') }}</small>
+                <div class="comment-bubble {% if loop.index % 2 == 0 %}bubble-right{% else %}bubble-left{% endif %}">
+                    <div class="comment-header">
+                        <strong>{{ comment.name }}</strong>
+                        <small class="text-muted">{{ comment.created_at.strftime('%d %B %Y, %H:%M') }}</small>
+                    </div>
+                    <div class="comment-message">
                         <p>{{ comment.message }}</p>
-                    </li>
+                    </div>
+                </div>
                 {% endfor %}
             </ul>
         {% else %}
