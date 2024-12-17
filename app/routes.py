@@ -168,7 +168,7 @@ def dashboard():
             .scalar()
         )
         avg_rating = round(avg_rating, 1) if avg_rating else None
-        
+
         # Filteren op minimale beoordeling
         if filters.get('min_rating'):
             try:
@@ -945,7 +945,12 @@ def wishlist():
     return render_template('wishlist.html', favorite_recipes=favorite_recipes)
 
 
-
+@main.app_template_filter('fromjson')
+def fromjson(value):
+    try:
+        return json.loads(value) if value else []
+    except (ValueError, TypeError):
+        return []
 
 
 
