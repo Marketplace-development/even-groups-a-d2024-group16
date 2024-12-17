@@ -2,6 +2,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import text, cast
 from sqlalchemy import func, and_
 from app.models import Recipe
+from app import db  # SQLAlchemy-instantie
+
 import json
 
 
@@ -12,7 +14,7 @@ def apply_filters(query, filters):
             ingredient_list = json.loads(filters['ingredients'])
             if ingredient_list:
                 ingredient_conditions = [
-                    Recipe.ingredients.op('@>')(cast({ingredient: {}}, JSONB))
+                    func.lower(cast(Recipe.ingredients, db.Text)).like(f'%"{ingredient.lower()}"%')
                     for ingredient in ingredient_list
                 ]
                 query = query.filter(and_(*ingredient_conditions))  # Zorg dat alle ingrediënten aanwezig zijn
