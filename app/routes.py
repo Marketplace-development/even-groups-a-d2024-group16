@@ -271,6 +271,8 @@ def add_recipe():
         
                 # Save de afbeelding
                 file_path = os.path.join(upload_folder, filename)
+                file_path = file_path.replace("C:", "").replace("\\", "/")  # Remove "C:" and normalize to "/"
+
                 image_file.save(file_path)
         
                 # Gebruik altijd relatieve paden voor de database
@@ -689,6 +691,7 @@ def edit_recipe(recipename):
                 upload_folder = os.path.join(current_app.root_path, 'static/images')
                 os.makedirs(upload_folder, exist_ok=True)
                 file_path = os.path.join(upload_folder, filename)
+                file_path = file_path.replace("C:", "").replace("\\", "/")
                 image_file.save(file_path)
                 recipe.image = f'images/{filename}'
                 
@@ -958,6 +961,17 @@ def fromjson(value):
     except (ValueError, TypeError):
         return []
 
+@main.route('/fix_image_paths', methods=['GET'])
+def fix_image_paths():
+    recipes = Recipe.query.all()
+    for recipe in recipes:
+        if recipe.image and '\\' in recipe.image:
+            # Convert Windows-style paths to relative paths
+            corrected_path = recipe.image.split('static\\images\\')[-1]  # Extract the relative path
+            corrected_path = corrected_path.replace("\\", "/")
+            recipe.image = f'images/{corrected_path}'
+    db.session.commit()
+    return "Image paths fixed successfully!"
 
 
 
