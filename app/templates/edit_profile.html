@@ -54,6 +54,55 @@
     </div>
 </nav>
 
+<!-- Background Styling -->
+<style>
+    html, body {
+        margin: 0; 
+        padding: 0; 
+        height: 100%;
+    }
+
+    body {
+        background-image: url('{{ url_for('static', filename='images/Index_background.jpeg') }}');
+        background-size: cover; 
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat; 
+        overflow-x: hidden; 
+        font-family: 'Roboto', sans-serif; 
+        color: white; 
+        scroll-behavior: smooth; 
+    }
+
+    .welcome-content {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); 
+        padding: 2rem;
+        border-radius: 12px; 
+        max-width: 600px;
+        margin: 5vh auto; 
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        color: black;
+        overflow-y: auto; 
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #333;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+    ul.errors {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 15px 0;
+        color: #d32f2f;
+        text-align: left;
+    }
+</style>
 
 <div class="welcome-content"> <!-- Zelfde stijl als register -->
     <h1>Edit Profile</h1>
@@ -236,20 +285,7 @@
     });
 </script>
 
-<style>
-    form {
-        max-width: 600px;
-        margin: auto;
-        margin-top: 30px;
-    }
-    .errors {
-        list-style: none;
-        padding: 0;
-    }
-    .errors li {
-        font-size: 0.9em;
-    }
-</style>
+
 
 {% endblock %}
 
