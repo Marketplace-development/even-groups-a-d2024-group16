@@ -1,5 +1,6 @@
 import os  # Voor bestandspaden en mapbeheer
 import json
+from pathlib import Path
 from datetime import datetime  # Voor datum- en tijdstempels
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app, jsonify
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
@@ -257,16 +258,19 @@ def add_recipe():
     if form.validate_on_submit():
         try:
             # Zorg ervoor dat de uploadmap bestaat
-            upload_folder = os.path.join(current_app.root_path, 'static/images')
-            os.makedirs(upload_folder, exist_ok=True)
+            upload_folder = Path(current_app.root_path) / 'static' / 'images'
+            upload_folder.mkdir(parents=True, exist_ok=True)
 
             # Verwerk de afbeelding
             image_file = form.image.data
             filename = secure_filename(image_file.filename) if image_file else None
             relative_path = None
             if filename:
-                file_path = os.path.join(upload_folder, filename)
-                image_file.save(file_path)
+                # Sla het bestand op met behulp van pathlib voor platformonafhankelijke paden
+                file_path = upload_folder / filename
+                image_file.save(str(file_path))  # Zorg dat het pad een string is voor .save()
+
+                # Sla het relatieve pad op in UNIX-stijl (compatibel met webservers)
                 relative_path = f'images/{filename}'
 
             # Haal ingrediënten, hoeveelheden en eenheden op uit het formulier
@@ -677,15 +681,18 @@ def edit_recipe(recipename):
 
             # Update image
             if form.image.data:
-                upload_folder = os.path.join(current_app.root_path, 'static/images')
-                os.makedirs(upload_folder, exist_ok=True)
+                # Gebruik pathlib voor platformonafhankelijke paden
+                upload_folder = Path(current_app.root_path) / 'static' / 'images'
+                upload_folder.mkdir(parents=True, exist_ok=True)
 
                 image_file = form.image.data
                 filename = secure_filename(image_file.filename)
-                file_path = os.path.join(upload_folder, filename)
-                image_file.save(file_path)
-                recipe.image = f'images/{filename}'
+                file_path = upload_folder / filename
+                image_file.save(str(file_path))  # Gebruik str(file_path) voor .save()
 
+                # Sla het relatieve pad op in UNIX-stijl
+                recipe.image = f'images/{filename}'
+                
             db.session.commit()
             flash('Recipe updated successfully!', 'success')
             return redirect(url_for('main.my_uploads'))
