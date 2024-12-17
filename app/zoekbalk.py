@@ -23,3 +23,4 @@ def apply_search(query, search_term):
             func.lower(Recipe.origin).like(f"%{search_term}%")
         )
     return query
+
