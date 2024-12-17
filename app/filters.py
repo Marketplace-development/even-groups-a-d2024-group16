@@ -1,10 +1,23 @@
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import text, cast
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from app.models import Recipe
+import json
+
 
 def apply_filters(query, filters):
     """Past filters toe op de receptenquery."""
+    if filters.get('ingredients') and filters['ingredients'] != '[]':
+        try:
+            ingredient_list = json.loads(filters['ingredients'])
+            if ingredient_list:
+                ingredient_conditions = [
+                    Recipe.ingredients.op('@>')(cast({ingredient: {}}, JSONB))
+                    for ingredient in ingredient_list
+                ]
+                query = query.filter(and_(*ingredient_conditions))  # Zorg dat alle ingrediënten aanwezig zijn
+        except json.JSONDecodeError:
+            pass  # Negeer ongeldige JSON
 
     # Allergieënfilter (recepten zonder de opgegeven allergieën)
     if filters.get('allergies'):
@@ -13,7 +26,7 @@ def apply_filters(query, filters):
             query = query.filter(
                 ~func.lower(Recipe.allergiesrec).like(f"%{allergy.lower()}%")
             )
-
+    
     # Herkomstfilter
     if filters.get('origin'):
         origin = filters['origin'].strip()

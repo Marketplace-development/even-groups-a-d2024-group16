@@ -133,6 +133,17 @@
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
             <h5 class="mb-3">Filters</h5>
             <form method="GET" action="{{ url_for('main.dashboard') }}">
+                <div class="mb-3">
+                    <label for="ingredient-input" class="form-label">Search by Ingredients</label>
+                    <div id="ingredient-container">
+                        <input type="text" class="form-control mb-2 ingredient-input" placeholder="Enter ingredient and press Enter">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" id="add-ingredient">Add Ingredient</button>
+                    <ul id="ingredient-list" class="list-group mt-2">
+                        <!-- Dynamisch toegevoegde ingrediënten verschijnen hier -->
+                    </ul>
+                    <input type="hidden" name="ingredients" id="ingredients-hidden">
+                </div>                
                 <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>
@@ -306,7 +317,56 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ingredientInput = document.querySelector('.ingredient-input');
+        const ingredientList = document.getElementById('ingredient-list');
+        const ingredientsHidden = document.getElementById('ingredients-hidden');
 
+        // Voeg nieuw ingrediënt toe
+        function addIngredient(value) {
+            if (!value.trim()) return;
+
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item ingredient-list-item';
+            listItem.textContent = value.trim();
+
+            // Verwijderknop toevoegen
+            const removeButton = document.createElement('button');
+            removeButton.className = 'btn btn-danger btn-sm';
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => {
+                listItem.remove();
+                updateHiddenInput();
+            });
+
+            listItem.appendChild(removeButton);
+            ingredientList.appendChild(listItem);
+            updateHiddenInput();
+        }
+
+        // Update verborgen input met alle ingrediënten
+        function updateHiddenInput() {
+            const ingredients = Array.from(ingredientList.children).map(li => li.firstChild.textContent.trim());
+            ingredientsHidden.value = JSON.stringify(ingredients);
+        }
+
+        // Voeg ingrediënt toe bij Enter
+        ingredientInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addIngredient(ingredientInput.value);
+                ingredientInput.value = '';
+            }
+        });
+
+        // Voeg ingrediënt toe bij klik op knop
+        document.getElementById('add-ingredient').addEventListener('click', function () {
+            addIngredient(ingredientInput.value);
+            ingredientInput.value = '';
+        });
+    });
+</script>
 <script>
     function addFilterRow() {
         let newFilterRow = document.createElement('div');
@@ -458,6 +518,25 @@
         position: absolute;
         z-index: 1;
         border-radius: 5px;
+    }
+    .ingredient-input {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    #ingredient-list {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .ingredient-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ingredient-list-item button {
+        margin-left: 10px;
     }
 </style>
 

@@ -128,13 +128,12 @@ def dashboard():
     allergies_input = request.args.get('allergies', "")
     allergies_list = [a.lower().strip() for a in allergies_input.split(",") if a]
     filters = {
-        'ingredient': request.args.getlist('ingredient[]'),
-        'quantity': request.args.getlist('quantity[]'),
-        'unit': request.args.getlist('unit[]'),
+        'ingredients': request.args.get('ingredients', '[]'),  # JSON string van ingrediënten
+        'min_price': request.args.get('min_price', 0),
+        'max_price': request.args.get('max_price', max_price),  # Gebruik max_price als standaard
         'allergies': allergies_list,  # Zorg voor een genormaliseerde lijst
         'min_rating': request.args.get('min_rating'),
         'duration': request.args.get('duration'),
-        'price': request.args.get('price', max_price),  # Gebruik max_price als standaard
         'category': request.args.get('category'),
         'origin': request.args.get('origin'),
     }
@@ -192,52 +191,8 @@ def dashboard():
             'allergies': allergies,  # Voeg 'allergies' expliciet toe
             'is_liked': is_liked  # Include the accurate liked state
         })
-
-    # Verwerk allergieënfilters
-    if filters['allergies']:
-        allergy_filters = filters['allergies']
-        recipe_data = [
-            r for r in recipe_data
-            if not any(
-                allergy in [a.lower() for a in r['allergies']]  # Controleer overlap
-                for allergy in allergy_filters
-            )
-        ]
-
-    # Filteren op minimale beoordeling
-    if filters.get('min_rating'):
-        try:
-            min_rating = float(filters['min_rating'])
-            recipe_data = [r for r in recipe_data if r['avg_rating'] and r['avg_rating'] >= min_rating]
-        except ValueError:
-            flash("Invalid minimum rating value.", "danger")
-
-    # Filteren op duur
-    if filters.get('duration'):
-        try:
-            max_duration = int(filters['duration'])
-            recipe_data = [r for r in recipe_data if r['recipe'].duration and r['recipe'].duration <= max_duration]
-        except ValueError:
-            flash("Invalid duration value.", "danger")
-
-    # Filteren op prijs
-    if filters.get('price'):
-        try:
-            max_price = float(filters['price'])
-            recipe_data = [r for r in recipe_data if r['recipe'].price and r['recipe'].price <= max_price]
-        except ValueError:
-            flash("Invalid price value.", "danger")
-
-    # Filteren op categorie
-    if filters.get('category'):
-        recipe_data = [r for r in recipe_data if r['recipe'].category == filters['category']]
-
-    # Filteren op herkomst
-    if filters.get('origin'):
-        recipe_data = [r for r in recipe_data if r['recipe'].origin == filters['origin']]
-
-    max_price_query = db.session.query(func.max(Recipe.price)).scalar()
-    max_price = max_price_query if max_price_query is not None else 100.0
+    
+    
 
     # Render de template met de nodige gegevens
     return render_template(
@@ -249,9 +204,10 @@ def dashboard():
         allergens=allergens,
         sort_by=sort_by,
         user_favorites=user_favorites,
-        max_price=max_price  # Voeg maximale prijs toe
+        max_price=max_price,
+        filters=filters  # Geef filters door voor persistentie
     )
-    
+
 
 
 @main.route('/logout', methods=['GET'])
