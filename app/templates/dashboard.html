@@ -136,14 +136,19 @@
                 <div class="mb-3">
                     <label for="ingredient-input" class="form-label">Search by Ingredients</label>
                     <div id="ingredient-container">
-                        <input type="text" class="form-control mb-2 ingredient-input" placeholder="Enter ingredient and press Enter">
+                        <input type="text" class="form-control mb-2 ingredient-input" id="ingredient-input" placeholder="Enter ingredient and press Enter">
                     </div>
-                    <button type="button" class="btn btn-sm btn-secondary" id="add-ingredient">Add Ingredient</button>
                     <ul id="ingredient-list" class="list-group mt-2">
-                        <!-- Dynamisch toegevoegde ingrediënten verschijnen hier -->
+                        {% for ingredient in request.args.get('ingredients', '[]') | fromjson %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ ingredient }}">
+                                {{ ingredient }}
+                                <button type="button" class="btn btn-sm btn-danger remove-ingredient">Remove</button>
+                            </li>
+                        {% endfor %}
                     </ul>
-                    <input type="hidden" name="ingredients" id="ingredients-hidden">
-                </div>                
+                    <input type="hidden" name="ingredients" id="ingredients-hidden" value="{{ request.args.get('ingredients', '[]') }}">
+                </div>
+                
                 <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>
@@ -169,7 +174,7 @@
                     </div>
                     <input type="hidden" name="min_price" id="min_price_input" value="{{ request.args.get('min_price', 0) }}">
                     <input type="hidden" name="max_price" id="max_price_input" value="{{ request.args.get('max_price', max_price) }}">
-                </div>                                       
+                </div>
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select name="category" id="category" class="form-control">
@@ -193,61 +198,27 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="allergies" class="form-label">Exclude Allergens</label>
-                    <div id="allergy-input-container">
-                        <input type="text" id="allergy-input" class="form-control mb-2" placeholder="Type an allergen and press Enter">
+                    <label for="allergy-select" class="form-label">Exclude Allergens</label>
+                    <div class="input-group">
+                        <select id="allergy-select" class="form-control">
+                            <option value="">Select an allergen</option>
+                            {% for allergen in allergens %}
+                                <option value="{{ allergen }}">{{ allergen }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" id="add-allergy-btn" class="btn btn-primary">Add</button>
                     </div>
-                    <small class="form-text text-muted">
-                        Press Enter after typing each allergen.
-                    </small>
                     <ul id="allergy-list" class="list-group mt-2">
-                        <!-- Dynamisch toegevoegde allergieën worden hier weergegeven -->
+                        {% for allergy in request.args.get('allergies', '').split(',') if allergy %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ allergy }}">
+                                {{ allergy }}
+                                <button type="button" class="btn btn-sm btn-danger remove-allergy">Remove</button>
+                            </li>
+                        {% endfor %}
                     </ul>
-                    <input type="hidden" name="allergies" id="allergies-hidden">
-                </div>
+                    <input type="hidden" name="allergies" id="allergies-hidden" value="{{ request.args.get('allergies', '') }}">
+                </div>        
                 
-                <script>
-                    const allergyInput = document.getElementById("allergy-input");
-                    const allergyList = document.getElementById("allergy-list");
-                    const allergiesHidden = document.getElementById("allergies-hidden");
-                
-                    // Dynamisch allergieën toevoegen
-                    allergyInput.addEventListener("keypress", function (e) {
-                        if (e.key === "Enter" && allergyInput.value.trim() !== "") {
-                            e.preventDefault();
-                            const allergy = allergyInput.value.trim();
-                
-                            // Maak een nieuwe lijstitem
-                            const listItem = document.createElement("li");
-                            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
-                            listItem.textContent = allergy;
-                
-                            // Verwijderknop toevoegen
-                            const removeButton = document.createElement("button");
-                            removeButton.className = "btn btn-sm btn-danger";
-                            removeButton.textContent = "Remove";
-                            removeButton.addEventListener("click", function () {
-                                listItem.remove();
-                                updateHiddenInput();
-                            });
-                
-                            listItem.appendChild(removeButton);
-                            allergyList.appendChild(listItem);
-                
-                            // Inputveld leegmaken
-                            allergyInput.value = "";
-                
-                            // Update verborgen input
-                            updateHiddenInput();
-                        }
-                    });
-                
-                    // Verborgen input bijwerken
-                    function updateHiddenInput() {
-                        const allergies = Array.from(allergyList.children).map(li => li.textContent.replace("Remove", "").trim());
-                        allergiesHidden.value = allergies.join(",");
-                    }
-                </script>                       
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-secondary">Apply Filters</button>
                     <a href="{{ url_for('main.dashboard') }}" class="btn btn-danger">Remove All Filters</a>
@@ -319,54 +290,143 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ingredientInput = document.querySelector('.ingredient-input');
+        const ingredientInput = document.getElementById('ingredient-input');
         const ingredientList = document.getElementById('ingredient-list');
         const ingredientsHidden = document.getElementById('ingredients-hidden');
 
-        // Voeg nieuw ingrediënt toe
+        // Voeg een nieuw ingrediënt toe
         function addIngredient(value) {
             if (!value.trim()) return;
 
+            // Controleer of het ingrediënt al bestaat
+            const existingIngredients = Array.from(ingredientList.children).map(li => li.dataset.value.trim().toLowerCase());
+            if (existingIngredients.includes(value.trim().toLowerCase())) return;
+
             const listItem = document.createElement('li');
-            listItem.className = 'list-group-item ingredient-list-item';
+            listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+            listItem.dataset.value = value.trim();
             listItem.textContent = value.trim();
 
-            // Verwijderknop toevoegen
             const removeButton = document.createElement('button');
-            removeButton.className = 'btn btn-danger btn-sm';
+            removeButton.className = 'btn btn-sm btn-danger';
             removeButton.textContent = 'Remove';
             removeButton.addEventListener('click', () => {
                 listItem.remove();
-                updateHiddenInput();
+                updateHiddenIngredients();
             });
 
             listItem.appendChild(removeButton);
             ingredientList.appendChild(listItem);
-            updateHiddenInput();
+            updateHiddenIngredients();
         }
 
         // Update verborgen input met alle ingrediënten
-        function updateHiddenInput() {
-            const ingredients = Array.from(ingredientList.children).map(li => li.firstChild.textContent.trim());
-            ingredientsHidden.value = JSON.stringify(ingredients);
+        function updateHiddenIngredients() {
+            const ingredients = Array.from(ingredientList.children).map(li => li.dataset.value.trim());
+            ingredientsHidden.value = JSON.stringify(ingredients); // JSON-string opslaan
         }
 
-        // Voeg ingrediënt toe bij Enter
+        // Ingrediënt toevoegen via Enter-toets
         ingredientInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 addIngredient(ingredientInput.value);
-                ingredientInput.value = '';
+                ingredientInput.value = ''; // Reset invoerveld
             }
         });
 
-        // Voeg ingrediënt toe bij klik op knop
-        document.getElementById('add-ingredient').addEventListener('click', function () {
-            addIngredient(ingredientInput.value);
-            ingredientInput.value = '';
-        });
+        // Dynamische verwijderknoppen ondersteunen
+        function initializeRemoveButtons() {
+            document.querySelectorAll('.remove-ingredient').forEach(button => {
+                button.addEventListener('click', function () {
+                    const item = this.closest('.list-group-item');
+                    item.remove();
+                    updateHiddenIngredients();
+                });
+            });
+        }
+
+        // Herstel bestaande ingrediënten bij laden
+        function restoreIngredients() {
+            const existingIngredients = JSON.parse(ingredientsHidden.value || '[]');
+            existingIngredients.forEach(ingredient => addIngredient(ingredient));
+        }
+
+        restoreIngredients(); // Initialiseer ingrediënten bij laden
+        initializeRemoveButtons(); // Initialiseer bestaande verwijderknoppen
     });
 </script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const allergySelect = document.getElementById('allergy-select');
+        const addAllergyBtn = document.getElementById('add-allergy-btn');
+        const allergyList = document.getElementById('allergy-list');
+        const allergiesHidden = document.getElementById('allergies-hidden');
+
+        // Voeg een nieuwe allergie toe vanuit de dropdown
+        function addAllergy(value) {
+            if (!value.trim()) return;
+
+            // Controleer of de allergie al in de lijst staat
+            const existingAllergies = Array.from(allergyList.children).map(li => li.dataset.value.trim().toLowerCase());
+            if (existingAllergies.includes(value.trim().toLowerCase())) return;
+
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+            listItem.dataset.value = value.trim();
+            listItem.textContent = value.trim();
+
+            const removeButton = document.createElement('button');
+            removeButton.className = 'btn btn-sm btn-danger';
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => {
+                listItem.remove();
+                updateHiddenAllergies();
+            });
+
+            listItem.appendChild(removeButton);
+            allergyList.appendChild(listItem);
+            updateHiddenAllergies();
+        }
+
+        // Update verborgen input met alle allergieën
+        function updateHiddenAllergies() {
+            const allergies = Array.from(allergyList.children).map(li => li.dataset.value.trim());
+            allergiesHidden.value = allergies.join(','); // Opslaan als door komma's gescheiden string
+        }
+
+        // Allergie toevoegen via knop
+        addAllergyBtn.addEventListener('click', function () {
+            const selectedAllergy = allergySelect.value;
+            if (selectedAllergy) {
+                addAllergy(selectedAllergy);
+                allergySelect.value = ''; // Reset de dropdown
+            }
+        });
+
+        // Dynamische verwijderknoppen ondersteunen
+        document.querySelectorAll('.remove-allergy').forEach(button => {
+            button.addEventListener('click', function () {
+                const item = this.closest('.list-group-item');
+                item.remove();
+                updateHiddenAllergies();
+            });
+        });
+
+        // Herstel bestaande allergieën bij laden
+        function restoreAllergies() {
+            const existingAllergies = allergiesHidden.value.split(',').map(allergy => allergy.trim()).filter(allergy => allergy);
+            existingAllergies.forEach(allergy => addAllergy(allergy));
+        }
+
+        restoreAllergies(); // Initialiseer bij laden
+    });
+</script>
+
+    
 <script>
     function addFilterRow() {
         let newFilterRow = document.createElement('div');
@@ -419,6 +479,15 @@
         const minPriceLabel = document.getElementById('min_price_label');
         const maxPriceLabel = document.getElementById('max_price_label');
         const maxPrice = parseFloat("{{ max_price }}");
+
+        // Voeg de hier ontbrekende initialisatie toe
+        const minPrice = parseFloat("{{ request.args.get('min_price', 0) }}");
+        const maxPriceFromArgs = parseFloat("{{ request.args.get('max_price', max_price) }}");
+        minPriceLabel.textContent = `€${minPrice}`;
+        maxPriceLabel.textContent = `€${maxPriceFromArgs}`;
+
+        minPriceInput.value = minPrice;
+        maxPriceInput.value = maxPriceFromArgs;
 
         // Create slider thumbs
         const thumbMin = document.createElement('div');
@@ -539,6 +608,7 @@
         margin-left: 10px;
     }
 </style>
+
 
 
 {% endblock %}
