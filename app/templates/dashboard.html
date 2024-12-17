@@ -140,7 +140,7 @@
                     </div>
                     <ul id="ingredient-list" class="list-group mt-2">
                         {% for ingredient in request.args.get('ingredients', '[]') | fromjson %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ ingredient }}">
                                 {{ ingredient }}
                                 <button type="button" class="btn btn-sm btn-danger remove-ingredient">Remove</button>
                             </li>
@@ -149,7 +149,6 @@
                     <input type="hidden" name="ingredients" id="ingredients-hidden" value="{{ request.args.get('ingredients', '[]') }}">
                 </div>
                 
-    
                 <!-- Other Filters -->
                 <div class="mb-3">
                     <label for="min_rating" class="form-label">Min. Rating</label>
@@ -337,13 +336,15 @@
         });
 
         // Dynamische verwijderknoppen ondersteunen
-        document.querySelectorAll('.remove-ingredient').forEach(button => {
-            button.addEventListener('click', function () {
-                const item = this.closest('.list-group-item');
-                item.remove();
-                updateHiddenIngredients();
+        function initializeRemoveButtons() {
+            document.querySelectorAll('.remove-ingredient').forEach(button => {
+                button.addEventListener('click', function () {
+                    const item = this.closest('.list-group-item');
+                    item.remove();
+                    updateHiddenIngredients();
+                });
             });
-        });
+        }
 
         // Herstel bestaande ingrediënten bij laden
         function restoreIngredients() {
@@ -352,8 +353,11 @@
         }
 
         restoreIngredients(); // Initialiseer ingrediënten bij laden
+        initializeRemoveButtons(); // Initialiseer bestaande verwijderknoppen
     });
 </script>
+
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
