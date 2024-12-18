@@ -244,17 +244,31 @@
             <div class="row g-4">
                 {% for data in recipe_data %}
                 <div class="col-md-6">
-                    <a href="{% if session.get('role') == 'customer' %}{{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}{% elif session.get('role') == 'chef' %}{{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}{% endif %}" class="text-decoration-none">
+                    <a href="
+                        {% if session.get('role') == 'customer' %}
+                            {% if data.recipe.recipename in purchased_recipenames %}
+                                {{ url_for('main.recipe_detail', recipename=data.recipe.recipename) }}
+                            {% else %}
+                                {{ url_for('main.buy_recipe', recipename=data.recipe.recipename) }}
+                            {% endif %}
+                        {% elif session.get('role') == 'chef' %}
+                            {{ url_for('main.recipe_reviews', recipename=data.recipe.recipename) }}
+                        {% endif %}
+                    " class="text-decoration-none">
                         <div class="card shadow-sm h-100">
+                            <!-- Receptafbeelding -->
                             {% if data.recipe.image %}
                                 <img src="{{ url_for('static', filename=data.recipe.image) }}" class="card-img-top" alt="{{ data.recipe.recipename }}">
                             {% else %}
                                 <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
                             {% endif %}
                             <div class="card-body text-center">
+                                <!-- Receptnaam -->
                                 <h5 class="card-title">{{ data.recipe.recipename }}</h5>
-                                <p class="text-muted">by {{ data.recipe.chef_name }}</p>
-                                {% if session.get('role') == 'customer' %}
+                                <p class="text-muted">by {{ data.recipe.chef_name or "Unknown Chef" }}</p>
+        
+                                <!-- Favoriet-knop verbergen voor aangekochte recepten -->
+                                {% if session.get('role') == 'customer' and data.recipe.recipename not in purchased_recipenames %}
                                 <button 
                                     class="btn favorite-btn"
                                     data-recipename="{{ data.recipe.recipename }}"
@@ -263,12 +277,14 @@
                                 </button>
                                 {% endif %}
         
-                            
+                                <!-- Duur en prijs -->
                                 <div class="d-flex justify-content-center align-items-center">
                                     <i class="fas fa-clock me-2"></i>
                                     <span>{{ data.recipe.duration }} min</span>
                                 </div>
-                                <p class="text-success fw-bold">€{{ data.recipe.price }}</p>
+                                <p class="text-success fw-bold">€{{ data.recipe.price or "N/A" }}</p>
+        
+                                <!-- Gemiddelde beoordeling -->
                                 <div class="d-flex align-items-center justify-content-center">
                                     {% set avg_rating = data.avg_rating if data.avg_rating is not none else 0 %}
                                     <div class="me-2">
@@ -298,7 +314,7 @@
                     <p class="text-center">No recipes available at the moment.</p>
                 {% endfor %}
             </div>
-        </div>
+        </div>        
     </div>
 </div>
 <script>

@@ -220,8 +220,10 @@ def dashboard():
             'allergies': allergies,  # Voeg 'allergies' expliciet toe
             'is_liked': is_liked  # Include the accurate liked state
         })
-    
-    
+
+        # Haal lijst van aangekochte recepten op
+        purchased_recipes = Transaction.query.filter_by(consumer_email=session['email']).all()
+        purchased_recipenames = {t.recipename for t in purchased_recipes}
 
     # Render de template met de nodige gegevens
     return render_template(
@@ -233,6 +235,7 @@ def dashboard():
         allergens=allergens,
         sort_by=sort_by,
         user_favorites=user_favorites,
+        purchased_recipenames=purchased_recipenames,
         max_price=max_price,
         filters=filters  # Geef filters door voor persistentie
     )
@@ -586,6 +589,15 @@ def buy_recipe(recipename):
         user_email = session['email']
         chef_email = recipe.chef_email
 
+        # Check if the recipe is in the user's favorites
+        user = User.query.filter_by(email=user_email).first()  # Haal de gebruiker op
+        if user and user.favorites:
+            user.favorites = [
+                fav for fav in user.favorites
+                if not (fav['recipename'] == recipename and fav['chef_email'] == chef_email)
+            ]
+            db.session.commit()  # Update de database
+
         existing_transaction = Transaction.query.filter_by(
             consumer_email=user_email,
             recipename=recipename
@@ -612,6 +624,7 @@ def buy_recipe(recipename):
         flash('Recipe purchased successfully!', 'success')
         return redirect(url_for('main.my_recipes'))
 
+    # Render the template for GET requests
     return render_template(
         'buy_recipe.html',
         recipe=recipe,
@@ -623,6 +636,7 @@ def buy_recipe(recipename):
         related_recipes=related_recipes,
         recipe_avg_rating=recipe_avg_rating  # Pass the recipe's average rating to the template
     )
+
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
