@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}All Recipes of Chef {{ chef.name }}{% endblock %}
+
+{% block content %}
+<!-- Navigatiebalk -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
+                        <i class="fas fa-robot me-2"></i>Chatbot
+                    </a>
+                </li>
+                {% if session.get('role') == 'customer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.wishlist') }}">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div style="display: flex; align-items: center;">
+                            <div style="line-height: 1;">
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
+                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                            </div>
+                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                        {% if session.get('role') == 'customer' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% elif session.get('role') == 'chef' %}
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Stats&Uploads</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.chef_profile') }}">Chef Profile</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
+                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-5 pt-4 welcome-content">
+    <div class="row">
+       <!-- Filters Sidebar -->
+       <div class="col-md-3 bg-light p-4 shadow-sm rounded">
+        <h5 class="mb-3">Filters</h5>
+        <form method="GET" action="{{ url_for('main.chef_recipes', chef_email=chef.email) }}">
+            <div class="mb-3">
+                <label for="ingredient-input" class="form-label">Search by Ingredients</label>
+                <div id="ingredient-container">
+                    <input type="text" class="form-control mb-2 ingredient-input" id="ingredient-input" placeholder="Enter ingredient and press Enter">
+                </div>
+                <ul id="ingredient-list" class="list-group mt-2">
+                    {% for ingredient in request.args.get('ingredients', '[]') | fromjson %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ ingredient }}">
+                            {{ ingredient }}
+                            <button type="button" class="btn btn-sm btn-danger remove-ingredient">Remove</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <input type="hidden" name="ingredients" id="ingredients-hidden" value="{{ request.args.get('ingredients', '[]') }}">
+            </div>
+            <div class="mb-3">
+                <label for="min_rating" class="form-label">Min. Rating</label>
+                <select name="min_rating" id="min_rating" class="form-control">
+                    <option value="">Any</option>
+                    {% for i in range(1, 6) %}
+                        <option value="{{ i }}" {% if request.args.get('min_rating') == i|string %}selected{% endif %}>
+                            {{ i }}+
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="duration" class="form-label">Max. Duration (min)</label>
+                <input type="number" name="duration" id="duration" class="form-control" value="{{ request.args.get('duration') }}">
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="">Any</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
+                            {{ category }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="origin" class="form-label">Origin</label>
+                <select name="origin" id="origin" class="form-control">
+                    <option value="">Any</option>
+                    {% for origin in origins %}
+                        <option value="{{ origin }}" {% if request.args.get('origin') == origin %}selected{% endif %}>
+                            {{ origin }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="allergy-select" class="form-label">Exclude Allergens</label>
+                <div class="input-group">
+                    <select id="allergy-select" class="form-control">
+                        <option value="">Select an allergen</option>
+                        {% for allergen in allergens %}
+                            <option value="{{ allergen }}">{{ allergen }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" id="add-allergy-btn" class="btn btn-primary">Add</button>
+                </div>
+                <ul id="allergy-list" class="list-group mt-2">
+                    {% for allergy in request.args.get('allergies', '').split(',') if allergy %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ allergy }}">
+                            {{ allergy }}
+                            <button type="button" class="btn btn-sm btn-danger remove-allergy">Remove</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <input type="hidden" name="allergies" id="allergies-hidden" value="{{ request.args.get('allergies', '') }}">
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-secondary">Apply Filters</button>
+                <a href="{{ url_for('main.chef_recipes', chef_email=chef.email) }}" class="btn btn-danger">Remove All Filters</a>
+            </div>
+        </form>
+    </div>
+
+        <!-- Recipes Section -->
+        <div class="col-md-6">
+            <h1 class="text-center">All Recipes of Chef {{ chef.name }}</h1>
+            <div class="row g-4 mt-4">
+                {% for recipe in chef_recipes %}
+                <div class="col-md-6">
+                    <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100">
+                            {% if recipe.image %}
+                                <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ recipe.recipename }}</h5>
+                                <p class="text-success fw-bold">€{{ recipe.price }}</p>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <span>{{ recipe.duration }} min</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% else %}
+                    <p class="text-center">No recipes available for this chef at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Chef Information -->
+        <div class="col-md-3 bg-light p-4 shadow-sm rounded">
+            <div class="text-center mb-4">
+                <h5>Chef Information</h5>
+                {% if chef.profile_picture %}
+                <img src="{{ url_for('static', filename=chef.profile_picture) }}" class="rounded-circle mb-3" style="width:150px; height:150px; object-fit:cover;" alt="Chef Picture">
+                {% endif %}
+                <p><strong>{{ chef.name }}</strong></p>
+                {% if chef.chef_description %}
+                <p>{{ chef.chef_description }}</p>
+                {% endif %}
+                <div class="mt-2">
+                    <strong>Average Rating:</strong>
+                    <div>
+                        {% for star in range(1, 6) %}
+                            {% if star <= chef_avg_rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% elif star - 0.5 <= chef_avg_rating %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">({{ chef_avg_rating or 'No reviews yet' }})</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

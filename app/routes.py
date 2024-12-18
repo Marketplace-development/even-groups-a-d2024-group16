@@ -1024,6 +1024,31 @@ def edit_chef_profile():
 
     return render_template('chef_profile.html', form=form, user=user)
 
+@main.route('/chef_recipes/<chef_email>', methods=['GET'])
+def chef_recipes(chef_email):
+    # Fetch chef details
+    chef = User.query.filter_by(email=chef_email).first()
+    if not chef:
+        flash('Chef not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Fetch recipes by this chef
+    chef_recipes = Recipe.query.filter_by(chef_email=chef_email).all()
+
+    # Calculate average rating for this chef
+    chef_avg_rating = (
+        db.session.query(func.avg(Review.rating))
+        .filter(Review.chef_email == chef_email)
+        .scalar()
+    )
+    chef_avg_rating = round(chef_avg_rating, 1) if chef_avg_rating else 0
+
+    return render_template(
+        'chef_recipes.html',
+        chef=chef,
+        chef_recipes=chef_recipes,  # Use 'chef_recipes' to align with the template
+        chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
+    )
 
 
 

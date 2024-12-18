@@ -102,6 +102,43 @@
                 <button type="submit" class="btn btn-success">Confirm Purchase</button>
                 <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
             </form>
+
+            <!-- Reviews Section -->
+            <div class="reviews mt-5">
+                <h3>Reviews</h3>
+                {% if reviews %}
+                    {% for review in reviews %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
+                                <p><strong>Comment:</strong> {{ review.comment }}</p>
+                                <p><small><em>By: {{ review.consumer_email }} on {{ review.reviewdate.strftime('%Y-%m-%d') }}</em></small></p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No reviews available for this recipe yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- More Like This Section -->
+            <div class="mt-5">
+                <h3 class="text-success">More Like This</h3>
+                <div class="row">
+                    {% for related in related_recipes %}
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ related.recipename }}</h5>
+                                <p class="text-muted">€{{ related.price }}</p>
+                                <a href="{{ url_for('main.buy_recipe', recipename=related.recipename) }}" class="btn btn-secondary">View Recipe</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
         <!-- Chef Information on the Right -->
@@ -137,6 +174,7 @@
                             {% endif %}
                         </small>
                     </div>
+                    <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-info">View More Recipes by {{ recipe.chef_name }}</a>
                 </div>
             </div>
         </div>
