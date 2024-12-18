@@ -61,19 +61,39 @@
     </div>
 </nav>
 
+<style>
+    body {
+        margin: 0; 
+        padding: 0; 
+        height: 100vh; 
+        background-image: url("{{ url_for('static', filename='images/achtergrond_chatbot.jpeg') }}");
+        background-size: cover; 
+        background-position: center; 
+        background-attachment: fixed; 
+        font-family: 'Roboto', sans-serif; 
+    }
+</style>
+
 <div class="container mt-5">
     <h1 class="page-title">Dishcovery Chatbot</h1>
     <div class="chatbox mt-4">
-        <div id="chat-messages" class="chat-messages border rounded p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+        <div id="chat-messages" class="chat-messages border rounded p-3 mb-3" 
+        style="height: 300px; overflow-y: scroll; background-color: rgba(255, 255, 255, 0.7);">
             <!-- Berichten verschijnen hier -->
         </div>
         <div class="input-group">
-            <input type="text" id="user-input" class="form-control" placeholder="Type your message here..." aria-label="Type your message">
+            <input type="text" id="user-input" 
+                class="form-control" 
+                placeholder="Type your message here..." 
+                aria-label="Type your message"
+                style="background-color: rgba(255, 255, 255, 0.7) !important;">
             <button id="send-btn" class="btn btn-primary">Send</button>
         </div>
         <small id="typing-indicator" class="text-muted d-none">Chatbot is typing...</small>
     </div>
 </div>
+
+
 
 
 <script>
