@@ -113,17 +113,68 @@
     <!-- Preparation Steps - Numbered list -->
     <div class="mt-4">
         <h5><strong>Preparation Steps:</strong></h5>
-        <ol style="list-style-position: inside; padding-left: 20px;">
+        <div class="steps-container">
             {% if recipe.preparation %}
                 {% set steps = recipe.preparation.split('|') %}
                 {% for step in steps %}
-                    <li style="margin-left: 10px; padding-left: 5px;">{{ step.strip() }}</li>
+                    <div class="step d-flex align-items-start mb-3">
+                        <div class="step-number d-flex justify-content-center align-items-center">
+                            <span>{{ loop.index }}</span>
+                        </div>
+                        <div class="step-text ms-3">
+                            <p class="mb-0">{{ step.strip() }}</p>
+                        </div>
+                    </div>
                 {% endfor %}
             {% else %}
-                <li>No preparation steps available.</li>
+                <p>No preparation steps available.</p>
             {% endif %}
-        </ol>
+        </div>
     </div>
+
+    <!-- Download button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.download_recipe', recipename=recipe.recipename) }}" class="btn btn-success">
+            <i class="fas fa-download me-2"></i> Download Recipe as PDF
+        </a>
+    </div>
+    
+
+    <style>
+        /* Preparation Steps Styling */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #ffebe6;
+            color: #ff5733;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .step-number span {
+            line-height: 30px;
+        }
+
+        .step-text p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333;
+        }
+    </style>
+
 
     <!-- Back Button -->
     <div class="text-center mt-4">

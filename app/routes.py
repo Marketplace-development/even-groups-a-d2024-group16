@@ -1019,12 +1019,17 @@ def edit_chef_profile():
     form = ChefProfileForm(obj=user)
 
     # Bereken statistieken voor de preview
-    avg_rating = (
-        db.session.query(func.avg(Review.rating))
-        .join(Recipe, Recipe.chef_email == user.email)
-        .scalar()
-    )
-    avg_rating = round(avg_rating, 1) if avg_rating else None
+    recipes = Recipe.query.filter_by(chef_email=user.email).all()
+    total_ratings = 0
+    rating_count = 0
+
+    for recipe in recipes:
+        recipe_ratings = db.session.query(func.sum(Review.rating)).filter(Review.recipename == recipe.recipename).scalar() or 0
+        recipe_count = db.session.query(func.count(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
+        total_ratings += recipe_ratings
+        rating_count += recipe_count
+
+    avg_rating = round(total_ratings / rating_count, 1) if rating_count > 0 else None
 
     total_recipes_sold = (
         db.session.query(func.count(Transaction.transactionid))
@@ -1093,3 +1098,53 @@ def chef_recipes(chef_email):
     )
 
 
+from flask import Response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import io
+
+@main.route('/download_recipe/<recipename>', methods=['GET'])
+def download_recipe(recipename):
+    # Fetch recipe details
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if not recipe:
+        flash('Recipe not found', 'danger')
+        return redirect(url_for('main.dashboard'))
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Add content to the PDF
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, height - 50, f"Recipe: {recipe.recipename}")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(100, height - 80, f"Chef: {recipe.chef_name}")
+    p.drawString(100, height - 100, f"Cooking Time: {recipe.duration} minutes")
+
+    # Add ingredients
+    y = height - 150
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(100, y, "Ingredients:")
+    p.setFont("Helvetica", 10)
+    for ingredient in recipe.ingredients.items():
+        y -= 20
+        p.drawString(120, y, f"{ingredient[0]}: {ingredient[1]['quantity']} {ingredient[1]['unit']}")
+
+    # Add preparation steps
+    y -= 40
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(100, y, "Preparation Steps:")
+    p.setFont("Helvetica", 10)
+    for i, step in enumerate(recipe.preparation.split('|')):
+        y -= 20
+        p.drawString(120, y, f"{i+1}. {step.strip()}")
+
+    # Finalize the PDF
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return Response(buffer, mimetype='application/pdf',
+                    headers={"Content-Disposition": f"attachment;filename={recipe.recipename}.pdf"})
