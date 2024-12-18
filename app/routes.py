@@ -536,9 +536,6 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
 
-    avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
-    avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
-
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
