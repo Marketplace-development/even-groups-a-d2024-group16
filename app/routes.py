@@ -1120,7 +1120,16 @@ def chef_recipes(chef_email):
     # Fetch recipes by this chef
     chef_recipes = Recipe.query.filter_by(chef_email=chef_email).all()
 
-    # Calculate average rating for this chef
+    # Calculate average rating for each recipe
+    for recipe in chef_recipes:
+        avg_rating = (
+            db.session.query(func.avg(Review.rating))
+            .filter(Review.recipename == recipe.recipename)
+            .scalar()
+        )
+        recipe.avg_rating = round(avg_rating, 1) if avg_rating else 0
+
+    # Calculate overall chef rating (optional, if you still need it)
     chef_avg_rating = (
         db.session.query(func.avg(Review.rating))
         .filter(Review.chef_email == chef_email)
@@ -1131,9 +1140,10 @@ def chef_recipes(chef_email):
     return render_template(
         'chef_recipes.html',
         chef=chef,
-        chef_recipes=chef_recipes,  # Use 'chef_recipes' to align with the template
+        chef_recipes=chef_recipes,  # Pass recipes with avg_rating
         chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
     )
+
 
 
 from flask import Response

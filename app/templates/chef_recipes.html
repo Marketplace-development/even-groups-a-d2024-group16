@@ -149,35 +149,58 @@
         </form>
     </div>
 
-        <!-- Recipes Section -->
+       <!-- Recipes Section -->
+<div class="col-md-6">
+    <h1 class="text-center">All Recipes of Chef {{ chef.name }}</h1>
+    <div class="row g-4 mt-4">
+        {% for recipe in chef_recipes %}
         <div class="col-md-6">
-            <h1 class="text-center">All Recipes of Chef {{ chef.name }}</h1>
-            <div class="row g-4 mt-4">
-                {% for recipe in chef_recipes %}
-                <div class="col-md-6">
-                    <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="text-decoration-none">
-                        <div class="card shadow-sm h-100">
-                            {% if recipe.image %}
-                                <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
-                            {% else %}
-                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
-                            {% endif %}
-                            <div class="card-body text-center">
-                                <h5 class="card-title">{{ recipe.recipename }}</h5>
-                                <p class="text-success fw-bold">€{{ recipe.price }}</p>
-                                <div class="d-flex justify-content-center align-items-center">
-                                    <i class="fas fa-clock me-2"></i>
-                                    <span>{{ recipe.duration }} min</span>
-                                </div>
-                            </div>
+            <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="text-decoration-none">
+                <div class="card shadow-sm h-100">
+                    {% if recipe.image %}
+                        <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ recipe.recipename }}</h5>
+                        <p class="text-success fw-bold">€{{ recipe.price }}</p>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>{{ recipe.duration }} min</span>
                         </div>
-                    </a>
+
+                        <!-- Star Rating -->
+                        <div class="d-flex align-items-center justify-content-center mt-2">
+                            {% set avg_rating = recipe.avg_rating if recipe.avg_rating is not none else 0 %}
+                            <div class="me-2">
+                                {% for star in range(1, 6) %}
+                                    {% if star <= avg_rating %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% elif star - 0.5 <= avg_rating %}
+                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">
+                                {% if avg_rating > 0 %}
+                                    ({{ avg_rating }})
+                                {% else %}
+                                    (No rating)
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
                 </div>
-                {% else %}
-                    <p class="text-center">No recipes available for this chef at the moment.</p>
-                {% endfor %}
-            </div>
+            </a>
         </div>
+        {% else %}
+            <p class="text-center">No recipes available for this chef at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
 
         <!-- Chef Information -->
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
