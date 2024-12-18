@@ -536,6 +536,9 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
 
+    avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
+    avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
+
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
@@ -816,45 +819,67 @@ def edit_profile():
 
 @main.route('/recipe_reviews/<recipename>')
 def recipe_reviews(recipename):
-    # Haal het recept op uit de database
+    # Fetch recipe from the database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
-    if not recipe:
-        flash('Recipe not found.', 'danger')
+
+    if recipe is None:
+        flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
-    # Haal de beoordelingen voor het recept op
-    reviews = Review.query.filter_by(recipename=recipename).all()
+    # Fetch chef details from the User model
+    chef = User.query.filter_by(email=recipe.chef_email).first()
 
-    # Bereken de gemiddelde rating
-    avg_rating = (
-        db.session.query(db.func.avg(Review.rating))
-        .filter(Review.recipename == recipename)
-        .scalar()
+    # Calculate chef's average rating
+    chef_reviews = Review.query.filter_by(chef_email=chef.email).all()
+    chef_avg_rating = (
+        round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
-    avg_rating = round(avg_rating, 1) if avg_rating else None
 
-    # Verwerk de ingrediënten voor weergave (nu direct als dictionary)
+    # Calculate total recipes sold by the chef
+    total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
+
+    reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
+
+    # Bereken gemiddelde beoordeling handmatig
+    avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
+    avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
+
+
+    # Ingrediënten als JSON voorbereiden
+    ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
+
+    # Gerelateerde recepten ophalen
+    related_recipes = Recipe.query.filter(
+        (Recipe.origin == recipe.origin) | 
+        (Recipe.ingredients.contains(ingredients_to_match))
+    ).filter(Recipe.recipename != recipename).limit(4).all()
+
+    # Process ingredients
     ingredients_list = []
     if recipe.ingredients:
         try:
-            # Loop door de ingrediënten dictionary (geen JSON decoding nodig)
             for ingredient, details in recipe.ingredients.items():
-                # Voeg de quantity, unit en ingredient toe aan de lijst
                 ingredients_list.append({
                     'quantity': details['quantity'],
-                    'unit': details.get('unit', ''),  # Voeg unit toe, als die bestaat
+                    'unit': details.get('unit', ''),
                     'ingredient': ingredient
                 })
         except KeyError:
             ingredients_list = ["Invalid ingredient format"]
 
-    # Render de recipe_reviews pagina
+    # Fetch reviews for the recipe
+    reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
+
     return render_template(
         'recipe_reviews.html',
         recipe=recipe,
+        chef=chef,
+        chef_avg_rating=chef_avg_rating,
+        total_recipes_sold=total_recipes_sold,
+        ingredients_list=ingredients_list,
         reviews=reviews,
-        avg_rating=avg_rating,
-        ingredients_list=ingredients_list
+        related_recipes=related_recipes,
+        avg_rating=avg_rating  # Pass the recipe's average rating
     )
 
 from flask import Blueprint, render_template, request, jsonify
