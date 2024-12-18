@@ -51,6 +51,22 @@ def register():
             return redirect(url_for('main.register'))
         
         favorite_ingredients = form.favorite_ingredients.data.split(',') if form.favorite_ingredients.data else []
+        profile_picture_path = None
+        if is_chef and form.profile_picture.data:
+            if hasattr(form.profile_picture.data, 'filename') and form.profile_picture.data.filename:
+                try:
+                    upload_folder = os.path.join(current_app.root_path, 'static/images')
+                    os.makedirs(upload_folder, exist_ok=True)
+
+                    image_file = form.profile_picture.data
+                    filename = secure_filename(image_file.filename)
+                    file_path = os.path.join(upload_folder, filename)
+                    image_file.save(file_path)
+                    profile_picture_path = f'images/{filename}'  # Sla de URL van de foto op
+                except Exception as e:
+                    flash(f"Error saving profile picture: {e}", 'danger')
+            else:
+                flash('No valid file uploaded for profile picture.', 'warning')
 
         # Maak nieuwe gebruiker aan
         preferences = {
@@ -69,7 +85,9 @@ def register():
             country=form.country.data,
             telephonenr=form.telephonenr.data,
             is_chef=is_chef,
-            preferences=preferences
+            preferences=preferences,
+            profile_picture=profile_picture_path if is_chef else None,  # Profielfoto alleen voor chefs
+            chef_description=form.chef_description.data if is_chef else None  # Beschrijving alleen voor chefs
         )
 
         # Voeg nieuwe gebruiker toe aan de database
@@ -1055,6 +1073,44 @@ def chef_recipes(chef_email):
     )
 
 
+@main.route('/edit_chef_profile', methods=['GET', 'POST'])
+def edit_chef_profile():
+    # Controleer of de gebruiker een chef is
+    user = User.query.filter_by(email=session.get('email')).first()
+
+    if not user or not user.is_chef:
+        flash('You need to log in as a chef to access this page.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    form = ChefProfileForm(obj=user)
+
+    # Verwerk formulier indien ingediend
+    if form.validate_on_submit():
+        try:
+            # Update beschrijving
+            user.chef_description = form.chef_description.data
+
+            # Update profielfoto
+            if form.profile_picture.data:
+                upload_folder = os.path.join(current_app.root_path, 'static/images')
+                os.makedirs(upload_folder, exist_ok=True)
+
+                image_file = form.profile_picture.data
+                filename = secure_filename(image_file.filename)
+                file_path = os.path.join(upload_folder, filename)
+                image_file.save(file_path)
+                user.profile_picture = f'images/{filename}'
+
+            # Opslaan in database
+            db.session.commit()
+            flash('Your profile has been updated successfully!', 'success')
+            return redirect(url_for('main.dashboard'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating profile: {e}", 'danger')
+
+    return render_template('edit_chef_profile.html', form=form, user=user)
 
 
 

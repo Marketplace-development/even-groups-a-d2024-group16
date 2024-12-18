@@ -24,7 +24,7 @@ class User(db.Model):
         "favorite_ingredients": []
     })
     favorites = db.Column(MutableList.as_mutable(JSONB), default=[])
-    profile_picture = db.Column(db.String(255), nullable=True)
+    profile_picture = db.Column(db.Text(255), nullable=True)
     chef_description = db.Column(db.String(2500), nullable=True)
 
     # Relaties

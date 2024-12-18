@@ -113,7 +113,7 @@
     <h1>Register</h1>
 
     <!-- Registration Form -->
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
 
         <!-- Email -->
@@ -197,6 +197,35 @@
                 </div>
             </div>
         </div>
+
+        <!-- Chef Profile Section -->
+
+        <div id="chef-section" style="display: none;">
+            <div class="mb-3">
+                <label for="chef_description" class="form-label">Description</label>
+                {{ form.chef_description(class="form-control", rows="5") }}
+                {% if form.chef_description.errors %}
+                    <ul class="errors">
+                        {% for error in form.chef_description.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="profile_picture" class="form-label">Profile Picture</label>
+                {{ form.profile_picture(class="form-control") }}
+                {% if form.profile_picture.errors %}
+                    <ul class="errors">
+                        {% for error in form.profile_picture.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
 
         <!-- Preferences Section -->
         <div id="preferences-section" style="display: none;">
@@ -308,9 +337,10 @@
 <script>
     function togglePreferences() {
         const chefYes = document.getElementById('yes').checked;
+        const chefSection = document.getElementById('chef-section');
         const preferencesSection = document.getElementById('preferences-section');
 
-        // Toon de voorkeuren alleen als "No" is geselecteerd
+        chefSection.style.display = chefYes ? 'block' : 'none';
         preferencesSection.style.display = chefYes ? 'none' : 'block';
     }
 </script>

@@ -22,7 +22,15 @@ class UserForm(FlaskForm):
         choices=[('true', 'Yes'), ('false', 'No')], 
         validators=[DataRequired()]
     )
-    
+    chef_description = TextAreaField(
+        'Chef Description', 
+        validators=[Length(max=500)],
+        render_kw={"rows": 5}
+    )
+    profile_picture = FileField(
+        'Profile Picture', 
+        validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')]
+    )
     # Dynamische keuzes voor voorkeuren
     allergies = SelectMultipleField(
         'Allergies',
@@ -125,6 +133,11 @@ class ContactForm(FlaskForm):
     is_public = BooleanField('Make this comment public')  # Checkbox for public visibility
     submit = SubmitField('Send Message')
 
+
 class ChefProfileForm(FlaskForm):
-    chef_description = TextAreaField('Description', validators=[DataRequired()])
-    profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')])
+    chef_description = TextAreaField(
+        'Description', 
+        validators=[DataRequired(), Length(max=500)]
+    )
+    profile_picture = FileField('Profile Picture')
+    submit = SubmitField('Save Changes')
