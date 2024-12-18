@@ -83,9 +83,29 @@
         border-radius: 8px;
     }
 
+    .form-control:focus {
+        border-color: #ff4500; /* Oranje rand bij focus */
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+    }
+
     ul.errors {
         list-style: none;
         color: #d32f2f;
+    }
+
+    /* Stijl voor de Save Changes-knop */
+    .btn-primary {
+        color: black; /* Standaard zwarte tekstkleur */
+        background-color: transparent; /* Transparante achtergrond */
+        border: 2px solid black; /* Zwarte rand */
+        border-radius: 25px; /* Ronde knop */
+        transition: all 0.3s ease; /* Gladde overgang */
+    }
+
+    .btn-primary:hover {
+        background-color: #ff4500; /* Oranje achtergrond bij hover */
+        color: white; /* Witte tekst bij hover */
+        border: 2px solid black; /* Zwarte rand bij hover */
     }
 
     /* Logout-knop hover effect */
