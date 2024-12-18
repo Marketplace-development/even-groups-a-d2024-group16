@@ -74,6 +74,21 @@
                 <p><strong>Category:</strong> {{ recipe.category }}</p>
                 <p><strong>Origin:</strong> {{ recipe.origin }}</p>
                 <p><strong>Description:</strong> {{ recipe.description }}</p>
+                <p>
+                    <strong>Average Rating:</strong> 
+                    <div>
+                        {% for star in range(1, 6) %}
+                            {% if star <= (recipe_avg_rating or 0) %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% elif star - 0.5 <= (recipe_avg_rating or 0) %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">({{ recipe_avg_rating or 'No reviews yet' }})</small>
+                </p>
 
                 <!-- Ingredients Table -->
                 <h5><strong>Ingredients:</strong></h5>
