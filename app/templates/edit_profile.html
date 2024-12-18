@@ -47,7 +47,7 @@
                         {% elif session.get('role') == 'chef' %}
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Stats&Uploads</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.chef_profile') }}">Public Profile Settings</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_chef_profile') }}">Public Profile Settings</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
                         <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>

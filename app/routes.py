@@ -1007,44 +1007,64 @@ def fix_image_paths():
     return "Image paths fixed successfully!"
 
 
-@main.route('/chef_profile', methods=['GET', 'POST'], endpoint='chef_profile')
+@main.route('/edit_chef_profile', methods=['GET', 'POST'])
 def edit_chef_profile():
-    # Ensure user is logged in
-    if 'email' not in session:
-        flash('Please log in to access your profile.', 'danger')
-        return redirect(url_for('main.login'))
+    # Controleer of de gebruiker een chef is
+    user = User.query.filter_by(email=session.get('email')).first()
 
-    user = User.query.filter_by(email=session['email']).first()
-    if not user:
-        flash('User not found.', 'danger')
-        return redirect(url_for('main.login'))
+    if not user or not user.is_chef:
+        flash('You need to log in as a chef to access this page.', 'danger')
+        return redirect(url_for('main.dashboard'))
 
-    form = ChefProfileForm(obj=user)  # This pre-populates the form fields from the user if applicable
+    form = ChefProfileForm(obj=user)
+
+    # Bereken statistieken voor de preview
+    avg_rating = (
+        db.session.query(func.avg(Review.rating))
+        .join(Recipe, Recipe.chef_email == user.email)
+        .scalar()
+    )
+    avg_rating = round(avg_rating, 1) if avg_rating else None
+
+    total_recipes_sold = (
+        db.session.query(func.count(Transaction.transactionid))
+        .join(Recipe, Recipe.chef_email == user.email)
+        .scalar()
+    )
 
     if form.validate_on_submit():
-        # Update the user's description from the form input
-        user.chef_description = form.chef_description.data
+        try:
+            # Update beschrijving
+            user.chef_description = form.chef_description.data
 
-        # Handle profile picture upload if provided
-        if form.profile_picture.data:
-            image_file = form.profile_picture.data
-            filename = secure_filename(image_file.filename)
-            
-            # Define the upload folder
-            upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'profiles')
-            os.makedirs(upload_folder, exist_ok=True)
-            
-            file_path = os.path.join(upload_folder, filename)
-            image_file.save(file_path)
-            
-            user.profile_picture = f'images/profiles/{filename}'
+            # Update profielfoto
+            if form.profile_picture.data:
+                upload_folder = os.path.join(current_app.root_path, 'static/images')
+                os.makedirs(upload_folder, exist_ok=True)
 
-        # Commit changes to the database
-        db.session.commit()
-        flash('Profile updated successfully!', 'success')
-        return redirect(url_for('main.chef_profile'))
+                image_file = form.profile_picture.data
+                filename = secure_filename(image_file.filename)
+                file_path = os.path.join(upload_folder, filename)
+                image_file.save(file_path)
+                user.profile_picture = f'images/{filename}'
 
-    return render_template('chef_profile.html', form=form, user=user)
+            # Opslaan in database
+            db.session.commit()
+            flash('Your profile has been updated successfully!', 'success')
+            return redirect(url_for('main.edit_chef_profile'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating profile: {e}", 'danger')
+
+    return render_template(
+        'edit_chef_profile.html',
+        form=form,
+        user=user,
+        avg_rating=avg_rating,
+        total_recipes_sold=total_recipes_sold
+    )
+
 
 @main.route('/chef_recipes/<chef_email>', methods=['GET'])
 def chef_recipes(chef_email):
@@ -1071,48 +1091,5 @@ def chef_recipes(chef_email):
         chef_recipes=chef_recipes,  # Use 'chef_recipes' to align with the template
         chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
     )
-
-
-@main.route('/edit_chef_profile', methods=['GET', 'POST'])
-def edit_chef_profile():
-    # Controleer of de gebruiker een chef is
-    user = User.query.filter_by(email=session.get('email')).first()
-
-    if not user or not user.is_chef:
-        flash('You need to log in as a chef to access this page.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    form = ChefProfileForm(obj=user)
-
-    # Verwerk formulier indien ingediend
-    if form.validate_on_submit():
-        try:
-            # Update beschrijving
-            user.chef_description = form.chef_description.data
-
-            # Update profielfoto
-            if form.profile_picture.data:
-                upload_folder = os.path.join(current_app.root_path, 'static/images')
-                os.makedirs(upload_folder, exist_ok=True)
-
-                image_file = form.profile_picture.data
-                filename = secure_filename(image_file.filename)
-                file_path = os.path.join(upload_folder, filename)
-                image_file.save(file_path)
-                user.profile_picture = f'images/{filename}'
-
-            # Opslaan in database
-            db.session.commit()
-            flash('Your profile has been updated successfully!', 'success')
-            return redirect(url_for('main.dashboard'))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error updating profile: {e}", 'danger')
-
-    return render_template('edit_chef_profile.html', form=form, user=user)
-
-
-
 
 
