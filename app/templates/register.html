@@ -43,6 +43,7 @@
         margin: 20vh auto; /* Center the content both vertically and horizontally */
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
         color: black; /* Black text for contrast */
+        border: 4px ridge #ff4500; /* Oranje rand */
     }
 
     /* Fix white bar issue on smaller screens */
@@ -80,8 +81,9 @@
 
     /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: black; /* Black background on hover */
+        background-color: #ff4500; /* Oranje achtergrond */
         color: white; /* White text on hover */
+        border: 2px ridge black; /* Black border on hover*/
     }
 
     .chef-container {
@@ -105,6 +107,79 @@
         margin: 0 0 15px 0;
         color: #d32f2f;
         text-align: left;
+    }
+
+    /* Stijl voor de oranje radio-knoppen */
+    input[type="radio"] {
+        appearance: none; /* Verberg standaard stijl */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 20px; /* Grootte van het bolletje */
+        height: 20px;
+        border: 2px solid #ff4500; /* Oranje rand */
+        border-radius: 50%; /* Maak het rond */
+        outline: none;
+        margin-right: 5px; /* Ruimte tussen knop en label */
+        cursor: pointer;
+    }
+
+    /* Oranje vulling bij selectie */
+    input[type="radio"]:checked {
+        background-color: #ff4500; /* Oranje kleur bij selectie */
+        border: 2px solid black; /* Rand zwart */
+    }
+
+    /* Optionele hover-effect voor radio-knoppen */
+    input[type="radio"]:hover {
+        border-color: #ff4500; /* Oranje rand bij hover */
+        background-color: rgba(255, 69, 0, 0.1); /* Lichte oranje achtergrond */
+    }
+
+    /* Verberg lijststijlen van alle lijsten in de form */
+    ul, li {
+        list-style: none; /* Verberg de standaard bolletjes */
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Verberg de standaard checkbox */
+    input[type="checkbox"] {
+        appearance: none; /* Verwijder de standaardstijl */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 20px; /* Grootte van de checkbox */
+        height: 20px;
+        border: 2px solid #ff4500; /* Oranje rand */
+        border-radius: 4px; /* Licht afgeronde hoeken */
+        outline: none;
+        cursor: pointer;
+        background-color: white; /* Witte achtergrond */
+        display: inline-block;
+        vertical-align: middle; /* Zet de checkbox in het midden van de tekst */
+        position: relative;
+        transition: all 0.2s ease; /* Gladde transitie */
+    }
+
+    /* Voeg het oranje vinkje toe */
+    input[type="checkbox"]:checked::after {
+        content: '\2713'; /* Unicode voor een vinkje */
+        font-size: 16px;
+        color: white; /* Wit vinkje */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Centreer het vinkje */
+    }
+
+    /* Verander de achtergrond naar oranje bij selectie */
+    input[type="checkbox"]:checked {
+        background-color: #ff4500; /* Oranje achtergrond */
+        border-color: #ff4500; /* Oranje rand */
+    }
+
+    /* Optioneel: Maak de checkbox iets groter bij hover */
+    input[type="checkbox"]:hover {
+        transform: scale(1.1);
     }
 </style>
 
@@ -231,9 +306,9 @@
             <input type="hidden" id="favorite_ingredients" name="favorite_ingredients" value="{{ ','.join(form.favorite_ingredients.data) if form.favorite_ingredients.data else '' }}">
             
 
-            <!-- Favourite Origins -->
+            <!-- Favorite Origins -->
             <div>
-                <label for="favorite_origins">Favourite Origins</label>
+                <label for="favorite_origins">Favorite Origins</label>
                 {{ form.favorite_origins(class="form-control", multiple="multiple") }}
                 {% if form.favorite_origins.errors %}
                     <ul class="errors">
