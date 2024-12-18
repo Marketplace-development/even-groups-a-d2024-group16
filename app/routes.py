@@ -284,18 +284,22 @@ def add_recipe():
             image_file = form.image.data
             filename = secure_filename(image_file.filename) if image_file else None
             relative_path = None
+
             if filename:
+                # Verwerk de geüploade afbeelding
                 upload_folder = os.path.join(current_app.root_path, 'static/images')
                 os.makedirs(upload_folder, exist_ok=True)  # Zorg dat de map bestaat
-        
+
                 # Save de afbeelding
                 file_path = os.path.join(upload_folder, filename)
                 file_path = file_path.replace("C:", "").replace("\\", "/")  # Remove "C:" and normalize to "/"
-
                 image_file.save(file_path)
-        
+
                 # Gebruik altijd relatieve paden voor de database
                 relative_path = f'images/{filename}'
+            else:
+                # Gebruik een default afbeelding als er geen bestand is geüpload
+                relative_path = 'images/default_recipe_image.jpeg'
 
             # Haal ingrediënten, hoeveelheden en eenheden op uit het formulier
             ingredients = request.form.getlist('ingredients[]')
