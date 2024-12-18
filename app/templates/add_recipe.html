@@ -62,6 +62,18 @@
 </nav>
 
 <style>
+    /* Algemene stijl voor de box rond het formulier */
+    .welcome-content {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); /* Achtergrondkleur met transparantie */
+        padding: 2rem;
+        border-radius: 12px; /* Afgeronde hoeken */
+        max-width: 800px;
+        margin: 5rem auto; /* Centreer de box */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        border: 4px ridge #ff4500; /* Oranje rand */
+    }
+
     .btn-danger{
         margin: 0.25rem; 
         padding: 0.5rem 1rem; 
@@ -73,10 +85,89 @@
         transition: all 0.3s ease;
     }
 
+    /* Hover-effect voor de knop */
+    .btn-primary {
+        background-color: transparent; /* Transparante achtergrond */
+        color: black; /* Zwarte tekst */
+        border: 2px solid black;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #ff4500; /* Oranje achtergrond bij hover */
+        color: white; /* Witte tekst bij hover */
+        border-color: black;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center; /* Zorgt ervoor dat checkboxen verticaal gecentreerd zijn */
+        margin-bottom: 10px; /* Ruimte tussen regels */
+    }
+
+    /* Vinkjes stijl zoals bij register.html */
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        background-color: white; /* Witte achtergrond */
+        border: 2px solid black;
+        cursor: pointer;
+        margin-right: 10px; /* Ruimte tussen checkbox en tekst */
+    }
+
+    .form-check-input:checked {
+        background-color: #ff4500; /* Oranje achtergrond bij selectie */
+        border-color: #ff4500;
+    }
+
+    /* Zorg ervoor dat de vinkjes wit blijven */
+    .form-check-input:checked::before {
+        color: white; /* Witte kleur voor het vinkje */
+    }
+
+    /* Labels bij de allergieënlijst */
+    .form-check-label {
+        margin-left: 10px;
+        color: black;
+        font-size: 1rem;
+        margin: 0; /* Verwijdert extra marges rond de tekst */
+        font-size: 16px; /* Consistente lettergrootte */
+    }
+
+    .form-control {
+        border: 1px solid #000; /* Dunne zwarte rand */
+        border-radius: 5px; /* Kleine afronding voor een nette look */
+        box-shadow: none; /* Verwijdert eventuele standaard schaduw */
+        transition: border-color 0.3s ease-in-out; /* Soepele overgang bij hover/focus */
+    }
+    
+    .form-control:focus {
+        border-color: #ff4500; /* Oranje rand bij focus */
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+    }
+
+    /* Optioneel: Maak de checkbox iets groter bij hover */
+    input[type="checkbox"]:hover {
+        transform: scale(1.1);
+    }
+
+    /* Logout-knop hover effect */
+    .dropdown-item.text-danger {
+        color: red; /* Standaard rode tekstkleur */
+        background-color: transparent; /* Geen achtergrond standaard */
+        border-radius: 25px; /* Maak de knop consistent afgerond */
+        transition: all 0.3s ease, color 0.3s ease; /* Soepele overgang */
+    }
+
+    .dropdown-item.text-danger:hover {
+        background-color: black; /* Zwart bij hover */
+        color: red; /* Rode tekst bij hover */
+        border-radius: 25px; /* Houd de afgeronde vorm */
+    }
 </style>
 
 <!-- Add Recipe Form -->
-<div class="container mt-5 pt-4">
+<div class="welcome-content">
     <h1>Add a New Recipe</h1>
     <form method="POST" action="{{ url_for('main.add_recipe') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
@@ -140,8 +231,6 @@
             </div>
             <small class="form-text text-muted">Select all applicable allergies.</small>
         </div>
-
-
     
         <!-- Origin Dropdown -->
         <div class="mb-3">
@@ -204,7 +293,7 @@
         </div>
     
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">Add Recipe</button>
+        <button type="submit" class="btn btn-primary mt-3">Add Recipe</button>
     </form>
 </div>
 
@@ -295,4 +384,3 @@
     });
 </script>
 {% endblock %}
-
