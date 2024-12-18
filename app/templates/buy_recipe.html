@@ -2,21 +2,17 @@
 
 {% block content %}
 
-<!-- Navigation Bar -->
+<!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Replace Dishcovery text with an image -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
         </a>
-        
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Chatbot Link with Icon -->
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
                         <i class="fas fa-robot me-2"></i>Chatbot
@@ -29,8 +25,6 @@
                     </a>
                 </li>
                 {% endif %}
-
-                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div style="display: flex; align-items: center;">
@@ -49,9 +43,9 @@
                         {% elif session.get('role') == 'chef' %}
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Stats&Uploads</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.chef_profile') }}">Chef Profile</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
-                        <!-- Contact Link -->
                         <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
                         <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
                     </ul>
@@ -63,89 +57,90 @@
 
 <!-- Page Content -->
 <div class="container mt-5 pt-5">
-    <h1 class="text-center">Purchase {{ recipe.recipename }}</h1>
-    <div class="recipe-detail text-center my-4">
-        <!-- Display Recipe Image -->
-        <div class="image-container mb-4">
-            {% if recipe.image %}
-                <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
-            {% else %}
-                <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
-            {% endif %}
-        </div>
-        <h2>Details</h2>
-        <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-        <p><strong>Category:</strong> {{ recipe.category }}</p>
-        <p><strong>Origin:</strong> {{ recipe.origin }}</p>
-        <p><strong>Description:</strong> {{ recipe.description }}</p>
-
-        <!-- Ingredients Table -->
-        <h5><strong>Ingredients:</strong></h5>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Ingredient</th>
-                    <th>Quantity & Unit</th>
-                </tr>
-            </thead>
-            <tbody id="ingredientsTableBody">
-                {% for ingredient in ingredients_list %}
-                    <tr>
-                        <td>{{ ingredient.ingredient }}</td>
-                        <td>{{ ingredient.quantity }} {{ ingredient.unit }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <p><strong>Price:</strong> €{{ recipe.price }}</p>
-        <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-    </div>
-
-    <form method="POST" class="text-center my-4">
-        <button type="submit" class="btn btn-success">Confirm Purchase</button>
-        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
-    </form>
-
-    <!-- Reviews Section -->
-    <div class="reviews mt-5">
-        <h3>Reviews</h3>
-        {% if reviews %}
-            {% for review in reviews %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
-                        <p><strong>Comment:</strong> {{ review.comment }}</p>
-                        <p><small><em>By: {{ review.consumer_email }} on {{ review.reviewdate.strftime('%Y-%m-%d') }}</em></small></p>
-                    </div>
+    <div class="row">
+        <!-- Recipe Details on the Left -->
+        <div class="col-md-8">
+            <h1>Purchase {{ recipe.recipename }}</h1>
+            <div class="recipe-detail my-4">
+                <div class="image-container mb-4">
+                    {% if recipe.image %}
+                        <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
+                    {% endif %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <p>No reviews available for this recipe yet.</p>
-        {% endif %}
-    </div>
+                <h2>Details</h2>
+                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                <p><strong>Category:</strong> {{ recipe.category }}</p>
+                <p><strong>Origin:</strong> {{ recipe.origin }}</p>
+                <p><strong>Description:</strong> {{ recipe.description }}</p>
 
-    <!-- More Like This Section -->
-    <div class="mt-5">
-        <h3 class="text-success">More Like This</h3>
-        <div class="row">
-            {% for related in related_recipes %}
-            <div class="col-md-3">
-                <div class="card shadow-sm">
-                    <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">{{ related.recipename }}</h5>
-                        <p class="text-muted">€{{ related.price }}</p>
-                        <a href="{{ url_for('main.buy_recipe', recipename=related.recipename) }}" class="btn btn-secondary">View Recipe</a>
+                <!-- Ingredients Table -->
+                <h5><strong>Ingredients:</strong></h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Quantity & Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredientsTableBody">
+                        {% for ingredient in ingredients_list %}
+                            <tr>
+                                <td>{{ ingredient.ingredient }}</td>
+                                <td>{{ ingredient.quantity }} {{ ingredient.unit }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <p><strong>Price:</strong> €{{ recipe.price }}</p>
+                <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
+            </div>
+
+            <form method="POST" class="my-4">
+                <button type="submit" class="btn btn-success">Confirm Purchase</button>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+
+        <!-- Chef Information on the Right -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h3>Chef Information</h3>
+                    <p><strong>{{ chef.name }}</strong></p>
+                    {% if chef.profile_picture %}
+                        <img src="{{ url_for('static', filename=chef.profile_picture) }}" alt="Chef Image" class="rounded-circle mb-3" style="width:150px; height:150px; object-fit:cover;">
+                    {% endif %}
+                    {% if chef.chef_description %}
+                        <p class="mt-3">{{ chef.chef_description }}</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <strong>Average Rating:</strong>
+                        <div>
+                            {% for star in range(1, 6) %}
+                                {% if star <= (chef_avg_rating or 0) %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% elif star - 0.5 <= (chef_avg_rating or 0) %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">
+                            {% if chef_avg_rating %}
+                                ({{ chef_avg_rating }})
+                            {% else %}
+                                No reviews yet
+                            {% endif %}
+                        </small>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>
+
 {% endblock %}
-
-
-
-

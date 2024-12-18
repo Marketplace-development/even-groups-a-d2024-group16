@@ -124,3 +124,7 @@ class ContactForm(FlaskForm):
     message = TextAreaField('Message', validators=[DataRequired(), Length(max=1000)])
     is_public = BooleanField('Make this comment public')  # Checkbox for public visibility
     submit = SubmitField('Send Message')
+
+class ChefProfileForm(FlaskForm):
+    chef_description = TextAreaField('Description', validators=[DataRequired()])
+    profile_picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')])

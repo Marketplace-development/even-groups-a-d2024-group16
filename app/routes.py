@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction, Feedback  # Je databasemodellen
-from app.forms import RecipeForm, ReviewForm, EditProfileForm, ContactForm
+from app.forms import RecipeForm, ReviewForm, EditProfileForm, ContactForm, ChefProfileForm
 from app.dropdowns import get_allergens, get_categories, get_origins
 from sqlalchemy import and_, or_, func
 from app.filters import apply_filters
@@ -16,6 +16,7 @@ from flask_mail import Mail, Message
 from app.check_and_notify_chef import check_and_notify_chef
 from app import mail
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
+from flask_wtf.file import FileAllowed
 
 main = Blueprint('main', __name__)
 chatbot = Blueprint('chatbot', __name__)
@@ -508,6 +509,15 @@ def buy_recipe(recipename):
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
 
+    # Fetch chef details from the User model
+    chef = User.query.filter_by(email=recipe.chef_email).first()
+
+    # Calculate chef's average rating
+    chef_reviews = Review.query.filter_by(chef_email=chef.email).all()
+    chef_avg_rating = (
+        round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
+    )
+
     # Ingrediënten als JSON voorbereiden
     ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
 
@@ -572,11 +582,12 @@ def buy_recipe(recipename):
     return render_template(
         'buy_recipe.html',
         recipe=recipe,
+        chef=chef,  # Pass the chef object to the template
+        chef_avg_rating=chef_avg_rating,  # Pass the average rating to the template
         ingredients_list=ingredients_list,
         reviews=reviews,
         related_recipes=related_recipes
     )
-
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
@@ -972,6 +983,47 @@ def fix_image_paths():
             recipe.image = f'images/{corrected_path}'
     db.session.commit()
     return "Image paths fixed successfully!"
+
+
+@main.route('/chef_profile', methods=['GET', 'POST'], endpoint='chef_profile')
+def edit_chef_profile():
+    # Ensure user is logged in
+    if 'email' not in session:
+        flash('Please log in to access your profile.', 'danger')
+        return redirect(url_for('main.login'))
+
+    user = User.query.filter_by(email=session['email']).first()
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('main.login'))
+
+    form = ChefProfileForm(obj=user)  # This pre-populates the form fields from the user if applicable
+
+    if form.validate_on_submit():
+        # Update the user's description from the form input
+        user.chef_description = form.chef_description.data
+
+        # Handle profile picture upload if provided
+        if form.profile_picture.data:
+            image_file = form.profile_picture.data
+            filename = secure_filename(image_file.filename)
+            
+            # Define the upload folder
+            upload_folder = os.path.join(current_app.root_path, 'static', 'images', 'profiles')
+            os.makedirs(upload_folder, exist_ok=True)
+            
+            file_path = os.path.join(upload_folder, filename)
+            image_file.save(file_path)
+            
+            user.profile_picture = f'images/profiles/{filename}'
+
+        # Commit changes to the database
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('main.chef_profile'))
+
+    return render_template('chef_profile.html', form=form, user=user)
+
 
 
 

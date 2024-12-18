@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <!-- Navigatiebalk -->
+<!-- Navigatiebalk -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
+        <!-- Replace Dishcovery text with an image -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
         </a>
@@ -13,6 +15,7 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                <!-- Chatbot Link with Icon -->
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
                         <i class="fas fa-robot me-2"></i>Chatbot
@@ -25,6 +28,7 @@
                     </a>
                 </li>
                 {% endif %}
+                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div style="display: flex; align-items: center;">
@@ -43,6 +47,7 @@
                         {% elif session.get('role') == 'chef' %}
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Stats&Uploads</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.chef_profile') }}">Chef Profile</a></li>
                             <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
                         <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
@@ -288,4 +293,3 @@
 
 
 {% endblock %}
-
