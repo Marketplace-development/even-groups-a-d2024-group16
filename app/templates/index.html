@@ -8,13 +8,12 @@ Dishcovery - Welcome
 <!-- Navigatiebalk -->
 <nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Logo met link naar de indexpagina -->
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        <!-- Logo, niet klikbaar -->
+        <span class="navbar-brand">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
-        </a>
+        </span>
     </div>
 </nav>
-
 <!-- Include Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
@@ -47,6 +46,7 @@ Dishcovery - Welcome
         margin: 20vh auto; /* Center the content both vertically and horizontally */
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
         color: black; /* Black text for contrast */
+        border: 4px ridge #ff4500; /* Oranje rand */
     }
 
     /* Fix white bar issue on smaller screens */
@@ -57,8 +57,19 @@ Dishcovery - Welcome
 
     .welcome-content h1 {
         font-family: 'Dancing Script', cursive; /* Elegant handwritten font */
-        color: #ff4500; /* Red color */
+        color: #ff4500;
         font-size: 3rem; /* Increase font size for emphasis */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px; /* Ruimte tussen tekst en logo */
+    }
+
+    /* Stijl voor het logo binnen de grote kader */
+    .welcome-content img {
+        height: 70px; /* Grootte van het logo */
+        vertical-align: baseline; /* Lijn de onderkant van het logo uit met de tekst */
+        margin-bottom: 13px; /* Fijnafstelling om het logo iets hoger te krijgen */
     }
 
     .welcome-content p {
@@ -69,32 +80,38 @@ Dishcovery - Welcome
         margin: 0.5rem;
         padding: 0.75rem 1.5rem;
         font-size: 1.25rem;
-        border: 2px solid black; /* Black border for contrast */
+        border: 2px ridge  black;
         background-color: transparent; /* Transparent background */
-        color: black; /* Black text color */
+        color: black;
         border-radius: 25px; /* Rounded buttons */
         transition: all 0.3s ease; /* Smooth hover effect */
     }
 
     /* Hover effects for buttons */
     .btn-custom:hover {
-        background-color: black; /* Black background on hover */
+        background-color: #ff4500; /* Oranje achtergrond */
         color: white; /* White text on hover */
+        border: 2px ridge black; /* Black border on hover*/
     }
 
-    .btn-outline-light:hover {
-        background-color: black; /* Black background on hover */
-        color: white; /* White text on hover */
+    .button-container {
+        display: flex; /* Plaats de knoppen naast elkaar */
+        justify-content: center; /* Centreer de knoppen */
+        gap: 20px; /* Voeg ruimte toe tussen de knoppen */
+        margin-top: 1rem; /* Voeg ruimte boven de knoppen toe */
     }
 </style>
 
 <div class="welcome-content">
-    <!-- Welcome message -->
-    <h1 class="mb-4">Welcome to Dishcovery</h1>
+    <!-- Welcome message met logo -->
+    <h1 class="mb-4">
+        Welcome to  
+        <img src="{{ url_for('static', filename='images/Dishcovery-logo-oranje.png') }}" alt="Dishcovery Logo">
+    </h1>
     <p class="text-center lead mb-4">Discover and share the most delicious recipes. Log in or create an account to get started!</p>
 
-    <!-- Buttons -->
-    <div>
+    <!-- Buttons naast elkaar -->
+    <div class="button-container">
         <a href="{{ url_for('main.login') }}" class="btn btn-custom btn-lg">
             Login
         </a>
