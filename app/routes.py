@@ -536,6 +536,12 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
 
+    # Calculate recipe's average rating
+    recipe_reviews = Review.query.filter_by(recipename=recipename).all()
+    recipe_avg_rating = (
+        round(sum(review.rating for review in recipe_reviews) / len(recipe_reviews), 1) if recipe_reviews else None
+    )
+
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
@@ -608,7 +614,8 @@ def buy_recipe(recipename):
         total_recipes_sold=total_recipes_sold,  # Pass the total recipes sold
         ingredients_list=ingredients_list,
         reviews=reviews,
-        related_recipes=related_recipes
+        related_recipes=related_recipes,
+        recipe_avg_rating=recipe_avg_rating  # Pass the recipe's average rating to the template
     )
 
 
@@ -838,8 +845,12 @@ def recipe_reviews(recipename):
     reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
 
     # Bereken gemiddelde beoordeling handmatig
-    avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
-    avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
+    avg_rating = (
+            db.session.query(func.avg(Review.rating))
+            .filter(Review.recipename == recipe.recipename)
+            .scalar()
+        )
+    avg_rating = round(avg_rating, 1) if avg_rating else None
 
 
     # Ingrediënten als JSON voorbereiden
