@@ -64,14 +64,11 @@
 <!-- Recipe Details Section -->
 <div class="container mt-5 pt-5">
     <div class="row">
-        {% if from_my_uploads %}
-            <div class="col-md-12"> <!-- Gebruik volledige breedte bij My Uploads -->
-        {% else %}
-            <div class="col-lg-8"> <!-- Beperk breedte bij andere routes -->
-        {% endif %}
+        <!-- Recipe Details -->
+        <div class="col-md-8">
             <h1>{{ recipe.recipename }}</h1>
-            <div class="image-container mb-4 text-center"> <!-- Aangepast: Gecentreerde afbeelding -->
-                <div class="image-container mb-4 text-center"> <!-- Gecentreerde afbeelding -->
+            <div class="recipe-detail my-4">
+                <div class="image-container mb-4">
                     {% if recipe.image %}
                         <img src="{{ url_for('static', filename=recipe.image) }}" alt="{{ recipe.recipename }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; width: 100%;">
                     {% else %}
@@ -87,17 +84,19 @@
                     <strong>Average Rating:</strong> 
                     <div>
                         {% for star in range(1, 6) %}
-                            {% if star <= (recipe_avg_rating or 0) %}
+                            {% if star <= (avg_rating or 0) %}
                                 <i class="fas fa-star text-warning"></i>
-                            {% elif star - 0.5 <= (recipe_avg_rating or 0) %}
+                            {% elif star - 0.5 <= (avg_rating or 0) %}
                                 <i class="fas fa-star-half-alt text-warning"></i>
                             {% else %}
                                 <i class="far fa-star text-warning"></i>
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <small class="text-muted">({{ recipe_avg_rating or 'No ratings yet' }})</small>
+                    <small class="text-muted">({{ avg_rating or 'No ratings yet' }})</small>
                 </p>
+
+                <!-- Ingredients Table -->
                 <h5><strong>Ingredients:</strong></h5>
                 <table class="table table-bordered">
                     <thead>
@@ -115,6 +114,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
                 <p><strong>Price:</strong> €{{ recipe.price }}</p>
                 <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
             </div>
@@ -138,82 +138,73 @@
             </div>
 
             <!-- More Like This Section -->
-            {% if not from_my_uploads %}
-                <div class="mt-5">
-                    <h3 class="text-success">More Like This</h3>
-                    <div class="row">
-                        {% for related in related_recipes %}
-                            <div class="col-md-3">
-                                <div class="card shadow-sm">
-                                    <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}" style="height: 200px; object-fit: cover;">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">{{ related.recipename }}</h5>
-                                        <p class="text-muted">€{{ related.price }}</p>
-                                        <a href="{{ url_for('main.buy_recipe', recipename=related.recipename) }}" class="btn btn-secondary">View Recipe</a>
-                                    </div>
+            <div class="mt-5">
+                <h3 class="text-success">More Like This</h3>
+                <div class="row">
+                    {% for related in related_recipes %}
+                        <div class="col-md-3">
+                            <div class="card shadow-sm">
+                                <img src="{{ url_for('static', filename=related.image) }}" class="card-img-top" alt="{{ related.recipename }}" style="height: 200px; object-fit: cover;">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ related.recipename }}</h5>
+                                    <p class="text-muted">€{{ related.price }}</p>
+                                    <a href="{{ url_for('main.buy_recipe', recipename=related.recipename) }}" class="btn btn-secondary">View Recipe</a>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endif %}
+            </div>
         </div>
 
         <!-- Chef Information -->
-        {% if not from_my_uploads %}
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <h3>{{ chef.name }}</h3>
-                        {% if chef.profile_picture %}
-                            <img src="{{ url_for('static', filename=chef.profile_picture) }}" alt="Chef Image" class="rounded-circle mb-3" style="width:150px; height:150px; object-fit:cover;">
-                        {% endif %}
-                        {% if chef.chef_description %}
-                            <p class="mt-3">{{ chef.chef_description }}</p>
-                        {% endif %}
-                        <div class="mt-3">
-                            <strong>Average Rating:</strong>
-                            <div>
-                                {% for star in range(1, 6) %}
-                                    {% if star <= (chef_avg_rating or 0) %}
-                                        <i class="fas fa-star text-warning"></i>
-                                    {% elif star - 0.5 <= (chef_avg_rating or 0) %}
-                                        <i class="fas fa-star-half-alt text-warning"></i>
-                                    {% else %}
-                                        <i class="far fa-star text-warning"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            <small class="text-muted">
-                                {% if chef_avg_rating %}
-                                    ({{ chef_avg_rating }})
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h3>{{ chef.name }}</h3>
+                    {% if chef.profile_picture %}
+                        <img src="{{ url_for('static', filename=chef.profile_picture) }}" alt="Chef Image" class="rounded-circle mb-3" style="width:150px; height:150px; object-fit:cover;">
+                    {% endif %}
+                    {% if chef.chef_description %}
+                        <p class="mt-3">{{ chef.chef_description }}</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <strong>Average Rating:</strong>
+                        <div>
+                            {% for star in range(1, 6) %}
+                                {% if star <= (chef_avg_rating or 0) %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% elif star - 0.5 <= (chef_avg_rating or 0) %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
                                 {% else %}
-                                    No ratings yet
+                                    <i class="far fa-star text-warning"></i>
                                 {% endif %}
-                            </small>
+                            {% endfor %}
                         </div>
-                        <div class="mt-3">
-                            <strong>Total Recipes Sold:</strong>
-                            <p>{{ total_recipes_sold }}</p>
-                        </div>
-                        <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-info">View More Recipes by {{ recipe.chef_name }}</a>
+                        <small class="text-muted">
+                            {% if chef_avg_rating %}
+                                ({{ chef_avg_rating }})
+                            {% else %}
+                                No ratings yet
+                            {% endif %}
+                        </small>
                     </div>
+                    <div class="mt-3">
+                        <strong>Total Recipes Sold:</strong>
+                        <p>{{ total_recipes_sold }}</p>
+                    </div>
+                    <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-info">View More Recipes by {{ recipe.chef_name }}</a>
                 </div>
             </div>
-        {% endif %}
+        </div>
     </div>
-
-    <!-- Back Button -->
-    <div class="text-center mt-4"> <!-- Aangepast: Gecentreerde knoppen -->
-        {% if from_my_uploads %}
-            <a href="{{ url_for('main.my_uploads') }}" class="btn btn-primary">Back to My Uploads</a>
-        {% else %}
-            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
-        {% endif %}
-    </div>    
+    <!-- Back to Dashboard Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
 </div>
-
 {% endblock %}
+
 
 
 
