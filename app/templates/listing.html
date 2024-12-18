@@ -85,4 +85,20 @@
             <p class="text-muted">No recipes available at the moment. Please check back later!</p>
         {% endif %}
     </div>
+
+<style>
+    /* Logout-knop hover effect */
+    .dropdown-item.text-danger {
+        color: red; /* Standaard rode tekstkleur */
+        background-color: transparent; /* Geen achtergrond standaard */
+        border-radius: 25px; /* Maak de knop consistent afgerond */
+        transition: all 0.3s ease, color 0.3s ease; /* Soepele overgang */
+    }
+
+    .dropdown-item.text-danger:hover {
+        background-color: black; /* Zwart bij hover */
+        color: red; /* Rode tekst bij hover */
+        border-radius: 25px; /* Houd de afgeronde vorm */
+    }
+</style>
 {% endblock %}
