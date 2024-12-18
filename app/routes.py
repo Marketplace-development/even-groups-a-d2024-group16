@@ -455,6 +455,8 @@ def my_uploads():
     if 'email' not in session or session.get('role') != 'chef':
         flash('You need to log in as a chef to access this page.', 'danger')
         return redirect(url_for('main.login'))
+    
+    recipes = Recipe.query.filter_by(chef_email=session['email']).all()
 
     chef_email = session['email']
     uploads = Recipe.query.filter_by(chef_email=chef_email).all()
@@ -518,7 +520,7 @@ def my_uploads():
                            uploads_data=uploads_data,
                            overall_avg_rating=overall_avg_rating,
                            total_revenue=total_revenue,
-                           revenue_data=revenue_data)
+                           revenue_data=revenue_data, recipes=recipes)
 
 
 
@@ -827,6 +829,8 @@ def edit_profile():
 
 @main.route('/recipe_reviews/<recipename>')
 def recipe_reviews(recipename):
+    from_my_uploads = request.args.get('from_my_uploads', False)
+
     # Fetch recipe from the database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
 
@@ -849,12 +853,8 @@ def recipe_reviews(recipename):
     reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
 
     # Bereken gemiddelde beoordeling handmatig
-    avg_rating = (
-            db.session.query(func.avg(Review.rating))
-            .filter(Review.recipename == recipe.recipename)
-            .scalar()
-        )
-    avg_rating = round(avg_rating, 1) if avg_rating else None
+    avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
+    avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
 
 
     # Ingrediënten als JSON voorbereiden
@@ -891,7 +891,9 @@ def recipe_reviews(recipename):
         ingredients_list=ingredients_list,
         reviews=reviews,
         related_recipes=related_recipes,
-        avg_rating=avg_rating  # Pass the recipe's average rating
+        avg_rating=avg_rating,  # Pass the recipe's average rating
+        from_my_uploads=from_my_uploads  # Doorgeven aan de template
+
     )
 
 from flask import Blueprint, render_template, request, jsonify
