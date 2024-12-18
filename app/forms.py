@@ -24,7 +24,7 @@ class UserForm(FlaskForm):
     )
     chef_description = TextAreaField(
         'Chef Description', 
-        validators=[Length(max=500)],
+        validators=[Length(max=2500)],
         render_kw={"rows": 5}
     )
     profile_picture = FileField(
