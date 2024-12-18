@@ -1053,11 +1053,10 @@ def edit_chef_profile():
 
     avg_rating = round(total_ratings / rating_count, 1) if rating_count > 0 else None
 
-    total_recipes_sold = (
-        db.session.query(func.count(Transaction.transactionid))
-        .join(Recipe, Recipe.chef_email == user.email)
-        .scalar()
-    )
+    chef = User.query.filter_by(email=recipe.chef_email).first()
+
+    total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
+
 
     if form.validate_on_submit():
         try:
