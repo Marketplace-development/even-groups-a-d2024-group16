@@ -102,11 +102,8 @@
 
         <!-- Name -->
         <div>
-            <label for="name">Full Name</label>
-            {{ form.name(class="form-control", value=user.name) }}
-            {% for error in form.name.errors %}
-            <ul class="errors"><li>{{ error }}</li></ul>
-            {% endfor %}
+            <label for="name">Full Name (cannot be changed)</label>
+            {{ form.name(class="form-control", value=user.name, readonly=True) }}
         </div>
 
         <!-- Date of Birth -->
