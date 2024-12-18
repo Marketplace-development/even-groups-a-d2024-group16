@@ -61,45 +61,38 @@
     </div>
 </nav>
 
-
-
 <!-- Pagina inhoud -->
 <div class="container mt-5">
     <h1 class="page-title">My Purchased Recipes</h1>
 
     {% if recipes %}
-        <div class="recipes-container row mt-4">
+        <div class="row g-4">
             {% for recipe in recipes %}
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100 d-flex flex-column">
-                        {% if recipe.image %}
-                            <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
-                        {% endif %}
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-center">{{ recipe.recipename }}</h5>
-                            <p class="card-text text-muted text-center">by {{ recipe.chef_name }}</p>
-                            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-                            <p><strong>Ingredients:</strong></p>
-                            <ul>
-                                {% for ingredient in recipe.ingredients_list %}
-                                    <li>{{ ingredient }}</li>
-                                {% endfor %}
-                            </ul>                                
-                            <p><strong>Price:</strong> €{{ recipe.price }}</p>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    {% if recipe.image %}
+                        <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ recipe.recipename }}</h5>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>{{ recipe.duration }} min</span>
+                        </div>
+                        <p class="text-success fw-bold">€{{ recipe.price }}</p>
+                        <div class="d-flex align-items-center justify-content-center">
                             <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
-                            
-                            <!-- Knoppen met witruimte tussen de knoppen en Review knop bovenaan -->
-                            <div class="mt-auto d-flex flex-column align-items-center">
-                                <!-- Review knop bovenaan met een grotere marge naar beneden -->
-                                <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-review">Review</a>
-                                <!-- View Recipe knop met witruimte tussen de knoppen -->
-                                <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-success mt-3">View Recipe</a>
-                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <!-- Zorg ervoor dat beide knoppen dezelfde stijl hebben -->
+                            <a href="{{ url_for('main.add_review', recipename=recipe.recipename) }}" class="btn btn-primary">Review</a>
+                            <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-primary">View Recipe</a>
                         </div>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     {% else %}
@@ -107,4 +100,6 @@
     {% endif %}
 </div>
 {% endblock %}
+
+
 

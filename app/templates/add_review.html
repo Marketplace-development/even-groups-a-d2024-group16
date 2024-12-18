@@ -81,7 +81,7 @@
         <button type="submit" class="btn btn-primary">Submit Review</button>
     </form>
     <div class="text-center mt-3">
-        <a href="{{ url_for('main.recipe_detail', recipename=recipe.recipename) }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ url_for('main.my_recipes', recipename=recipe.recipename) }}" class="btn btn-secondary">Cancel</a>
     </div>
 </div>
 {% endblock %}
