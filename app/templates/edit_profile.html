@@ -1,21 +1,17 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<!-- Navigatiebalk -->
-<!-- Navigatiebalk -->
+<!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <!-- Replace Dishcovery text with an image -->
         <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
             <img src="{{ url_for('static', filename='images/Logo Dishcovery wit.png') }}" alt="Dishcovery Logo" class="navbar-logo">
         </a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <!-- Chatbot Link with Icon -->
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" href="{{ url_for('chatbot.chat') }}">
                         <i class="fas fa-robot me-2"></i>Chatbot
@@ -28,30 +24,29 @@
                     </a>
                 </li>
                 {% endif %}
-                <!-- Dropdown Menu -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link d-flex align-items-center" href="#" id="menuButton" role="button" data-bs-toggle="dropdown">
                         <div style="display: flex; align-items: center;">
                             <div style="line-height: 1;">
-                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
-                                <div style="width: 25px; height: 3px; background-color: white; margin-bottom: 5px;"></div>
-                                <div style="width: 25px; height: 3px; background-color: white;"></div>
+                                <div class="menu-bar"></div>
+                                <div class="menu-bar"></div>
+                                <div class="menu-bar"></div>
                             </div>
-                            <div style="font-size: 18px; font-weight: bold; margin-left: 10px;">MENU</div>
+                            <span class="menu-text">MENU</span>
                         </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="menuButton" style="min-width: 200px; border-radius: 10px;">
+                    <ul class="dropdown-menu dropdown-menu-end p-3">
                         {% if session.get('role') == 'customer' %}
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.my_recipes') }}">My Recipes</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% elif session.get('role') == 'chef' %}
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.my_uploads') }}">My Stats&Uploads</a></li>
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.chef_profile') }}">Chef Profile</a></li>
-                            <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.my_uploads') }}">My Stats & Uploads</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.add_recipe') }}">Add Recipe</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.chef_profile') }}">Chef Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.edit_profile') }}">Edit Profile</a></li>
                         {% endif %}
-                        <li><a class="dropdown-item btn btn-primary mb-2" href="{{ url_for('main.contact') }}">Contact</a></li>
-                        <li><a class="dropdown-item btn btn-primary text-danger mb-2" href="{{ url_for('main.logout') }}">Logout</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('main.contact') }}">Contact</a></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('main.logout') }}">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -59,237 +54,129 @@
     </div>
 </nav>
 
-<!-- Background Styling -->
+<!-- Styling -->
 <style>
-    html, body {
-        margin: 0; 
-        padding: 0; 
-        height: 100%;
-    }
-
     body {
-        background-image: url('{{ url_for('static', filename='images/Index_background.jpeg') }}');
-        background-size: cover; 
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat; 
-        overflow-x: hidden; 
-        font-family: 'Roboto', sans-serif; 
-        color: white; 
-        scroll-behavior: smooth; 
+        background: url('{{ url_for('static', filename='images/Index_background.jpeg') }}') no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+        font-family: 'Roboto', sans-serif;
     }
 
     .welcome-content {
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.8); 
+        background-color: rgba(255, 255, 255, 0.8);
         padding: 2rem;
-        border-radius: 12px; 
+        border-radius: 12px;
         max-width: 600px;
-        margin: 5vh auto; 
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        margin: 5vh auto;
         color: black;
-        overflow-y: auto; 
     }
 
     .form-control {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #333;
         border-radius: 8px;
-        margin-bottom: 15px;
-        font-size: 16px;
     }
 
     ul.errors {
         list-style: none;
-        padding: 0;
-        margin: 0 0 15px 0;
         color: #d32f2f;
-        text-align: left;
     }
 </style>
 
-<div class="welcome-content"> <!-- Zelfde stijl als register -->
+<div class="welcome-content">
     <h1>Edit Profile</h1>
     <form method="POST">
-    {{ form.hidden_tag() }}
+        {{ form.hidden_tag() }}
 
-    <!-- E-mail (readonly) -->
-    <div>
-        <label for="email">E-mail (cannot be changed)</label>
-        {{ form.email(class="form-control", value=user.email, readonly=True) }}
-    </div>
+        <!-- Email -->
+        <div>
+            <label for="email">E-mail (cannot be changed)</label>
+            {{ form.email(class="form-control", value=user.email, readonly=True) }}
+        </div>
 
-    <!-- Name -->
-    <div>
-        <label for="name">Full Name</label>
-        {{ form.name(class="form-control", value=user.name) }}
-        {% if form.name.errors %}
-            <ul class="errors">
-                {% for error in form.name.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
+        <!-- Name -->
+        <div>
+            <label for="name">Full Name</label>
+            {{ form.name(class="form-control", value=user.name) }}
+            {% for error in form.name.errors %}
+            <ul class="errors"><li>{{ error }}</li></ul>
+            {% endfor %}
+        </div>
 
-    <!-- Date of Birth -->
-    <div>
-        <label for="date_of_birth">Date of Birth</label>
-        {{ form.date_of_birth(class="form-control", value=user.date_of_birth.strftime('%Y-%m-%d') if user.date_of_birth else '') }}
-        {% if form.date_of_birth.errors %}
-            <ul class="errors">
-                {% for error in form.date_of_birth.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
+        <!-- Date of Birth -->
+        <div>
+            <label for="date_of_birth">Date of Birth</label>
+            {{ form.date_of_birth(class="form-control", value=user.date_of_birth.strftime('%Y-%m-%d') if user.date_of_birth else '') }}
+        </div>
 
-    <!-- Address Fields -->
-    <div>
-        <label for="street">Street</label>
-        {{ form.street(class="form-control", value=user.street) }}
-        {% if form.street.errors %}
-            <ul class="errors">
-                {% for error in form.street.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
+        <!-- Address Fields -->
+        <div>
+            <label for="street">Street</label>
+            {{ form.street(class="form-control", value=user.street) }}
+        </div>
+        <div>
+            <label for="housenr">House Number</label>
+            {{ form.housenr(class="form-control", value=user.housenr) }}
+        </div>
+        <div>
+            <label for="postalcode">Postal Code</label>
+            {{ form.postalcode(class="form-control", value=user.postalcode) }}
+        </div>
+        <div>
+            <label for="city">City</label>
+            {{ form.city(class="form-control", value=user.city) }}
+        </div>
+        <div>
+            <label for="country">Country</label>
+            {{ form.country(class="form-control", value=user.country) }}
+        </div>
 
-    <div>
-        <label for="housenr">House Number</label>
-        {{ form.housenr(class="form-control", value=user.housenr) }}
-        {% if form.housenr.errors %}
-            <ul class="errors">
-                {% for error in form.housenr.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
+        <!-- Telephone -->
+        <div>
+            <label for="telephonenr">Telephone</label>
+            {{ form.telephonenr(class="form-control", value=user.telephonenr) }}
+        </div>
 
-    <div>
-        <label for="postalcode">Postal Code</label>
-        {{ form.postalcode(class="form-control", value=user.postalcode) }}
-        {% if form.postalcode.errors %}
-            <ul class="errors">
-                {% for error in form.postalcode.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-
-    <div>
-        <label for="city">City</label>
-        {{ form.city(class="form-control", value=user.city) }}
-        {% if form.city.errors %}
-            <ul class="errors">
-                {% for error in form.city.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-
-    <div>
-        <label for="country">Country</label>
-        {{ form.country(class="form-control", value=user.country) }}
-        {% if form.country.errors %}
-            <ul class="errors">
-                {% for error in form.country.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-
-    <!-- Telephone -->
-    <div>
-        <label for="telephonenr">Telephone</label>
-        {{ form.telephonenr(class="form-control", value=user.telephonenr) }}
-        {% if form.telephonenr.errors %}
-            <ul class="errors">
-                {% for error in form.telephonenr.errors %}
-                    <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </div>
-
-    <!-- Allergies -->
-    {% if not user.is_chef %}
+        {% if not user.is_chef %}
+        <!-- Allergies -->
         <div>
             <label for="allergies">Allergies</label>
             {{ form.allergies(class="form-control", multiple="multiple") }}
-            {% if form.allergies.errors %}
-                <ul class="errors">
-                    {% for error in form.allergies.errors %}
-                        <li class="text-danger">{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
 
         <!-- Favourite Ingredients -->
         <div>
             <label for="favorite_ingredients">Favourite Ingredients</label>
-            
-            <!-- Dynamisch lijst van favoriete ingrediënten -->
             <div id="ingredients-list">
                 {% for ingredient in user.preferences.favorite_ingredients %}
-                    <input type="text" name="favorite_ingredients" class="form-control mb-2" value="{{ ingredient }}">
+                <input type="text" name="favorite_ingredients" class="form-control mb-2" value="{{ ingredient }}">
                 {% endfor %}
             </div>
-
-            <!-- Knop om ingredienten toe te voegen -->
             <button type="button" id="add-ingredient" class="btn btn-secondary mt-2">Add Ingredient</button>
-
-            {% if form.favorite_ingredients.errors %}
-                <ul class="errors">
-                    {% for error in form.favorite_ingredients.errors %}
-                        <li class="text-danger">{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
 
         <!-- Favourite Origins -->
         <div>
             <label for="favorite_origins">Favourite Origins</label>
             {{ form.favorite_origins(class="form-control", multiple="multiple") }}
-            {% if form.favorite_origins.errors %}
-                <ul class="errors">
-                    {% for error in form.favorite_origins.errors %}
-                        <li class="text-danger">{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </div>
-    {% endif %}
+        {% endif %}
 
-    <!-- Submit Button -->
-    <div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </div>
-</form>
+        <!-- Submit Button -->
+        <div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
 
 <script>
     document.getElementById("add-ingredient").addEventListener("click", function() {
-        // Maak een nieuw tekstinvoerveld aan
         var newInput = document.createElement("input");
         newInput.type = "text";
-        newInput.name = "favorite_ingredients"; // Zorg ervoor dat alle velden dezelfde naam hebben
-        newInput.className = "form-control mb-2"; // Voeg een klasse toe voor opmaak
-
-        // Voeg het nieuwe invoerveld toe aan de lijst
+        newInput.name = "favorite_ingredients";
+        newInput.className = "form-control mb-2";
         document.getElementById("ingredients-list").appendChild(newInput);
     });
 </script>
-
-
 
 {% endblock %}
