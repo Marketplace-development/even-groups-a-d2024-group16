@@ -189,11 +189,16 @@
                             {% endif %}
                         </small>
                     </div>
+                    <div class="mt-3">
+                        <strong>Total Recipes Sold:</strong>
+                        <p>{{ total_recipes_sold }}</p>
+                    </div>
                     <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-info">View More Recipes by {{ recipe.chef_name }}</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+        
 
 {% endblock %}

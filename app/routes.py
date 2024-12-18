@@ -518,6 +518,9 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
 
+    # Calculate total recipes sold by the chef
+    total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
+
     # Ingrediënten als JSON voorbereiden
     ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
 
@@ -584,6 +587,7 @@ def buy_recipe(recipename):
         recipe=recipe,
         chef=chef,  # Pass the chef object to the template
         chef_avg_rating=chef_avg_rating,  # Pass the average rating to the template
+        total_recipes_sold=total_recipes_sold,  # Pass the total recipes sold
         ingredients_list=ingredients_list,
         reviews=reviews,
         related_recipes=related_recipes
