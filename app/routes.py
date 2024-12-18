@@ -1072,6 +1072,57 @@ def chef_recipes(chef_email):
         chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
     )
 
+from flask import Response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import io
+
+@main.route('/download_recipe/<recipename>', methods=['GET'])
+def download_recipe(recipename):
+    # Fetch recipe details
+    recipe = Recipe.query.filter_by(recipename=recipename).first()
+    if not recipe:
+        flash('Recipe not found', 'danger')
+        return redirect(url_for('main.dashboard'))
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Add content to the PDF
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, height - 50, f"Recipe: {recipe.recipename}")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(100, height - 80, f"Chef: {recipe.chef_name}")
+    p.drawString(100, height - 100, f"Cooking Time: {recipe.duration} minutes")
+
+    # Add ingredients
+    y = height - 150
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(100, y, "Ingredients:")
+    p.setFont("Helvetica", 10)
+    for ingredient in recipe.ingredients.items():
+        y -= 20
+        p.drawString(120, y, f"{ingredient[0]}: {ingredient[1]['quantity']} {ingredient[1]['unit']}")
+
+    # Add preparation steps
+    y -= 40
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(100, y, "Preparation Steps:")
+    p.setFont("Helvetica", 10)
+    for i, step in enumerate(recipe.preparation.split('|')):
+        y -= 20
+        p.drawString(120, y, f"{i+1}. {step.strip()}")
+
+    # Finalize the PDF
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return Response(buffer, mimetype='application/pdf',
+                    headers={"Content-Disposition": f"attachment;filename={recipe.recipename}.pdf"})
+
 
 @main.route('/edit_chef_profile', methods=['GET', 'POST'])
 def edit_chef_profile():
@@ -1111,8 +1162,4 @@ def edit_chef_profile():
             flash(f"Error updating profile: {e}", 'danger')
 
     return render_template('edit_chef_profile.html', form=form, user=user)
-
-
-
-
-
+    
