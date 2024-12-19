@@ -44,5 +44,6 @@ def get_origins():
         "Thai",
         "Spanish",
         "Turkish",
-        "Greek"
+        "Greek",
+        "Other"
     ]

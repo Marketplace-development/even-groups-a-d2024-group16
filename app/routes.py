@@ -2,7 +2,7 @@ import os  # Voor bestandspaden en mapbeheer
 import json
 from pathlib import Path
 from datetime import datetime  # Voor datum- en tijdstempels
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app, jsonify
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app, jsonify, Response
 from werkzeug.utils import secure_filename  # Voor veilige bestandsnamen bij uploads
 from app import db  # SQLAlchemy-instantie
 from app.models import User, Recipe, Review, Transaction, Feedback  # Je databasemodellen
@@ -17,6 +17,10 @@ from app.check_and_notify_chef import check_and_notify_chef
 from app import mail
 from app.forms import UserForm, LoginForm, RecipeForm  # Je Flask-WTF-formulieren
 from flask_wtf.file import FileAllowed
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import io
+
 
 main = Blueprint('main', __name__)
 chatbot = Blueprint('chatbot', __name__)
@@ -1064,13 +1068,14 @@ def fix_image_paths():
 
 @main.route('/edit_chef_profile', methods=['GET', 'POST'])
 def edit_chef_profile():
-    # Controleer of de gebruiker een chef is
+    # Controleer of de gebruiker is ingelogd en een chef is
     user = User.query.filter_by(email=session.get('email')).first()
 
     if not user or not user.is_chef:
         flash('You need to log in as a chef to access this page.', 'danger')
         return redirect(url_for('main.dashboard'))
 
+    # Formulier instellen met de huidige gebruikersgegevens
     form = ChefProfileForm(obj=user)
 
     # Bereken statistieken voor de preview
@@ -1084,13 +1089,13 @@ def edit_chef_profile():
         total_ratings += recipe_ratings
         rating_count += recipe_count
 
+    # Bereken gemiddelde beoordeling
     avg_rating = round(total_ratings / rating_count, 1) if rating_count > 0 else None
 
-    chef = User.query.filter_by(email=recipe.chef_email).first()
+    # Bereken totaal aantal verkochte recepten
+    total_recipes_sold = Transaction.query.filter_by(chef_email=user.email).count()
 
-    total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
-
-
+    # Formulierverwerking
     if form.validate_on_submit():
         try:
             # Update beschrijving
@@ -1098,13 +1103,17 @@ def edit_chef_profile():
 
             # Update profielfoto
             if form.profile_picture.data:
+                # Uploadmap instellen
                 upload_folder = os.path.join(current_app.root_path, 'static/images')
                 os.makedirs(upload_folder, exist_ok=True)
 
+                # Bestand opslaan
                 image_file = form.profile_picture.data
                 filename = secure_filename(image_file.filename)
                 file_path = os.path.join(upload_folder, filename)
                 image_file.save(file_path)
+
+                # Profielfoto bijwerken
                 user.profile_picture = f'images/{filename}'
 
             # Opslaan in database
@@ -1116,6 +1125,7 @@ def edit_chef_profile():
             db.session.rollback()
             flash(f"Error updating profile: {e}", 'danger')
 
+    # Render de template
     return render_template(
         'edit_chef_profile.html',
         form=form,
@@ -1123,7 +1133,6 @@ def edit_chef_profile():
         avg_rating=avg_rating,
         total_recipes_sold=total_recipes_sold
     )
-
 
 @main.route('/chef_recipes/<chef_email>', methods=['GET'])
 def chef_recipes(chef_email):
@@ -1159,13 +1168,6 @@ def chef_recipes(chef_email):
         chef_recipes=chef_recipes,  # Pass recipes with avg_rating
         chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
     )
-
-
-
-from flask import Response
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-import io
 
 @main.route('/download_recipe/<recipename>', methods=['GET'])
 def download_recipe(recipename):
