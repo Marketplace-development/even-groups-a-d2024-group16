@@ -5,19 +5,27 @@ from app.models import Recipe
 from app import db  # SQLAlchemy-instantie
 
 import json
+import nltk
+from nltk.stem import PorterStemmer
+
+# Download de benodigde NLTK-data
+nltk.download('punkt')
 
 
 def apply_filters(query, filters):
     """Past filters toe op de receptenquery."""
+    stemmer = PorterStemmer()
+
     if filters.get('ingredients') and filters['ingredients'] != '[]':
         try:
             ingredient_list = json.loads(filters['ingredients'])
             if ingredient_list:
+            # Gebruik stemming voor meer flexibiliteit
                 ingredient_conditions = [
-                    func.lower(cast(Recipe.ingredients, db.Text)).like(f'%"{ingredient.lower()}"%')
+                    func.lower(cast(Recipe.ingredients, db.Text)).ilike(f'%{stemmer.stem(ingredient.lower())}%')
                     for ingredient in ingredient_list
                 ]
-                query = query.filter(and_(*ingredient_conditions))  # Zorg dat alle ingrediënten aanwezig zijn
+                query = query.filter(and_(*ingredient_conditions))  # Zorg dat alle ingrediënten matchen
         except json.JSONDecodeError:
             pass  # Negeer ongeldige JSON
 
