@@ -461,9 +461,6 @@ def recipe_detail(recipename):
         ingredients_list=ingredients_list  # De lijst van ingredienten als dictionaries
     )
 
-
-
-
 @main.route('/my_uploads')
 def my_uploads():
     if 'email' not in session or session.get('role') != 'chef':
@@ -550,12 +547,6 @@ def buy_recipe(recipename):
     # Fetch chef details from the User model
     chef = User.query.filter_by(email=recipe.chef_email).first()
 
-    # Calculate chef's average rating
-    chef_reviews = Review.query.filter_by(chef_email=chef.email).all()
-    chef_avg_rating = (
-        round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
-    )
-
     # Fetch reviews for the recipe
     reviews = Review.query.filter_by(recipename=recipename).all()
     total_reviews = len(reviews)
@@ -575,6 +566,13 @@ def buy_recipe(recipename):
         star: (count / total_reviews * 100) if total_reviews > 0 else 0
         for star, count in star_distribution.items()
     }
+
+    # Calculate chef's average rating
+    chef_reviews = Review.query.filter_by(chef_email=chef.email).all()
+    total_chef_reviews = len(chef_reviews)
+    chef_avg_rating = (
+        round(sum(review.rating for review in chef_reviews) / total_chef_reviews, 1) if total_chef_reviews > 0 else 0
+    )
 
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
@@ -624,6 +622,7 @@ def buy_recipe(recipename):
         total_recipes_sold=total_recipes_sold,
         chef_avg_rating=chef_avg_rating
     )
+
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
