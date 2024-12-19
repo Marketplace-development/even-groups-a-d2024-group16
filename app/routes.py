@@ -1147,7 +1147,7 @@ def chef_recipes(chef_email):
 
     # Fetch recipes by this chef
     chef_recipes = Recipe.query.filter_by(chef_email=chef_email).all()
-
+    
     # Calculate average rating for each recipe
     for recipe in chef_recipes:
         avg_rating = (

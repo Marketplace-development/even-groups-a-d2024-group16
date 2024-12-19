@@ -65,142 +65,58 @@
 <!-- Page Content -->
 <div class="container mt-5 pt-4 welcome-content">
     <div class="row">
-       <!-- Filters Sidebar -->
-       <div class="col-md-3 bg-light p-4 shadow-sm rounded">
-        <h5 class="mb-3">Filters</h5>
-        <form method="GET" action="{{ url_for('main.chef_recipes', chef_email=chef.email) }}">
-            <div class="mb-3">
-                <label for="ingredient-input" class="form-label">Search by Ingredients</label>
-                <div id="ingredient-container">
-                    <input type="text" class="form-control mb-2 ingredient-input" id="ingredient-input" placeholder="Enter ingredient and press Enter">
-                </div>
-                <ul id="ingredient-list" class="list-group mt-2">
-                    {% for ingredient in request.args.get('ingredients', '[]') | fromjson %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ ingredient }}">
-                            {{ ingredient }}
-                            <button type="button" class="btn btn-sm btn-danger remove-ingredient">Remove</button>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <input type="hidden" name="ingredients" id="ingredients-hidden" value="{{ request.args.get('ingredients', '[]') }}">
-            </div>
-            <div class="mb-3">
-                <label for="min_rating" class="form-label">Min. Rating</label>
-                <select name="min_rating" id="min_rating" class="form-control">
-                    <option value="">Any</option>
-                    {% for i in range(1, 6) %}
-                        <option value="{{ i }}" {% if request.args.get('min_rating') == i|string %}selected{% endif %}>
-                            {{ i }}+
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="duration" class="form-label">Max. Duration (min)</label>
-                <input type="number" name="duration" id="duration" class="form-control" value="{{ request.args.get('duration') }}">
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select name="category" id="category" class="form-control">
-                    <option value="">Any</option>
-                    {% for category in categories %}
-                        <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
-                            {{ category }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="origin" class="form-label">Origin</label>
-                <select name="origin" id="origin" class="form-control">
-                    <option value="">Any</option>
-                    {% for origin in origins %}
-                        <option value="{{ origin }}" {% if request.args.get('origin') == origin %}selected{% endif %}>
-                            {{ origin }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="allergy-select" class="form-label">Exclude Allergens</label>
-                <div class="input-group">
-                    <select id="allergy-select" class="form-control">
-                        <option value="">Select an allergen</option>
-                        {% for allergen in allergens %}
-                            <option value="{{ allergen }}">{{ allergen }}</option>
-                        {% endfor %}
-                    </select>
-                    <button type="button" id="add-allergy-btn" class="btn btn-primary">Add</button>
-                </div>
-                <ul id="allergy-list" class="list-group mt-2">
-                    {% for allergy in request.args.get('allergies', '').split(',') if allergy %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center" data-value="{{ allergy }}">
-                            {{ allergy }}
-                            <button type="button" class="btn btn-sm btn-danger remove-allergy">Remove</button>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <input type="hidden" name="allergies" id="allergies-hidden" value="{{ request.args.get('allergies', '') }}">
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-secondary">Apply Filters</button>
-                <a href="{{ url_for('main.chef_recipes', chef_email=chef.email) }}" class="btn btn-danger">Remove All Filters</a>
-            </div>
-        </form>
-    </div>
+        <!-- Recipes Section -->
+        <div class="col-md-9">
+            <h1 class="text-center">All Recipes of Chef {{ chef.name }}</h1>
+            <div class="row g-4 mt-4">
+                {% for recipe in chef_recipes %}
+                <div class="col-md-6">
+                    <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="text-decoration-none">
+                        <div class="card shadow-sm h-100">
+                            {% if recipe.image %}
+                                <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ recipe.recipename }}</h5>
+                                <p class="text-success fw-bold">€{{ recipe.price }}</p>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <span>{{ recipe.duration }} min</span>
+                                </div>
 
-       <!-- Recipes Section -->
-<div class="col-md-6">
-    <h1 class="text-center">All Recipes of Chef {{ chef.name }}</h1>
-    <div class="row g-4 mt-4">
-        {% for recipe in chef_recipes %}
-        <div class="col-md-6">
-            <a href="{{ url_for('main.buy_recipe', recipename=recipe.recipename) }}" class="text-decoration-none">
-                <div class="card shadow-sm h-100">
-                    {% if recipe.image %}
-                        <img src="{{ url_for('static', filename=recipe.image) }}" class="card-img-top" alt="{{ recipe.recipename }}">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/default.jpg') }}" class="card-img-top" alt="Default Image">
-                    {% endif %}
-                    <div class="card-body text-center">
-                        <h5 class="card-title">{{ recipe.recipename }}</h5>
-                        <p class="text-success fw-bold">€{{ recipe.price }}</p>
-                        <div class="d-flex justify-content-center align-items-center">
-                            <i class="fas fa-clock me-2"></i>
-                            <span>{{ recipe.duration }} min</span>
-                        </div>
-
-                        <!-- Star Rating -->
-                        <div class="d-flex align-items-center justify-content-center mt-2">
-                            {% set avg_rating = recipe.avg_rating if recipe.avg_rating is not none else 0 %}
-                            <div class="me-2">
-                                {% for star in range(1, 6) %}
-                                    {% if star <= avg_rating %}
-                                        <i class="fas fa-star text-warning"></i>
-                                    {% elif star - 0.5 <= avg_rating %}
-                                        <i class="fas fa-star-half-alt text-warning"></i>
-                                    {% else %}
-                                        <i class="far fa-star text-warning"></i>
-                                    {% endif %}
-                                {% endfor %}
+                                <!-- Star Rating -->
+                                <div class="d-flex align-items-center justify-content-center mt-2">
+                                    {% set avg_rating = recipe.avg_rating if recipe.avg_rating is not none else 0 %}
+                                    <div class="me-2">
+                                        {% for star in range(1, 6) %}
+                                            {% if star <= avg_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% elif star - 0.5 <= avg_rating %}
+                                                <i class="fas fa-star-half-alt text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <small class="text-muted">
+                                        {% if avg_rating > 0 %}
+                                            ({{ avg_rating }})
+                                        {% else %}
+                                            (No rating)
+                                        {% endif %}
+                                    </small>
+                                </div>
                             </div>
-                            <small class="text-muted">
-                                {% if avg_rating > 0 %}
-                                    ({{ avg_rating }})
-                                {% else %}
-                                    (No rating)
-                                {% endif %}
-                            </small>
                         </div>
-                    </div>
+                    </a>
                 </div>
-            </a>
+                {% else %}
+                    <p class="text-center">No recipes available for this chef at the moment.</p>
+                {% endfor %}
+            </div>
         </div>
-        {% else %}
-            <p class="text-center">No recipes available for this chef at the moment.</p>
-        {% endfor %}
-    </div>
-</div>
 
         <!-- Chef Information -->
         <div class="col-md-3 bg-light p-4 shadow-sm rounded">
@@ -234,18 +150,19 @@
 </div>
 
 <style>
-    /* Logout-knop hover effect */
-    .dropdown-item.text-danger {
-        color: red; /* Standaard rode tekstkleur */
-        background-color: transparent; /* Geen achtergrond standaard */
-        border-radius: 25px; /* Maak de knop consistent afgerond */
-        transition: all 0.3s ease, color 0.3s ease; /* Soepele overgang */
+    /* Chef Information Style */
+    .rounded-circle {
+        border: 2px solid #ddd;
     }
-
-    .dropdown-item.text-danger:hover {
-        background-color: black; /* Zwart bij hover */
-        color: red; /* Rode tekst bij hover */
-        border-radius: 25px; /* Houd de afgeronde vorm */
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .text-success {
+        color: #28a745 !important;
     }
 </style>
 {% endblock %}
