@@ -860,6 +860,17 @@ def recipe_reviews(recipename):
     avg_rating_query = db.session.query(func.avg(Review.rating)).filter(Review.recipename == recipe.recipename).scalar()
     avg_rating = round(avg_rating_query, 1) if avg_rating_query else None
 
+    total_reviews = len(reviews)
+
+    star_distribution = {i: 0 for i in range(1, 6)}
+    for review in reviews:
+        star_distribution[review.rating] += 1
+
+    # Safely calculate star percentages
+    star_percentages = {
+        star: (count / total_reviews * 100) if total_reviews > 0 else 0
+        for star, count in star_distribution.items()
+    }
 
     # Ingrediënten als JSON voorbereiden
     ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
@@ -896,8 +907,10 @@ def recipe_reviews(recipename):
         reviews=reviews,
         related_recipes=related_recipes,
         avg_rating=avg_rating,  # Pass the recipe's average rating
-        from_my_uploads=from_my_uploads  # Doorgeven aan de template
-
+        from_my_uploads=from_my_uploads,  # Doorgeven aan de template
+        star_distribution=star_distribution,
+        star_percentages=star_percentages,
+        total_reviews=total_reviews
     )
 
 from flask import Blueprint, render_template, request, jsonify
