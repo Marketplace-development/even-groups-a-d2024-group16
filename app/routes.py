@@ -1138,6 +1138,40 @@ def edit_chef_profile():
         avg_rating=avg_rating,
         total_recipes_sold=total_recipes_sold
     )
+@main.route('/chef_recipes/<chef_email>', methods=['GET'])
+def chef_recipes(chef_email):
+    # Fetch chef details
+    chef = User.query.filter_by(email=chef_email).first()
+    if not chef:
+        flash('Chef not found.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Fetch recipes by this chef
+    chef_recipes = Recipe.query.filter_by(chef_email=chef_email).all()
+
+    # Calculate average rating for each recipe
+    for recipe in chef_recipes:
+        avg_rating = (
+            db.session.query(func.avg(Review.rating))
+            .filter(Review.recipename == recipe.recipename)
+            .scalar()
+        )
+        recipe.avg_rating = round(avg_rating, 1) if avg_rating else 0
+
+    # Calculate overall chef rating (optional, if you still need it)
+    chef_avg_rating = (
+        db.session.query(func.avg(Review.rating))
+        .filter(Review.chef_email == chef_email)
+        .scalar()
+    )
+    chef_avg_rating = round(chef_avg_rating, 1) if chef_avg_rating else 0
+
+    return render_template(
+        'chef_recipes.html',
+        chef=chef,
+        chef_recipes=chef_recipes,  # Pass recipes with avg_rating
+        chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
+    )
 
 
 @main.route('/download_recipe/<recipename>', methods=['GET'])
