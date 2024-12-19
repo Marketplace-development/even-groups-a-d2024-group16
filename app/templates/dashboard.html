@@ -229,7 +229,7 @@
                     </div>
                     <input type="hidden" name="min_price" id="min_price_input" value="{{ request.args.get('min_price', 0) }}">
                     <input type="hidden" name="max_price" id="max_price_input" value="{{ request.args.get('max_price', max_price) }}">
-                </div>
+                </div>                
                 <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select name="category" id="category" class="form-control">
@@ -550,62 +550,62 @@
         const minPriceLabel = document.getElementById('min_price_label');
         const maxPriceLabel = document.getElementById('max_price_label');
         const maxPrice = parseFloat("{{ max_price }}");
-
+    
         // Voeg de hier ontbrekende initialisatie toe
         const minPrice = parseFloat("{{ request.args.get('min_price', 0) }}");
         const maxPriceFromArgs = parseFloat("{{ request.args.get('max_price', max_price) }}");
-        minPriceLabel.textContent = `€${minPrice}`;
-        maxPriceLabel.textContent = `€${maxPriceFromArgs}`;
-
-        minPriceInput.value = minPrice;
-        maxPriceInput.value = maxPriceFromArgs;
-
+        minPriceLabel.textContent = `€${minPrice.toFixed(1)}`;
+        maxPriceLabel.textContent = `€${maxPriceFromArgs.toFixed(1)}`;
+    
+        minPriceInput.value = minPrice.toFixed(1);
+        maxPriceInput.value = maxPriceFromArgs.toFixed(1);
+    
         // Create slider thumbs
         const thumbMin = document.createElement('div');
         const thumbMax = document.createElement('div');
         const track = document.createElement('div');
-
+    
         thumbMin.classList.add('thumb');
         thumbMax.classList.add('thumb');
         track.classList.add('track');
-
+    
         slider.appendChild(track);
         slider.appendChild(thumbMin);
         slider.appendChild(thumbMax);
-
+    
         // Initial positions
         const sliderWidth = slider.offsetWidth;
-        const minPosition = ((minPriceInput.value || 0) / maxPrice) * sliderWidth;
-        const maxPosition = ((maxPriceInput.value || maxPrice) / maxPrice) * sliderWidth;
-
+        const minPosition = ((minPrice / maxPrice) * sliderWidth);
+        const maxPosition = ((maxPriceFromArgs / maxPrice) * sliderWidth);
+    
         thumbMin.style.left = `${minPosition}px`;
         thumbMax.style.left = `${maxPosition}px`;
         track.style.left = `${minPosition}px`;
         track.style.width = `${maxPosition - minPosition}px`;
-
+    
         // Add drag logic
         function dragThumb(event, thumb, isMin) {
             event.preventDefault();
             const startX = event.clientX;
             const startLeft = parseFloat(thumb.style.left);
-
+    
             function onDrag(e) {
                 const deltaX = e.clientX - startX;
                 let newLeft = startLeft + deltaX;
-
+    
                 // Constrain within bounds
                 newLeft = Math.max(0, newLeft);
                 newLeft = Math.min(sliderWidth, newLeft);
-
+    
                 if (isMin) {
                     newLeft = Math.min(newLeft, parseFloat(thumbMax.style.left) - 10);
                 } else {
                     newLeft = Math.max(newLeft, parseFloat(thumbMin.style.left) + 10);
                 }
-
+    
                 thumb.style.left = `${newLeft}px`;
-                const value = Math.round((newLeft / sliderWidth) * maxPrice);
-
+                const value = ((newLeft / sliderWidth) * maxPrice).toFixed(1); // Kleine stappen: 0.1
+    
                 if (isMin) {
                     minPriceInput.value = value;
                     minPriceLabel.textContent = `€${value}`;
@@ -617,19 +617,19 @@
                     track.style.width = `${newLeft - parseFloat(thumbMin.style.left)}px`;
                 }
             }
-
+    
             function stopDrag() {
                 document.removeEventListener('mousemove', onDrag);
                 document.removeEventListener('mouseup', stopDrag);
             }
-
+    
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('mouseup', stopDrag);
         }
-
+    
         thumbMin.addEventListener('mousedown', (e) => dragThumb(e, thumbMin, true));
         thumbMax.addEventListener('mousedown', (e) => dragThumb(e, thumbMax, false));
-    });
+    });    
 </script>
 <style>
 
