@@ -624,7 +624,8 @@ def buy_recipe(recipename):
         ingredients_to_match=ingredients_to_match,
         related_recipes=related_recipes,
         total_recipes_sold=total_recipes_sold,
-        chef_avg_rating=chef_avg_rating
+        chef_avg_rating=chef_avg_rating,
+        ingredients_list=ingredients_list
     )
 
 
