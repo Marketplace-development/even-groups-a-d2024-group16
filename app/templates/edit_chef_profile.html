@@ -61,46 +61,49 @@
     </div>
 </nav>
 
-<div class="container mt-5">
-    <h1>Edit Your Public Profile</h1>
-    <form method="POST" enctype="multipart/form-data">
-        {{ form.csrf_token }}
-        
-        <!-- Form Section -->
-        <div class="alert alert-info" role="alert">
-            Customize your profile to leave a great impression on customers when they look you up!
-        </div>
+<div class="container mt-5 pt-4">
+    <!-- Kader voor profielbewerking -->
+    <div class="card card-orange-border shadow-lg p-4">
+        <h1 class="text-center page-title">Edit Your Public Profile</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.csrf_token }}
 
-        <div class="mb-3">
-            <label for="chef_description" class="form-label">Description</label>
-            {{ form.chef_description(class_="form-control", rows="5") }}
-            {% if form.chef_description.errors %}
-                <div class="text-danger">{{ form.chef_description.errors[0] }}</div>
+            <div class="alert alert-info" role="alert">
+                Customize your profile to leave a great impression on customers when they look you up!
+            </div>
+
+            <div class="mb-3">
+                <label for="chef_description" class="form-label">Description</label>
+                {{ form.chef_description(class_="form-control", rows="5") }}
+                {% if form.chef_description.errors %}
+                    <div class="text-danger">{{ form.chef_description.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="profile_picture" class="form-label">Profile Picture</label>
+                {{ form.profile_picture(class_="form-control") }}
+                {% if form.profile_picture.errors %}
+                    <div class="text-danger">{{ form.profile_picture.errors[0] }}</div>
+                {% endif %}
+            </div>
+            
+            {% if user.profile_picture %}
+            <div class="mb-3">
+                <p>Current Image:</p>
+                <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="Chef Image" style="max-width:200px;max-height:200px;">
+            </div>
             {% endif %}
-        </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-hover-save">Save Changes</button>
+        </form>
+    </div>
 
-        <div class="mb-3">
-            <label for="profile_picture" class="form-label">Profile Picture</label>
-            {{ form.profile_picture(class_="form-control") }}
-            {% if form.profile_picture.errors %}
-                <div class="text-danger">{{ form.profile_picture.errors[0] }}</div>
-            {% endif %}
-        </div>
-        
-        {% if user.profile_picture %}
-        <div class="mb-3">
-            <p>Current Image:</p>
-            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="Chef Image" style="max-width:200px;max-height:200px;">
-        </div>
-        {% endif %}
-        
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-
-    <!-- Preview Section -->
+    <!-- Public Profile Preview -->
     <div class="mt-5">
-        <h2>Public Profile Preview</h2>
-        <div class="card shadow-sm">
+        <h2 class="page-title text-center">Public Profile Preview</h2>
+        <div class="card card-black-border shadow-sm">
             <div class="card-body text-center">
                 <h3>Chef Information</h3>
                 <p><strong>{{ user.name }}</strong></p>
@@ -143,5 +146,72 @@
         </div>
     </div>
 </div>
+
+<style>
+    .page-title {
+        font-family: 'Dancing Script', cursive;
+        color: #ff5733;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); /* Achtergrondkleur met transparantie */
+        padding: 2rem;
+        border-radius: 12px; /* Afgeronde hoeken */
+        max-width: 800px;
+        margin: 5rem auto; /* Centreer de box */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Oranje rand voor de eerste kaart */
+    .card-orange-border {
+        border: 3px ridge #ff4500;
+    }
+
+    /* Zwarte rand voor de tweede kaart */
+    .card-black-border {
+        border: 2px solid black;
+    }
+
+    .btn-primary {
+        background-color: transparent;
+        color: black;
+        border: 2px solid black;
+        transition: all 0.3s ease, color 0.3s ease, border 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #ff4500;
+        color: white;
+        border: 2px solid black;
+    }
+
+    .form-control {
+        border: 1px solid #000; /* Dunne zwarte rand */
+        border-radius: 5px; /* Kleine afronding voor een nette look */
+        box-shadow: none; /* Verwijdert eventuele standaard schaduw */
+        transition: border-color 0.3s ease-in-out; /* Soepele overgang bij hover/focus */
+    }
+    
+    .form-control:focus {
+        border-color: #ff4500; /* Oranje rand bij focus */
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+    }
+    /* Logout-knop hover effect */
+    .dropdown-item.text-danger {
+        color: red; /* Standaard rode tekstkleur */
+        background-color: transparent; /* Geen achtergrond standaard */
+        border-radius: 25px; /* Maak de knop consistent afgerond */
+        transition: all 0.3s ease, color 0.3s ease; /* Soepele overgang */
+    }
+
+    .dropdown-item.text-danger:hover {
+        background-color: black; /* Zwart bij hover */
+        color: red; /* Rode tekst bij hover */
+        border-radius: 25px; /* Houd de afgeronde vorm */
+    }
+</style>
 
 {% endblock %}

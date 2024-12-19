@@ -61,10 +61,11 @@
     </div>
 </nav>
 
-<div class="container mt-4">
-    <h1>Edit Recipe</h1>
-    <form method="POST" action="{{ url_for('main.edit_recipe', recipename=recipe.recipename) }}" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
+<div class="container mt-5 pt-4">
+    <div class="card shadow-lg p-4">
+        <h1 class="text-center page-title">Edit Recipe</h1>
+        <form method="POST" action="{{ url_for('main.edit_recipe', recipename=recipe.recipename) }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
 
         <!-- Recipename -->
         <div class="mb-3">
@@ -254,6 +255,48 @@
 </script>
 
 <style>
+    .page-title {
+        font-family: 'Dancing Script', cursive;
+        color: #ff5733;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8); /* Achtergrondkleur met transparantie */
+        padding: 2rem;
+        border-radius: 12px; /* Afgeronde hoeken */
+        max-width: 800px;
+        margin: 5rem auto; /* Centreer de box */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        border: 3px ridge #ff4500; /* Oranje rand */
+    }
+
+    .btn-primary {
+        background-color: transparent;
+        color: black;
+        border: 2px solid black;
+        transition: all 0.3s ease, color 0.3s ease, border 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #ff5733;
+        color: white;
+        border: 2px solid black;
+    }
+
+    .form-control {
+        border: 1px solid #000; /* Dunne zwarte rand */
+        border-radius: 5px; /* Kleine afronding voor een nette look */
+        box-shadow: none; /* Verwijdert eventuele standaard schaduw */
+        transition: border-color 0.3s ease-in-out; /* Soepele overgang bij hover/focus */
+    }
+    
+    .form-control:focus {
+        border-color: #ff4500; /* Oranje rand bij focus */
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+    }
     /* Logout-knop hover effect */
     .dropdown-item.text-danger {
         color: red; /* Standaard rode tekstkleur */
@@ -269,4 +312,3 @@
     }
 </style>
 {% endblock %}
-
