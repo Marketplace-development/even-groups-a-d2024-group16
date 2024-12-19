@@ -79,6 +79,43 @@
         color: black;
     }
 
+    /* Lijst zonder bolletjes */
+    form ul {
+        list-style: none; /* Verwijdert de standaard bolletjes */
+        padding-left: 0; /* Verwijdert standaard inspringing */
+    }
+
+    /* Checkboxes oranje maken */
+    form input[type="checkbox"] {
+        appearance: none; /* Verwijdert standaard checkboxstijl */
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ff4500; /* Oranje rand */
+        border-radius: 4px; /* Maak de hoeken licht afgerond */
+        outline: none;
+        cursor: pointer;
+    }
+
+    /* Checkbox aangevinkt */
+    form input[type="checkbox"]:checked {
+        background-color: #ff4500; /* Oranje achtergrond */
+        border-color: #ff4500; /* Verandert randkleur naar oranje */
+        color: white;
+        position: relative; /* Relatieve positie voor het vinkje */
+    }
+
+    /* Pseudo-element voor vinkje */
+    form input[type="checkbox"]:checked::before {
+        content: '✓';
+        position: absolute;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        top: 50%; /* 50% vanaf de bovenkant */
+        left: 50%; /* 50% vanaf de linkerkant */
+        transform: translate(-50%, -50%); /* Centreert het vinkje */
+    }
+
     .form-control {
         border-radius: 8px;
     }
@@ -181,9 +218,9 @@
             {{ form.allergies(class="form-control", multiple="multiple") }}
         </div>
 
-        <!-- Favourite Ingredients -->
+        <!-- Favorite Ingredients -->
         <div>
-            <label for="favorite_ingredients">Favourite Ingredients</label>
+            <label for="favorite_ingredients">Favorite Ingredients</label>
             <div id="ingredients-list">
                 {% for ingredient in user.preferences.favorite_ingredients %}
                 <input type="text" name="favorite_ingredients" class="form-control mb-2" value="{{ ingredient }}">
@@ -192,9 +229,9 @@
             <button type="button" id="add-ingredient" class="btn btn-secondary mt-2">Add Ingredient</button>
         </div>
 
-        <!-- Favourite Origins -->
+        <!-- Favorite Origins -->
         <div>
-            <label for="favorite_origins">Favourite Origins</label>
+            <label for="favorite_origins">Favorite Origins</label>
             {{ form.favorite_origins(class="form-control", multiple="multiple") }}
         </div>
         {% endif %}
