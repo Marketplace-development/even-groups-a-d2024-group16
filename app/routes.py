@@ -774,6 +774,9 @@ def edit_recipe(recipename):
             db.session.rollback()
             flash(f"Error updating recipe: {e}", 'danger')
 
+    # Update form data for existing allergies
+    form.allergiesrec.data = recipe.allergiesrec.split(', ') if recipe.allergiesrec else []
+
     return render_template(
         'edit_recipe.html',
         form=form,
@@ -783,6 +786,7 @@ def edit_recipe(recipename):
         origins=origins,
         allergens=allergens
     )
+
 
 
 @main.route('/edit_profile', methods=['GET', 'POST'])
