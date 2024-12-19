@@ -115,14 +115,25 @@
 
         <!-- Allergies Multi-select -->
         <div class="mb-3">
-            <label for="allergies" class="form-label">Allergies</label>
-            <select name="allergiesrec[]" id="allergies" class="form-control" multiple>
+            <label for="allergiesrec" class="form-label">Select all allergies</label>
+            <div id="allergiesrec">
                 {% for allergen in allergens %}
-                    <option value="{{ allergen }}" {% if allergen in recipe.allergiesrec.split(', ') %}selected{% endif %}>
-                        {{ allergen }}
-                    </option>
+                    <div class="form-check">
+                        <input 
+                            type="checkbox" 
+                            name="allergiesrec[]" 
+                            id="allergen_{{ loop.index }}" 
+                            value="{{ allergen }}" 
+                            class="form-check-input"
+                            {% if form.allergiesrec.data and allergen in form.allergiesrec.data %}checked{% endif %}
+                        >
+                        <label for="allergen_{{ loop.index }}" class="form-check-label">
+                            {{ allergen }}
+                        </label>
+                    </div>
                 {% endfor %}
-            </select>
+            </div>
+            <small class="form-text text-muted">Select all applicable allergies.</small>
         </div>
 
         <!-- Preparation Instructions -->
