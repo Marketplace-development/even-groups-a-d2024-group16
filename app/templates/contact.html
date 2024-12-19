@@ -97,7 +97,7 @@
 
     <!-- Contact Details -->
     <div class="row mb-5">
-        <h2 class="text-center mb-4">Our contact details</h2>
+        <h2 class="text-center mb-4 section-title">Our contact details</h2>
         <p class="text-center">
             Do you have questions or comments? Please feel free to contact us!
             <br>
@@ -126,6 +126,11 @@
             margin-bottom: 15px;
             font-size: 16px;
         }
+
+        .form-control:focus {
+            border-color: #ff4500; /* Oranje rand bij focus */
+            box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+        }    
         
         .contact-container {
             background-color: rgba(255, 255, 255, 0.8); 
@@ -136,6 +141,51 @@
             margin: 5vh auto; 
             color: black; 
             font-family: 'Roboto', sans-serif;
+            border: 3px solid #ff4500; /* Oranje rand */
+        }
+
+        /* Oranje cursieve sectietitels */
+        .section-title {
+            font-family: 'Dancing Script', cursive;
+            color: #ff4500;
+            font-size: 2.5rem; /* Maak de tekst even groot als 'About Us' */
+        }
+
+        /* Standaardknoppenstijl */
+        .btn-primary {
+            color: black;
+            background-color: transparent;
+            border: 2px solid black;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover-effect voor knoppen */
+        .btn-primary:hover {
+            background-color: #ff4500; /* Oranje achtergrond */
+            color: white; /* Witte tekst */
+            border-color: black; /* Zwarte rand */
+        }
+
+        /* Positioneer de checkbox direct voor de tekst */
+        .form-check {
+            display: flex;
+            align-items: center; /* Zorg dat de checkbox en de tekst op één lijn staan */
+        }
+
+        /* Stijl voor de checkbox */
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #ff4500; /* Gebruik de accent-color voor de oranje stijl */
+            margin-right: 10px; /* Ruimte tussen de checkbox en de tekst */
+            cursor: pointer; /* Handcursor voor interactie */
+        }
+
+        /* Optioneel: voeg focus-stijl toe */
+        .form-check-input:focus {
+            outline: 2px solid #ff4500; /* Oranje focus-ring */
+            outline-offset: 2px;
         }
 
         /* Logout-knop hover effect */
@@ -154,77 +204,77 @@
     </style>
 
     <div class="contact-container">
-        <h2 class="text-center mb-4">Contact us</h2>
+        <h2 class="text-center mb-4 section-title">Contact us</h2>
         <form method="POST" action="{{ url_for('main.contact') }}">
             {{ form.hidden_tag() }}
-
+    
             <!-- Name -->
             <div>
                 <label for="name">Your Name</label>
                 {{ form.name(class="form-control", placeholder="Enter your name") }}
             </div>
-
+    
             <!-- Email -->
             <div>
                 <label for="email">Your Email</label>
                 {{ form.email(class="form-control", placeholder="Enter your email") }}
             </div>
-
+    
             <!-- Subject -->
             <div>
                 <label for="subject">Subject</label>
                 {{ form.subject(class="form-control", placeholder="Enter the subject") }}
             </div>
-
+    
             <!-- Message -->
             <div>
                 <label for="message">Your Message</label>
                 {{ form.message(class="form-control", rows=5, placeholder="Type your message here") }}
             </div>
-
+    
             <!-- Checkbox -->
             <div class="form-check mb-3">
-                {{ form.is_public(class="form-check-input") }}
-                {{ form.is_public.label(class="form-check-label") }}
+                <input type="checkbox" name="is_public" id="is_public" class="form-check-input">
+                <label for="is_public" class="form-check-label">Make this comment public</label>
             </div>
-
+    
             <!-- Submit Button -->
             <div>
-                <button type="submit" class="btn btn-secondary">Send Message</button>
+                <button type="submit" class="btn btn-primary">Send Message</button>
             </div>
         </form>
     </div>
 </div>
 
     <!-- FAQ Section -->
-<div class="row mb-5">
-    <h2 class="text-center mb-4">Frequently Asked Questions</h2>
-    <div class="col-md-8 offset-md-2">
-        <ul class="list-group">
-            <li class="list-group-item">
-                <strong>How can I add a recipe?</strong>
-                <p>Log in as a chef and click on "Add Recipe" in the menu.</p>
-            </li>
-            <li class="list-group-item">
-                <strong>How can I edit my profile?</strong>
-                <p>Go to "Edit Profile" in the menu to update your personal details.</p>
-            </li>
-            <li class="list-group-item">
-                <strong>How can I purchase a recipe?</strong>
-                <p>Log in as a customer, search for a recipe, and click on "Buy Now" to purchase it.</p>
-            </li>
-            <li class="list-group-item">
-                <strong>How can I contact support?</strong>
-                <p>Send us an email at <a href="mailto:dishcovery101@gmail.com">dishcovery101@gmail.com</a>.</p>
-            </li>
-        </ul>
+    <div class="row mb-5">
+        <h2 class="text-center mb-4 section-title">Frequently Asked Questions</h2>
+        <div class="col-md-8 offset-md-2">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>How can I add a recipe?</strong>
+                    <p>Log in as a chef and click on "Add Recipe" in the menu.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>How can I edit my profile?</strong>
+                    <p>Go to "Edit Profile" in the menu to update your personal details.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>How can I purchase a recipe?</strong>
+                    <p>Log in as a customer, search for a recipe, and click on "Buy Now" to purchase it.</p>
+                </li>
+                <li class="list-group-item">
+                    <strong>How can I contact support?</strong>
+                    <p>Send us an email at <a href="mailto:dishcovery101@gmail.com">dishcovery101@gmail.com</a>.</p>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
 
 
 <!-- Public Comments Section -->
 <div class="row mb-5">
-    <h2 class="text-center mb-4">Public Comments</h2>
+    <h2 class="text-center mb-4 section-title">Public Comments</h2>
     <div class="col-md-8 offset-md-2">
         {% if public_comments %}
             <ul class="comments-container">
