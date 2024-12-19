@@ -574,6 +574,14 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / total_chef_reviews, 1) if total_chef_reviews > 0 else 0
     )
 
+    ingredients_list = [
+        {
+            "ingredient": ingredient,
+            "quantity": details.get("quantity", ""),
+            "unit": details.get("unit", "")
+        }
+        for ingredient, details in (recipe.ingredients or {}).items()
+    ]
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
