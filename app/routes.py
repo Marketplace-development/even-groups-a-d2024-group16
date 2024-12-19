@@ -125,6 +125,10 @@ def login():
     
 @main.route('/dashboard')
 def dashboard():
+    # Haal lijst van aangekochte recepten op
+    purchased_recipes = Transaction.query.filter_by(consumer_email=session['email']).all()
+    purchased_recipenames = {t.recipename for t in purchased_recipes}
+
     if 'email' not in session:
         flash('You need to log in first.', 'danger')
         return redirect(url_for('main.login'))
@@ -221,9 +225,7 @@ def dashboard():
             'is_liked': is_liked  # Include the accurate liked state
         })
 
-        # Haal lijst van aangekochte recepten op
-        purchased_recipes = Transaction.query.filter_by(consumer_email=session['email']).all()
-        purchased_recipenames = {t.recipename for t in purchased_recipes}
+        
 
     # Render de template met de nodige gegevens
     return render_template(
