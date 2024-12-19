@@ -3,38 +3,146 @@
 <head>
     <title>{{ recipe.recipename }}</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        h1 { color: #ff5733; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table, th, td { border: 1px solid #ddd; }
-        th, td { padding: 10px; text-align: left; }
-        ol { margin-top: 20px; }
+        /* Algemene styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff5733;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #ff5733;
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        .recipe-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .recipe-info p {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f7f7f7;
+        }
+
+        ol {
+            margin-top: 20px;
+            padding-left: 20px;
+            list-style-position: inside;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        ol li {
+            margin-bottom: 10px;
+        }
+
+        .warning {
+            text-align: center;
+            font-size: 0.9rem;
+            color: red;
+            font-weight: bold;
+            margin-top: 30px;
+            border-top: 1px dashed red;
+            padding-top: 10px;
+        }
+
+        .footer-logo {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer-logo img {
+            width: 100px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
-    <h1>{{ recipe.recipename }}</h1>
-    <p><strong>Chef:</strong> {{ recipe.chef_name }}</p>
-    <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+    <div class="container">
+        <h1>{{ recipe.recipename }}</h1>
 
-    <h2>Ingredients</h2>
-    <table>
-        <tr>
-            <th>Ingredient</th>
-            <th>Quantity & Unit</th>
-        </tr>
-        {% for ingredient, details in ingredients_list %}
-        <tr>
-            <td>{{ ingredient }}</td>
-            <td>{{ details.quantity }} {{ details.unit }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+        <div class="recipe-info">
+            <p><strong>Chef:</strong> {{ recipe.chef_name }}</p>
+            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+        </div>
 
-    <h2>Preparation Steps</h2>
-    <ol>
-        {% for step in preparation_steps %}
-        <li>{{ step }}</li>
-        {% endfor %}
-    </ol>
+       
+        <h2>Ingredients</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Quantity & Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient, details in ingredients_list %}
+                <tr>
+                    <td>{{ ingredient }}</td>
+                    <td>{{ details.quantity }} {{ details.unit }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Preparation Steps</h2>
+        <ol>
+            {% for step in preparation_steps %}
+            <li>{{ step }}</li>
+            {% endfor %}
+        </ol>
+
+        <div class="warning">
+            This recipe is copyrighted by Dishcovery. Forwarding or reselling this content is strictly prohibited.
+        </div>
+
+        <div class="footer-logo">
+            <img src="{{ url_for('static', filename='images/Dishcovery-logo-oranje.png') }}" alt="Dishcovery Logo">
+        </div>
+    </div>
 </body>
 </html>

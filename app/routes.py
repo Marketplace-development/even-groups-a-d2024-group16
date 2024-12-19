@@ -20,6 +20,11 @@ from flask_wtf.file import FileAllowed
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import io
+from reportlab.lib.colors import Color
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+
+
 
 
 main = Blueprint('main', __name__)
@@ -1134,80 +1139,97 @@ def edit_chef_profile():
         total_recipes_sold=total_recipes_sold
     )
 
-@main.route('/chef_recipes/<chef_email>', methods=['GET'])
-def chef_recipes(chef_email):
-    # Fetch chef details
-    chef = User.query.filter_by(email=chef_email).first()
-    if not chef:
-        flash('Chef not found.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    # Fetch recipes by this chef
-    chef_recipes = Recipe.query.filter_by(chef_email=chef_email).all()
-
-    # Calculate average rating for each recipe
-    for recipe in chef_recipes:
-        avg_rating = (
-            db.session.query(func.avg(Review.rating))
-            .filter(Review.recipename == recipe.recipename)
-            .scalar()
-        )
-        recipe.avg_rating = round(avg_rating, 1) if avg_rating else 0
-
-    # Calculate overall chef rating (optional, if you still need it)
-    chef_avg_rating = (
-        db.session.query(func.avg(Review.rating))
-        .filter(Review.chef_email == chef_email)
-        .scalar()
-    )
-    chef_avg_rating = round(chef_avg_rating, 1) if chef_avg_rating else 0
-
-    return render_template(
-        'chef_recipes.html',
-        chef=chef,
-        chef_recipes=chef_recipes,  # Pass recipes with avg_rating
-        chef_avg_rating=chef_avg_rating  # Pass as 'chef_avg_rating' for the template
-    )
 
 @main.route('/download_recipe/<recipename>', methods=['GET'])
 def download_recipe(recipename):
-    # Fetch recipe details
+    # Haal het recept op uit de database
     recipe = Recipe.query.filter_by(recipename=recipename).first()
     if not recipe:
         flash('Recipe not found', 'danger')
         return redirect(url_for('main.dashboard'))
-    # Create PDF in memory
+
+    # Pad naar de static map
+    static_path = os.path.join(os.getcwd(), "app/static/images/")
+    watermark_logo_path = os.path.join(static_path, "Dishcovery-logo-oranje.png")
+
+    # Debugging
+    print(f"Watermark path: {watermark_logo_path}")
+
+    # Maak een PDF in geheugen
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
 
-    # Add content to the PDF
+    # Voeg watermerk toe
+    watermark_image = ImageReader(watermark_logo_path)
+    p.saveState()
+    p.setFillAlpha(0.03)  # Licht doorzichtig watermerk
+    p.drawImage(watermark_image, width / 4, height / 3, width=300, height=150, mask='auto')
+    p.restoreState()
+
+    # Header
     p.setFont("Helvetica-Bold", 16)
-    p.drawString(100, height - 50, f"Recipe: {recipe.recipename}")
+    p.setFillColorRGB(1, 0.345, 0.2)  # Oranje kleur
+    p.drawString(50, height - 50, f"Recipe: {recipe.recipename}")
 
+    # Recipe Info
     p.setFont("Helvetica", 12)
-    p.drawString(100, height - 80, f"Chef: {recipe.chef_name}")
-    p.drawString(100, height - 100, f"Cooking Time: {recipe.duration} minutes")
+    p.setFillColorRGB(0, 0, 0)  # Zwarte tekst
+    p.drawString(50, height - 80, f"Chef: {recipe.chef_name}")
+    p.drawString(50, height - 100, f"Cooking Time: {recipe.duration} minutes")
 
-    # Add ingredients
+    # Ingredients Section
     y = height - 150
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y, "Ingredients:")
+    p.drawString(50, y, "Ingredients:")
+    y -= 20
     p.setFont("Helvetica", 10)
-    for ingredient in recipe.ingredients.items():
+    for ingredient, details in recipe.ingredients.items():
+        if y < 100:  # Controleer ruimte voor footer
+            p.showPage()
+            y = height - 50
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Ingredients (continued):")
+            y -= 20
+            p.setFont("Helvetica", 10)
+        p.drawString(70, y, f"{ingredient}: {details['quantity']} {details['unit']}")
         y -= 20
-        p.drawString(120, y, f"{ingredient[0]}: {ingredient[1]['quantity']} {ingredient[1]['unit']}")
 
-    # Add preparation steps
-    y -= 40
+    # Preparation Steps Section
+    if y < 120:  # Controleer ruimte voor sectiekop
+        p.showPage()
+        y = height - 50
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, y, "Preparation Steps:")
+    p.drawString(50, y, "Preparation Steps:")
+    y -= 20
     p.setFont("Helvetica", 10)
-    for i, step in enumerate(recipe.preparation.split('|')):
-        y -= 20
-        p.drawString(120, y, f"{i+1}. {step.strip()}")
 
-    # Finalize the PDF
+    max_line_length = 80  # Maximaal aantal tekens per regel
+    for i, step in enumerate(recipe.preparation.split('|')):
+        # Lange stappen splitsen
+        step_lines = [step[j:j+max_line_length] for j in range(0, len(step), max_line_length)]
+        for line in step_lines:
+            if y < 100:  # Controleer ruimte voor footer
+                p.showPage()
+                y = height - 50
+                p.setFont("Helvetica-Bold", 12)
+                p.drawString(50, y, "Preparation Steps (continued):")
+                y -= 20
+                p.setFont("Helvetica", 10)
+            p.drawString(70, y, f"{i+1}. {line.strip()}" if line == step_lines[0] else f"   {line.strip()}")
+            y -= 20
+
+    # Footer Sectie
+    footer_y = 50  # Footer hoogte
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColorRGB(0, 0, 0)  # Zwarte kleur
+    p.drawCentredString(width / 2, footer_y, "This recipe is copyrighted by Dishcovery. Forwarding or reselling is strictly prohibited.")
+
+    # Voeg footer-logo toe
+    footer_logo = ImageReader(watermark_logo_path)
+    p.drawImage(footer_logo, width / 2 - 50, footer_y + 10, width=100, height=50, mask='auto')
+
+    # Finaliseer de PDF
     p.showPage()
     p.save()
 
