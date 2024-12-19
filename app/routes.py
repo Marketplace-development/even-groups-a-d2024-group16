@@ -556,98 +556,74 @@ def buy_recipe(recipename):
         round(sum(review.rating for review in chef_reviews) / len(chef_reviews), 1) if chef_reviews else None
     )
 
-    # Calculate recipe's average rating
-    recipe_reviews = Review.query.filter_by(recipename=recipename).all()
+    # Fetch reviews for the recipe
+    reviews = Review.query.filter_by(recipename=recipename).all()
+    total_reviews = len(reviews)
+
+    # Safely calculate recipe's average rating
     recipe_avg_rating = (
-        round(sum(review.rating for review in recipe_reviews) / len(recipe_reviews), 1) if recipe_reviews else None
+        round(sum(review.rating for review in reviews) / total_reviews, 1) if total_reviews > 0 else 0
     )
+
+    # Calculate star distribution
+    star_distribution = {i: 0 for i in range(1, 6)}
+    for review in reviews:
+        star_distribution[review.rating] += 1
+
+    # Safely calculate star percentages
+    star_percentages = {
+        star: (count / total_reviews * 100) if total_reviews > 0 else 0
+        for star, count in star_distribution.items()
+    }
 
     # Calculate total recipes sold by the chef
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
-    # Ingrediënten als JSON voorbereiden
-    ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
+    # Prepare ingredients as JSON
+    ingredients_list = [
+        {
+            "ingredient": ingredient,
+            "quantity": details.get("quantity", ""),
+            "unit": details.get("unit", "")
+        }
+        for ingredient, details in (recipe.ingredients or {}).items()
+    ]
 
-    # Gerelateerde recepten ophalen
+    # Related recipes logic
     related_recipes = Recipe.query.filter(
-        (Recipe.origin == recipe.origin) | 
-        (Recipe.ingredients.contains(ingredients_to_match))
+        (Recipe.origin == recipe.origin) |
+        (Recipe.ingredients.contains(list(recipe.ingredients.keys())))
     ).filter(Recipe.recipename != recipename).limit(4).all()
-
-    # Check if user is logged in
-    if 'email' not in session:
-        flash('You need to be logged in to buy a recipe.', 'danger')
-        return redirect(url_for('main.login'))
-
-    # Process ingredients
-    ingredients_list = []
-    if recipe.ingredients:
-        try:
-            for ingredient, details in recipe.ingredients.items():
-                ingredients_list.append({
-                    'quantity': details['quantity'],
-                    'unit': details.get('unit', ''),
-                    'ingredient': ingredient
-                })
-        except KeyError:
-            ingredients_list = ["Invalid ingredient format"]
-
-    # Fetch reviews for the recipe
-    reviews = Review.query.filter_by(recipename=recipename, chef_email=recipe.chef_email).all()
 
     # Handle POST request for purchase
     if request.method == 'POST':
         user_email = session['email']
-        chef_email = recipe.chef_email
-
-        # Check if the recipe is in the user's favorites
-        user = User.query.filter_by(email=user_email).first()  # Haal de gebruiker op
-        if user and user.favorites:
-            user.favorites = [
-                fav for fav in user.favorites
-                if not (fav['recipename'] == recipename and fav['chef_email'] == chef_email)
-            ]
-            db.session.commit()  # Update de database
-
-        existing_transaction = Transaction.query.filter_by(
-            consumer_email=user_email,
-            recipename=recipename
-        ).first()
-
-        if existing_transaction:
-            flash('You have already purchased this recipe.', 'warning')
-            return redirect(url_for('main.dashboard'))
-
-        # Create the transaction
         transaction = Transaction(
             transactiondate=datetime.now(),
             price=recipe.price,
             consumer_email=user_email,
-            chef_email=chef_email,
+            chef_email=recipe.chef_email,
             recipename=recipename
         )
         db.session.add(transaction)
         db.session.commit()
-
-        # Check if chef should be notified
-        check_and_notify_chef(chef_email, recipename)
-
         flash('Recipe purchased successfully!', 'success')
         return redirect(url_for('main.my_recipes'))
 
-    # Render the template for GET requests
     return render_template(
         'buy_recipe.html',
         recipe=recipe,
-        chef=chef,  # Pass the chef object to the template
-        chef_avg_rating=chef_avg_rating,  # Pass the average rating to the template
-        total_recipes_sold=total_recipes_sold,  # Pass the total recipes sold
-        ingredients_list=ingredients_list,
+        chef=chef,
         reviews=reviews,
+        recipe_avg_rating=recipe_avg_rating,
+        total_reviews=total_reviews,
+        star_distribution=star_distribution,
+        star_percentages=star_percentages,
+        ingredients_list=ingredients_list,
         related_recipes=related_recipes,
-        recipe_avg_rating=recipe_avg_rating  # Pass the recipe's average rating to the template
+        total_recipes_sold=total_recipes_sold,
+        chef_avg_rating=chef_avg_rating
     )
-
 
 
 @main.route('/add_review/<recipename>', methods=['GET', 'POST'])
