@@ -578,20 +578,16 @@ def buy_recipe(recipename):
     total_recipes_sold = Transaction.query.filter_by(chef_email=chef.email).count()
 
     # Prepare ingredients as JSON
-    ingredients_list = [
-        {
-            "ingredient": ingredient,
-            "quantity": details.get("quantity", ""),
-            "unit": details.get("unit", "")
-        }
-        for ingredient, details in (recipe.ingredients or {}).items()
-    ]
+    ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
 
-    # Related recipes logic
+
+    # Zoek gerelateerde recepten op basis van een combinatie van ingrediënten, categorie, en origine
     related_recipes = Recipe.query.filter(
-        (Recipe.origin == recipe.origin) |
-        (Recipe.ingredients.contains(list(recipe.ingredients.keys())))
+        (Recipe.ingredients.contains(ingredients_to_match)) |  # Ingrediënten overlappen
+        (Recipe.category == recipe.category) |                # Zelfde categorie
+        (Recipe.origin == recipe.origin)                      # Zelfde origine
     ).filter(Recipe.recipename != recipename).limit(4).all()
+
 
     # Handle POST request for purchase
     if request.method == 'POST':
@@ -617,7 +613,7 @@ def buy_recipe(recipename):
         total_reviews=total_reviews,
         star_distribution=star_distribution,
         star_percentages=star_percentages,
-        ingredients_list=ingredients_list,
+        ingredients_to_match=ingredients_to_match,
         related_recipes=related_recipes,
         total_recipes_sold=total_recipes_sold,
         chef_avg_rating=chef_avg_rating
@@ -875,12 +871,14 @@ def recipe_reviews(recipename):
     # Ingrediënten als JSON voorbereiden
     ingredients_to_match = [{'ingredient': ing} for ing in recipe.ingredients.keys()]
 
-    # Gerelateerde recepten ophalen
+    # Zoek gerelateerde recepten op basis van een combinatie van ingrediënten, categorie, en origine
     related_recipes = Recipe.query.filter(
-        (Recipe.origin == recipe.origin) | 
-        (Recipe.ingredients.contains(ingredients_to_match))
+        (Recipe.ingredients.contains(ingredients_to_match)) |  # Ingrediënten overlappen
+        (Recipe.category == recipe.category) |                # Zelfde categorie
+        (Recipe.origin == recipe.origin)                      # Zelfde origine
     ).filter(Recipe.recipename != recipename).limit(4).all()
 
+    
     # Process ingredients
     ingredients_list = []
     if recipe.ingredients:
