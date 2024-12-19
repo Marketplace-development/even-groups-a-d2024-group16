@@ -199,7 +199,7 @@
                         <strong>Total Recipes Sold:</strong>
                         <p>{{ total_recipes_sold }}</p>
                     </div>
-                    <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-info">View More Recipes by {{ recipe.chef_name }}</a>
+                    <a href="{{ url_for('main.chef_recipes', chef_email=recipe.chef_email) }}" class="btn btn-primary">View More Recipes by {{ recipe.chef_name }}</a>
                 </div>
             </div>
         </div>
@@ -235,5 +235,20 @@
         color: red; /* Rode tekst bij hover */
         border-radius: 25px; /* Houd de afgeronde vorm */
     }
+    .btn-custom {
+        padding: 12px 20px;
+        background-color: #1e90ff; /* Pas aan naar gewenste kleur */
+        color: white;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .btn-custom:hover {
+        background-color: #4682b4; /* Hover kleur */
+    }    
 </style>
 {% endblock %}

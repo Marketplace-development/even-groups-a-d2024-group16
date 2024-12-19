@@ -65,70 +65,70 @@
 
 <div class="container mt-5">
     <h1 class="text-center">{{ recipe.recipename }}</h1>
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <!-- Recipe Image -->
-            {% if recipe.image %}
-                <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
-            {% else %}
-                <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
-            {% endif %}
-        </div>
-        <div class="col-md-6">
-            <h5><strong>Chef:</strong> {{ recipe.chef_name }}</h5> <!-- Alleen chef_name wordt weergegeven -->
-            <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
-
-            <!-- Aantal personen invoer -->
-            <div class="mb-3">
-                <label for="numPersons" class="form-label"><strong>Number of persons:</strong></label>
-                <input type="number" id="numPersons" class="form-control" value="4" min="1" max="20" onchange="updateQuantities()">
+    <div class="row mt-5">
+        <!-- Linkerkolom: afbeelding en ingrediënten -->
+        <div class="col-md-8">
+            <div>
+                {% if recipe.image %}
+                    <img src="{{ url_for('static', filename=recipe.image) }}" class="img-fluid" alt="{{ recipe.recipename }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default.jpg') }}" class="img-fluid" alt="Default Image">
+                {% endif %}
             </div>
 
-            <!-- Ingredients Table -->
-            <h5><strong>Ingredients:</strong></h5>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Ingredient</th>
-                        <th>Quantity & Unit</th>
-                    </tr>
-                </thead>
-                <tbody id="ingredientsTableBody">
-                    {% for ingredient in ingredients_list %}
-                        <tr>
-                            <td>{{ ingredient.ingredient }}</td>
-                            <td data-quantity="{{ ingredient.quantity }}" data-unit="{{ ingredient.unit }}">
-                                {{ ingredient.quantity }} {{ ingredient.unit }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="mt-3">
+                <h5><strong>Chef:</strong> {{ recipe.chef_name }}</h5>
+                <p><strong>Cooking Time:</strong> {{ recipe.duration }} minutes</p>
+                <div class="mb-3">
+                    <label for="numPersons" class="form-label"><strong>Number of persons:</strong></label>
+                    <input type="number" id="numPersons" class="form-control" value="4" min="1" max="20" onchange="updateQuantities()">
+                </div>
+            </div>
 
-            <!-- Removed Price and Description fields as per request -->
+            <div class="table-container">
+                <h5><strong>Ingredients:</strong></h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Quantity & Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredientsTableBody">
+                        {% for ingredient in ingredients_list %}
+                            <tr>
+                                <td>{{ ingredient.ingredient }}</td>
+                                <td data-quantity="{{ ingredient.quantity }}" data-unit="{{ ingredient.unit }}">
+                                    {{ ingredient.quantity }} {{ ingredient.unit }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <p><strong>Allergies:</strong> {{ recipe.allergiesrec }}</p>
         </div>
-    </div>
 
-    <!-- Preparation Steps - Numbered list -->
-    <div class="mt-4">
-        <h5><strong>Preparation Steps:</strong></h5>
-        <div class="steps-container">
-            {% if recipe.preparation %}
-                {% set steps = recipe.preparation.split('|') %}
-                {% for step in steps %}
-                    <div class="step d-flex align-items-start mb-3">
-                        <div class="step-number d-flex justify-content-center align-items-center">
-                            <span>{{ loop.index }}</span>
+        <!-- Rechterkolom: preparation steps -->
+        <div class="col-md-4">
+            <div class="steps-container">
+                <h5><strong>Preparation Steps:</strong></h5>
+                {% if recipe.preparation %}
+                    {% set steps = recipe.preparation.split('|') %}
+                    {% for step in steps %}
+                        <div class="step d-flex align-items-start mb-3">
+                            <div class="step-number d-flex justify-content-center align-items-center">
+                                <span>{{ loop.index }}</span>
+                            </div>
+                            <div class="step-text ms-3">
+                                <p class="mb-0">{{ step.strip() }}</p>
+                            </div>
                         </div>
-                        <div class="step-text ms-3">
-                            <p class="mb-0">{{ step.strip() }}</p>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No preparation steps available.</p>
-            {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p>No preparation steps available.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -142,72 +142,73 @@
 
     <style>
         /* Preparation Steps Styling */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        /* Linkerkolom voor afbeelding en ingrediënten */
+        .col-md-8 {
+            flex: 2; /* Neemt 2/3 van de ruimte in */
+            max-width: 66.66%;
+        }
+        
+        /* Rechterkolom voor preparation steps */
+        .col-md-4 {
+            flex: 1; /* Neemt 1/3 van de ruimte in */
+            max-width: 33.33%;
+            background-color: #f9f9f9; /* Optionele achtergrondkleur */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtiele schaduw */
+        }
+        
+        /* Zorg dat de afbeelding netjes wordt weergegeven */
+        .col-md-8 img {
+            display: block;
+            margin: auto;
+            max-width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Preparation Steps Styling */
         .steps-container {
             display: flex;
             flex-direction: column;
         }
-
-        .step {
-            display: flex;
-            align-items: flex-start;
-        }
-
+        
         .step-number {
-            width: 30px;
-            height: 30px;
-            background-color: #ffebe6;
-            color: #ff5733;
-            border-radius: 50%;
-            font-weight: bold;
-            font-size: 18px;
-            text-align: center;
-            flex-shrink: 0;
+            width: 40px; /* Zorg voor een vaste breedte */
+            height: 40px; /* Zorg dat de hoogte gelijk is aan de breedte */
+            background-color: #ffebe6; /* Achtergrondkleur */
+            color: #ff5733; /* Tekstkleur */
+            border-radius: 50%; /* Maak het volledig rond */
+            font-weight: bold; /* Maak de tekst vetgedrukt */
+            font-size: 18px; /* Grootte van het nummer */
+            display: flex; /* Gebruik flexbox om de inhoud te centreren */
+            justify-content: center; /* Horizontaal centreren */
+            align-items: center; /* Verticaal centreren */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtiele schaduw */
+            flex-shrink: 0; /* Zorg ervoor dat de grootte niet wordt aangepast */
         }
-
-        .step-number span {
-            line-height: 30px;
-        }
-
-        .step-text p {
+        
+        /* Zorg dat de tekst consistent is naast de bolletjes */
+        .step-text {
+            margin-left: 15px;
             font-size: 16px;
             line-height: 1.5;
-            color: #333;
+            color: #333; /* Neutrale tekstkleur */
         }
-
-        /* Stijl voor de 'Back to My Recipes'-knop */
-        .btn-primary {
-            color: black; /* Standaard tekstkleur */
-            background-color: transparent; 
-            border: 2px solid black; /* Zwarte rand */
-            transition: all 0.3s ease; /* Gladde overgang */
-        }
-
-        .btn-primary:hover {
-            background-color: #ff5733; /* Oranje achtergrondkleur bij hover */
-            color: white; /* Witte tekst bij hover */
-            border: 1px solid black; /* Zwarte rand bij hover */
-        }
-
-        /* Titel styling */
-        h1.text-center {
-            font-size: 3rem; /* Verhoog de tekstgrootte */
-            font-weight: bold; /* Maak de tekst vetgedrukt */
-            text-align: center; /* Zorg dat de titel gecentreerd blijft */
-            margin-bottom: 20px; /* Optioneel: ruimte onder de titel */
-        }
-
-        /* Logout-knop hover effect */
-        .dropdown-item.text-danger {
-            color: red; /* Standaard rode tekstkleur */
-            background-color: transparent; /* Geen achtergrond standaard */
-            border-radius: 25px; /* Maak de knop consistent afgerond */
-            transition: all 0.3s ease, color 0.3s ease; /* Soepele overgang */
-        }
-
-        .dropdown-item.text-danger:hover {
-            background-color: black; /* Zwart bij hover */
-            color: red; /* Rode tekst bij hover */
-            border-radius: 25px; /* Houd de afgeronde vorm */
+        
+        /* Zorg voor een consistente ruimte tussen stappen */
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px; /* Ruimte tussen stappen */
         }
     </style>
 
