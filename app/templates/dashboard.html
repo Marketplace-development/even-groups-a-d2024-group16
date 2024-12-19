@@ -64,9 +64,9 @@
 
 
         
-<div class="container mt-5 pt-4 welcome-content">
+<div class="container mt-1 pt-4 welcome-content">
     <h1 class="text-center">Welcome to Dishcovery!</h1>
-    <p class="text-center">Explore recipes from amazing chefs and discover new flavours today.</p>
+    <p class="text-center">This is your Dashboard. Explore recipes from amazing chefs and discover new flavours today!</p>
 
     <!-- Sort Options -->
     <form method="GET" action="{{ url_for('main.dashboard') }}" class="mb-4">
@@ -127,6 +127,23 @@
     </div>
 
     <style>
+        .welcome-content h1 {
+            font-size: 5rem; /* Maak de tekst groter */
+            margin-top: 0.5rem; /* Zorg ervoor dat er minder ruimte is boven de tekst */
+        }
+
+        .form-control {
+            border: 1px solid #000; /* Dunne zwarte rand */
+            border-radius: 5px; /* Kleine afronding voor een nette look */
+            box-shadow: none; /* Verwijdert eventuele standaard schaduw */
+            transition: border-color 0.3s ease-in-out; /* Soepele overgang bij hover/focus */
+        }
+        
+        .form-control:focus {
+            border-color: black; /* Oranje rand bij focus */
+            box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+        }
+
         .btn-danger{
             margin: 0.25rem; 
             padding: 0.5rem 1rem; 
@@ -136,6 +153,18 @@
             color: red;
             border-radius: 20px; 
             transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ff4500; /* Oranje achtergrondkleur */
+            color: white; /* Witte tekstkleur */
+            border-color: black; /* Oranje randkleur */
+        }
+
+        .filters-container h5 {
+            font-family: 'Dancing Script', cursive; /* Cursief lettertype */
+            color: #ff4500; /* Oranje kleur */
+            font-size: 2.5rem; /* Vergroot de tekst */
         }
 
         /* Logout-knop hover effect */
@@ -156,7 +185,7 @@
 
     <div class="row">
         <!-- Filters Sidebar -->
-        <div class="col-md-3 bg-light p-4 shadow-sm rounded">
+        <div class="col-md-3 bg-light p-4 shadow-sm rounded filters-container">
             <h5 class="mb-3">Filters</h5>
             <form method="GET" action="{{ url_for('main.dashboard') }}">
                 <div class="mb-3">

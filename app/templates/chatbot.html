@@ -73,6 +73,37 @@
         font-family: 'Roboto', sans-serif; 
     }
 
+    /* Titelstijl voor de chatbox */
+    .title-chatbot {
+        color: #ff4500; /* Oranje kleur */
+        font-family: 'Dancing Script', cursive; /* Cursief lettertype */
+        font-size: 3rem; /* Maak de tekst groter */
+    }
+
+    .form-control {
+        border: 1px solid #000; /* Dunne zwarte rand */
+        border-radius: 5px; /* Kleine afronding voor een nette look */
+        box-shadow: none; /* Verwijdert eventuele standaard schaduw */
+        transition: border-color 0.3s ease-in-out; /* Soepele overgang bij hover/focus */
+    }
+    
+    .form-control:focus {
+        border-color: black; /* Oranje rand bij focus */
+        box-shadow: 0 0 5px rgba(255, 69, 0, 0.5); /* Subtiele schaduw bij focus */
+    }
+
+    /* Hover-effect voor de Send-knop */
+    #send-btn {
+        border: 2px solid black; /* Zwarte rand */
+        transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Soepel hover-effect */
+    }
+
+    #send-btn:hover {
+        background-color: #ff4500; /* Oranje achtergrond bij hover */
+        color: white; /* Witte tekst bij hover */
+        border-color: black; /* Zwarte rand blijft */
+    }
+
     /* Logout-knop hover effect */
     .dropdown-item.text-danger {
         color: red; /* Standaard rode tekstkleur */
@@ -89,10 +120,16 @@
 </style>
 
 <div class="container mt-5">
-    <h1 class="page-title">Dishcovery Chatbot</h1>
-    <div class="chatbox mt-4">
-        <div id="chat-messages" class="chat-messages border rounded p-3 mb-3" 
-        style="height: 300px; overflow-y: scroll; background-color: rgba(255, 255, 255, 0.7);">
+    <div class="chatbox mt-4 border rounded p-3" 
+        style="background-color: rgba(255, 255, 255, 0.8);">
+        
+        <!-- Titel in de chatkader -->
+        <h1 class="text-center p-2 title-chatbot" style="border-radius: 5px;">
+            Dishcovery Chatbot
+        </h1>
+        
+        <div id="chat-messages" class="chat-messages border rounded p-3 mb-3 mt-3" 
+            style="height: 300px; overflow-y: scroll; background-color: rgba(255, 255, 255, 0.7);">
             <!-- Berichten verschijnen hier -->
         </div>
         <div class="input-group">
