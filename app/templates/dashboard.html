@@ -162,7 +162,7 @@
                 <div class="mb-3">
                     <label for="ingredient-input" class="form-label">Search by Ingredients</label>
                     <div id="ingredient-container">
-                        <input type="text" class="form-control mb-2 ingredient-input" id="ingredient-input" placeholder="Enter ingredient and press Enter">
+                        <input type="text" class="form-control mb-2 ingredient-input" id="ingredient-input" placeholder="Press Enter to add">
                     </div>
                     <ul id="ingredient-list" class="list-group mt-2">
                         {% for ingredient in request.args.get('ingredients', '[]') | fromjson %}
@@ -603,6 +603,7 @@
     });
 </script>
 <style>
+
     #price_slider {
         margin: 10px 0;
         height: 6px;
@@ -649,6 +650,8 @@
     .ingredient-list-item button {
         margin-left: 10px;
     }
+
+    
 </style>
 
 
