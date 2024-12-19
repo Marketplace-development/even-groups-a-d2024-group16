@@ -83,21 +83,6 @@
                 <p><strong>Category:</strong> {{ recipe.category }}</p>
                 <p><strong>Origin:</strong> {{ recipe.origin }}</p>
                 <p><strong>Description:</strong> {{ recipe.description }}</p>
-                <p>
-                    <strong>Average Rating:</strong> 
-                    <div>
-                        {% for star in range(1, 6) %}
-                            {% if star <= (avg_rating or 0) %}
-                                <i class="fas fa-star text-warning"></i>
-                            {% elif star - 0.5 <= (avg_rating or 0) %}
-                                <i class="fas fa-star-half-alt text-warning"></i>
-                            {% else %}
-                                <i class="far fa-star text-warning"></i>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <small class="text-muted">({{ avg_rating or 'No ratings yet' }})</small>
-                </p>
 
 
                 <h5><strong>Ingredients:</strong></h5>
@@ -126,17 +111,18 @@
             <div class="reviews mt-5">
                 <h3>Reviews</h3>
                 <div class="review-summary text-center mb-4">
-                    <h4>{{ recipe_avg_rating or 0 }} / 5</h4>
+                    <h4>{{ avg_rating or 0 }} / 5</h4>
                     <div>
                         {% for star in range(1, 6) %}
-                            {% if star <= (recipe_avg_rating or 0) %}
+                            {% if star <= (avg_rating or 0) %}
                                 <i class="fas fa-star text-warning"></i>
+                            {% elif star - 0.5 <= (avg_rating or 0) %}
+                                <i class="fas fa-star-half-alt text-warning"></i>
                             {% else %}
                                 <i class="far fa-star text-warning"></i>
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <p class="text-muted">Based on {{ total_reviews }} reviews</p>
                 </div>
         
                 <!-- Star Filter Section -->
