@@ -2,7 +2,7 @@ from app.models import Recipe
 
 import nltk
 from nltk.stem import PorterStemmer
-from app.models import Recipe
+from app.models import Recipe, User
 from sqlalchemy import func, cast, String
 
 # Zorg ervoor dat NLTK de benodigde data downloadt
@@ -28,6 +28,8 @@ def apply_search(query, search_term):
         # Stem de zoekterm naar de basisvorm
         stemmed_term = stemmer.stem(search_term)
 
+        query = query.join(User, User.email == Recipe.chef_email)
+
         query = query.filter(
             func.lower(Recipe.recipename).like(f"%{search_term}%") |
             func.lower(Recipe.recipename).like(f"%{stemmed_term}%") |
@@ -38,7 +40,9 @@ def apply_search(query, search_term):
             func.lower(Recipe.category).like(f"%{search_term}%") |
             func.lower(Recipe.category).like(f"%{stemmed_term}%") |
             func.lower(Recipe.origin).like(f"%{search_term}%") |
-            func.lower(Recipe.origin).like(f"%{stemmed_term}%")
+            func.lower(Recipe.origin).like(f"%{stemmed_term}%") |
+            func.lower(User.name).like(f"%{search_term}%") |  # Zoek op chef's naam
+            func.lower(User.name).like(f"%{stemmed_term}%")   # Gestemde vorm van de naam
         )
     return query
 
