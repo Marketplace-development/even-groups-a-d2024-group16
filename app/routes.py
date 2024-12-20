@@ -1030,25 +1030,38 @@ def wishlist():
         return redirect(url_for('main.dashboard'))
 
     user = User.query.filter_by(email=session['email']).first()
-   
+
+    # Haal alle gekochte recepten van de gebruiker op
+    purchased_recipenames = {
+        transaction.recipename for transaction in Transaction.query.filter_by(consumer_email=session['email']).all()
+    }
+
     favorite_recipes = []
     if user and user.favorites:
+        updated_favorites = []
         for fav in user.favorites:
             recipe = Recipe.query.filter_by(recipename=fav['recipename'], chef_email=fav['chef_email']).first()
             if recipe:
-                avg_rating = (
-                    db.session.query(func.avg(Review.rating))
-                    .filter(Review.recipename == recipe.recipename)
-                    .scalar()
-                )
-                favorite_recipes.append({
-                    "recipe": recipe,
-                    "avg_rating": round(avg_rating, 1) if avg_rating else None,
-                    "is_liked": True
-                })
+                # Controleer of het recept is gekocht
+                if recipe.recipename not in purchased_recipenames:
+                    avg_rating = (
+                        db.session.query(func.avg(Review.rating))
+                        .filter(Review.recipename == recipe.recipename)
+                        .scalar()
+                    )
+                    favorite_recipes.append({
+                        "recipe": recipe,
+                        "avg_rating": round(avg_rating, 1) if avg_rating else None,
+                        "is_liked": True
+                    })
+                    # Voeg alleen niet-gekochte recepten toe aan de bijgewerkte wishlist
+                    updated_favorites.append(fav)
+
+        # Werk de favorieten van de gebruiker bij
+        user.favorites = updated_favorites
+        db.session.commit()
 
     return render_template('wishlist.html', favorite_recipes=favorite_recipes)
-
 
 @main.app_template_filter('fromjson')
 def fromjson(value):
@@ -1137,6 +1150,7 @@ def edit_chef_profile():
         avg_rating=avg_rating,
         total_recipes_sold=total_recipes_sold
     )
+
 @main.route('/chef_recipes/<chef_email>', methods=['GET'])
 def chef_recipes(chef_email):
     # Fetch chef details
